@@ -1,0 +1,25 @@
+/*!
+\defgroup group_Bits Bits
+Functions having to do with how bits are laid out on a machine.
+
+\defgroup group_Multithreading Multithreading
+Functions having to do with multithreading.
+
+\defgroup group_Math Math
+Functions for math.
+
+\defgroup group_Strings Strings
+Functions having to do with string massaging/manipulation
+
+\defgroup group_SystemFunctions System Functions
+Functions that encapsulate differing low-level system calls.
+
+\defgroup group_Memory Memory Management
+Functions having to do with memory allocation/handling.
+
+\defgroup group_Diagnostics Diagnostics
+Functions having to do with error reporting/handling.
+
+\defgroup group_SymbolVisibility Symbol Visibility
+Macros having to do with symbol visibility
+*/

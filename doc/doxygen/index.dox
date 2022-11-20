@@ -1,0 +1,11 @@
+/*!
+\mainpage Arch
+
+Abstract architecture-dependent logic.
+
+Read the [documentation](../index.html), or explore the API.
+
+<HR>
+
+Copyright 2022, Pixar, modified by Jeremy Retailleau
+*/

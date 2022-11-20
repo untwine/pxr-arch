@@ -1,0 +1,46 @@
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/doc")
+
+sphinx_add_docs(archDoc
+    SOURCE "${PROJECT_SOURCE_DIR}/doc/sphinx"
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/doc"
+)
+
+set(DOXYGEN_PROJECT_NAME "Arch")
+set(DOXYGEN_HTML_OUTPUT "doc/doxygen")
+set(DOXYGEN_EXTENSION_MAPPING "h=C++")
+set(DOXYGEN_GENERATE_HTML YES)
+set(DOXYGEN_GENERATE_LATEX NO)
+set(DOXYGEN_GENERATE_TREEVIEW YES)
+set(DOXYGEN_QUIET YES)
+set(DOXYGEN_SORT_MEMBER_DOCS NO)
+set(DOXYGEN_FULL_PATH_NAMES NO)
+set(DOXYGEN_FILE_PATTERNS *.dox *.h)
+set(DOXYGEN_ALWAYS_DETAILED_SEC YES)
+set(DOXYGEN_JAVADOC_AUTOBRIEF YES)
+set(DOXYGEN_BUILTIN_STL_SUPPORT YES)
+set(DOXYGEN_INLINE_SIMPLE_STRUCTS YES)
+set(DOXYGEN_QUIET YES)
+set(DOXYGEN_WARN_IF_UNDOCUMENTED NO)
+set(DOXYGEN_WARN_IF_DOC_ERROR NO)
+set(DOXYGEN_SHOW_INCLUDE_FILES NO)
+set(DOXYGEN_EXCLUDE_SYMBOLS "_*")
+
+doxygen_add_docs(archApiRefDoc
+    "${PROJECT_SOURCE_DIR}/doc/doxygen/index.dox"
+    "${PROJECT_SOURCE_DIR}/doc/doxygen/namespaces.dox"
+    "${PROJECT_SOURCE_DIR}/doc/doxygen/modules.dox"
+    "${PROJECT_SOURCE_DIR}/src/arch"
+)
+
+add_custom_target(documentation ALL)
+add_dependencies(documentation
+    archDoc
+    archApiRefDoc
+)
+
+install(
+    DIRECTORY
+        "${CMAKE_CURRENT_BINARY_DIR}/doc"
+    DESTINATION
+        ${CMAKE_INSTALL_PREFIX}
+)
