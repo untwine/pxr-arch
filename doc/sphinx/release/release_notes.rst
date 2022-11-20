@@ -8,4 +8,5 @@ Release Notes
 
     .. change:: new
 
-        Initial release.
+        Initial release based on the state of the ``arch`` module within
+        USD v22.11.
