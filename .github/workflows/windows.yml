@@ -28,7 +28,7 @@ jobs:
           shell: bash
           working-directory: ${{runner.workspace}}/build
           run: |
-            echo 
+            echo ${Env:VCPKG_INSTALLATION_ROOT}
             cmake \
               -D "CMAKE_CXX_STANDARD=${{matrix.std}}" \
               -D "CMAKE_TOOLCHAIN_FILE=${Env:VCPKG_INSTALLATION_ROOT}\scripts\buildsystems\vcpkg.cmake" \
