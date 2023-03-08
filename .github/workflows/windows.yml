@@ -1,4 +1,4 @@
-name: linux
+name: windows
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: windows-2019
     strategy:
       matrix:
         std: [14, 17, 20]
@@ -21,8 +21,7 @@ jobs:
 
       -   name: Create Build Environment
           run: |
-            sudo apt update
-            sudo apt install -y libgtest-dev ninja
+            vcpkg --triplet=x64-windows install ninja gtest
             cmake -E make_directory ${{runner.workspace}}/build
 
       -   name: Configure
