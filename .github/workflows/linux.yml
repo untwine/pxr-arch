@@ -22,6 +22,7 @@ jobs:
       - name: Create Build Environment
         run: |
           sudo apt update
+          sudo apt install -y libgtest-dev cmake
           ${{matrix.install}}
           cmake -E make_directory ${{runner.workspace}}/build
 
