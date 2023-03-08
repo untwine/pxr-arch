@@ -5,13 +5,16 @@ set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the build type")
 
 project(arch
     VERSION 0.1.0
-    HOMEPAGE_URL "https://github.com/Untwine/arch"
+    HOMEPAGE_URL "https://github.com/untwine/arch"
     LANGUAGES CXX
 )
 
 include(GNUInstallDirs)
 
-set(CMAKE_CXX_STANDARD 14 CACHE STRING "Default C++ standard")
+if(NOT "${CMAKE_CXX_STANDARD}")
+    set(CMAKE_CXX_STANDARD 14 CACHE STRING "Default C++ standard")
+endif()
+
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
