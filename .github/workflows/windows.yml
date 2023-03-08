@@ -19,16 +19,24 @@ jobs:
     steps:
       -   uses: actions/checkout@v3
 
+#      -   name: Mount vcpkg cache
+#          uses: actions/cache@v2
+#          with:
+#            path: "~/.cache/vcpkg/archives"
+#            key: vcpkg-${{ matrix.os }}-${{ matrix.triplet }}
+
       -   name: Create Build Environment
           run: |
-            vcpkg --triplet=x64-windows install gtest
+            vcpkg install --triplet=x64-windows gtest
             cmake -E make_directory ${{runner.workspace}}/build
 
       -   name: Configure
           shell: bash
           working-directory: ${{runner.workspace}}/build
           run: |
-            echo ${Env:VCPKG_INSTALLATION_ROOT}
+            echo "TEST"
+            echo "${VCPKG_INSTALLATION_ROOT}"
+            echo "${Env:VCPKG_INSTALLATION_ROOT}"
             cmake \
               -D "CMAKE_CXX_STANDARD=${{matrix.std}}" \
               -D "CMAKE_TOOLCHAIN_FILE=${Env:VCPKG_INSTALLATION_ROOT}\scripts\buildsystems\vcpkg.cmake" \
