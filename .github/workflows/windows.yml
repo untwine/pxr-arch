@@ -11,10 +11,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-2022
-    strategy:
-      matrix:
-        std: [14, 17, 20]
+    runs-on: windows-2019
 
     steps:
       -   uses: actions/checkout@v3
@@ -29,7 +26,7 @@ jobs:
           working-directory: ${{runner.workspace}}/build
           run: |
             cmake \
-              -D "CMAKE_CXX_STANDARD=${{matrix.std}}" \
+              -G "Visual Studio 17 2019 Win64" \
               -D "CMAKE_TOOLCHAIN_FILE=${VCPKG_INSTALLATION_ROOT}\scripts\buildsystems\vcpkg.cmake" \
               -D "VCPKG_TARGET_TRIPLET=x64-windows" \
               -D "BUILD_DOCS=OFF" \
