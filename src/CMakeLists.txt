@@ -23,6 +23,10 @@ add_library(arch
     arch/vsnprintf.cpp
 )
 
+if(MSVC)
+    target_precompile_headers(arch PRIVATE arch/pch.h)
+endif()
+
 target_include_directories(arch
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
