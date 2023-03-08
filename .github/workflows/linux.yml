@@ -32,7 +32,8 @@ jobs:
             CXX: ${{matrix.cxx}}
           run: |
             cmake \
-              -DCMAKE_CXX_STANDARD=${{matrix.std}} \
+              -D "CMAKE_CXX_STANDARD=${{matrix.std}}" \
+              -D "BUILD_DOCS=OFF"
               ${GITHUB_WORKSPACE}
 
       -   name: Build
