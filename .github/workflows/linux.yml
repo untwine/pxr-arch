@@ -9,11 +9,12 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     strategy:
-      cxx: [g++-9, g++-10, clang++-9, clang++-11]
-      std: [14, 17]
-      include:
-        - cxx: clang++-9
-          install: sudo apt install clang-9
+      matrix:
+        cxx: [g++-9, g++-10, clang++-9, clang++-11]
+        std: [14, 17]
+        include:
+          - cxx: clang++-9
+            install: sudo apt install clang-9
 
     steps:
       -   uses: actions/checkout@v3
