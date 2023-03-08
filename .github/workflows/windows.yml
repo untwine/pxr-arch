@@ -21,7 +21,7 @@ jobs:
 
       -   name: Create Build Environment
           run: |
-            vcpkg --triplet=x64-windows install ninja gtest
+            vcpkg --triplet=x64-windows install gtest
             cmake -E make_directory ${{runner.workspace}}/build
 
       -   name: Configure
