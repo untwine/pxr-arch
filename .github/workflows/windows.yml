@@ -28,7 +28,7 @@ jobs:
             cmake \
               -G "Visual Studio 16 2019" -A x64 \
               -DWIN32_LEAN_AND_MEAN \
-              -wd4273" \
+              -wd4273 \
               -D "CMAKE_TOOLCHAIN_FILE=${VCPKG_INSTALLATION_ROOT}\scripts\buildsystems\vcpkg.cmake" \
               -D "VCPKG_TARGET_TRIPLET=x64-windows" \
               -D "BUILD_DOCS=OFF" \
