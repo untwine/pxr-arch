@@ -36,7 +36,8 @@ target_link_libraries(arch
 )
 
 if(MSVC)
-#    target_precompile_headers(arch PRIVATE arch/pch.h)
+    target_precompile_headers(arch PRIVATE arch/pch.h)
+    target_compile_definitions(arch PUBLIC NOMINMAX WIN32_LEAN_AND_MEAN)
 endif()
 
 install(TARGETS arch EXPORT ${PROJECT_NAME})
