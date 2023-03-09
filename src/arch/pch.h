@@ -63,12 +63,12 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
+#include <DbgHelp.h>
 #include <Memoryapi.h>
 #include <Psapi.h>
 #include <WinIoCtl.h>
 #include <Windows.h>
 #include <Winsock2.h>
-#include <DbgHelp.h>
 #include <direct.h>
 #include <intrin.h>
 #include <io.h>

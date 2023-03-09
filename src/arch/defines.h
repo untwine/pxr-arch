@@ -43,7 +43,6 @@ namespace arch {
 #define ARCH_OS_OSX
 #endif
 #elif defined(_WIN32) || defined(_WIN64)
-#include <Windows.h>
 #define ARCH_OS_WINDOWS
 #endif
 
