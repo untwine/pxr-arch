@@ -29,6 +29,14 @@ if (DEFINED ENV{CMAKE_BUILD_TYPE})
         CACHE STRING "Specifies the build type" FORCE)
 endif()
 
+# Make sure WinDef.h does not define min and max macros which will conflict
+# with std::min() and std::max(), and exclude headers from unnecessary
+# Windows APIs to improve build times and avoid annoying conflicts with
+# macros defined in those headers.
+if(MSVC)
+    add_definitions(-DNOMINMAX -DWIN32_LEAN_AND_MEAN)
+endif()
+
 # Discover custom module finders.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
 
