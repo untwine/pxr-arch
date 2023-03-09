@@ -35,9 +35,9 @@ target_link_libraries(arch
         ${CMAKE_DL_LIBS}
 )
 
-#if(MSVC)
-#    target_precompile_headers(arch PUBLIC arch/pch.h)
-#endif()
+if(MSVC)
+    target_precompile_headers(arch PUBLIC arch/pch.h)
+endif()
 
 install(TARGETS arch EXPORT ${PROJECT_NAME})
 install(
