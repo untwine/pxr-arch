@@ -36,7 +36,7 @@ target_link_libraries(arch
 )
 
 if(MSVC)
-    target_precompile_headers(arch PRIVATE arch/pch.h)
+#    target_precompile_headers(arch PRIVATE arch/pch.h)
 endif()
 
 install(TARGETS arch EXPORT ${PROJECT_NAME})
