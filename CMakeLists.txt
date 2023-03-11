@@ -33,7 +33,7 @@ endif()
 # with std::min() and std::max(), and exclude headers from unnecessary
 # Windows APIs to improve build times and avoid annoying conflicts with
 # macros defined in those headers.
-if(MSVC)
+if (WIN32)
     add_definitions(-DNOMINMAX -DWIN32_LEAN_AND_MEAN)
 endif()
 
