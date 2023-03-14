@@ -38,7 +38,7 @@ TEST(FileSystemTest, FileOperations)
     mfm.get()[2] = 's';
     ASSERT_EQ(memcmp("Test", mfm.get(), strlen("Test")), 0);
     mfm.reset();
-    ArchUnlinkFile(firstName.c_str());
+    arch::UnlinkFile(firstName.c_str());
 
     // Test PWrite and PRead.
     auto len = (int64_t)strlen(testContent);
@@ -66,7 +66,7 @@ TEST(FileSystemTest, FileOperations)
     std::string retpath;
     retpath = arch::MakeTmpSubdir(arch::GetTmpDir(), "myprefix");
     ASSERT_NE(retpath, "");
-    ArchRmDir(retpath.c_str());
+    arch::RmDir(retpath.c_str());
 }
 
 TEST(FileSystemTest, NormPath)
