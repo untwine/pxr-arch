@@ -135,51 +135,51 @@ typedef struct stat StatType;
 ARCH_API FILE *OpenFile(char const *fileName, char const *mode);
 
 #if defined(ARCH_OS_WINDOWS)
-using Chmod = _chmod;
+static constexpr auto Chmod = _chmod;
 #else
-using Chmod = chmod;
+static constexpr auto Chmod = chmod;
 #endif
 
 #if defined(ARCH_OS_WINDOWS)
-using CloseFile = _close;
+static constexpr auto CloseFile = _close;
 #else
-using CloseFile = close;
+static constexpr auto CloseFile = close;
 #endif
 
 #if defined(ARCH_OS_WINDOWS)
-using UnlinkFile = _unlink;
+static constexpr auto UnlinkFile = _unlink;
 #else
-using UnlinkFile = unlink;
+static constexpr auto UnlinkFile = unlink;
 #endif
 
 #if defined(ARCH_OS_WINDOWS)
 ARCH_API int FileAccess(const char *path, int mode);
 #else
-using FileAccess = access;
+static constexpr auto FileAccess = access;
 #endif
 
 #if defined(ARCH_OS_WINDOWS)
-using FdOpen = _fdopen;
+static constexpr auto FdOpen = _fdopen;
 #else
-using FdOpen = fdopen;
+static constexpr auto FdOpen = fdopen;
 #endif
 
 #if defined(ARCH_OS_WINDOWS)
-using FileNo = _fileno;
+static constexpr auto FileNo = _fileno;
 #else
-using FileNo = fileno;
+static constexpr auto FileNo = fileno;
 #endif
 
 #if defined(ARCH_OS_WINDOWS)
-using FileIsaTTY = _isatty;
+static constexpr auto FileIsaTTY = _isatty;
 #else
-using FileIsaTTY = isatty;
+static constexpr auto FileIsaTTY = isatty;
 #endif
 
 #if defined(ARCH_OS_WINDOWS)
 ARCH_API int RmDir(const char *path);
 #else
-using RmDir = rmdir;
+static constexpr auto RmDir = rmdir;
 #endif
 
 /// Return the length of a file in bytes.
