@@ -8,9 +8,10 @@ Release Notes
 
     .. change:: changed
 
-        Replace the following macros in :file:`arch/fileSystem.h` header with 
-        ``static constexpr`` function variables so that it can be consistently 
-        namespaced:
+        Replace the following macros in the :file:`arch/fileSystem.h` header 
+        with function aliases using `static constexpr 
+        <https://en.cppreference.com/w/cpp/language/constexpr>`_ to ensure that
+        the ``arch::`` namespace is used consistently throughout the library:
 
         * ``ArchChmod`` →  ``arch::Chmod``
         * ``ArchCloseFile`` →  ``arch::CloseFile``
