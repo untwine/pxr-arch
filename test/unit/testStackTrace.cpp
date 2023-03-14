@@ -19,7 +19,7 @@ TEST(StackTraceTest, TestCrash)
     fclose(logFile);
 
     arch::LogStackTrace("Crashing", true, log.c_str());
-    ArchUnlinkFile(log.c_str());
+    arch::UnlinkFile(log.c_str());
 
     ASSERT_FALSE(arch::IsAppCrashing());
     arch::LogCurrentProcessState("Test Non-Fatal");

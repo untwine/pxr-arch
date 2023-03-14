@@ -135,51 +135,51 @@ typedef struct stat StatType;
 ARCH_API FILE *OpenFile(char const *fileName, char const *mode);
 
 #if defined(ARCH_OS_WINDOWS)
-#define ArchChmod(path, mode) _chmod(path, mode)
+using Chmod = _chmod;
 #else
-#define ArchChmod(path, mode) chmod(path, mode)
+using Chmod = chmod;
 #endif
 
 #if defined(ARCH_OS_WINDOWS)
-#define ArchCloseFile(fd) _close(fd)
+using CloseFile = _close;
 #else
-#define ArchCloseFile(fd) close(fd)
+using CloseFile = close;
 #endif
 
 #if defined(ARCH_OS_WINDOWS)
-#define ArchUnlinkFile(path) _unlink(path)
+using UnlinkFile = _unlink;
 #else
-#define ArchUnlinkFile(path) unlink(path)
+using UnlinkFile = unlink;
 #endif
 
 #if defined(ARCH_OS_WINDOWS)
-ARCH_API int ArchFileAccess(const char *path, int mode);
+ARCH_API int FileAccess(const char *path, int mode);
 #else
-#define ArchFileAccess(path, mode) access(path, mode)
+using FileAccess = access;
 #endif
 
 #if defined(ARCH_OS_WINDOWS)
-#define ArchFdOpen(fd, mode) _fdopen(fd, mode)
+using FdOpen = _fdopen;
 #else
-#define ArchFdOpen(fd, mode) fdopen(fd, mode)
+using FdOpen = fdopen;
 #endif
 
 #if defined(ARCH_OS_WINDOWS)
-#define ArchFileNo(stream) _fileno(stream)
+using FileNo = _fileno;
 #else
-#define ArchFileNo(stream) fileno(stream)
+using FileNo = fileno;
 #endif
 
 #if defined(ARCH_OS_WINDOWS)
-#define ArchFileIsaTTY(stream) _isatty(stream)
+using FileIsaTTY = _isatty;
 #else
-#define ArchFileIsaTTY(stream) isatty(stream)
+using FileIsaTTY = isatty;
 #endif
 
 #if defined(ARCH_OS_WINDOWS)
-ARCH_API int ArchRmDir(const char *path);
+ARCH_API int RmDir(const char *path);
 #else
-#define ArchRmDir(path) rmdir(path)
+using RmDir = rmdir;
 #endif
 
 /// Return the length of a file in bytes.
