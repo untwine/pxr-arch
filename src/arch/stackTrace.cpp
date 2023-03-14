@@ -495,7 +495,7 @@ int _GetStackTraceName(char* buf, size_t len)
 #endif
     }
     if (fd != -1) {
-        ArchCloseFile(fd);
+        CloseFile(fd);
         fd = 0;
     }
     return fd;
@@ -1135,7 +1135,7 @@ void LogStackTrace(
     }
 
     if (fd != -1) {
-        FILE* fout = ArchFdOpen(fd, "w");
+        FILE* fout = FdOpen(fd, "w");
         fprintf(
             stderr,
             "The stack can be found in %s:%s\n"
@@ -1199,7 +1199,7 @@ static void _LogStackTraceToOutputIterator(
     }
 
     inFile.close();
-    ArchUnlinkFile(logfile);
+    UnlinkFile(logfile);
 }
 
 #endif
