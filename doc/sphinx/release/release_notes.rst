@@ -22,6 +22,13 @@ Release Notes
         * ``ArchFileIsaTTY`` →  ``arch::FileIsaTTY``
         * ``ArchRmDir`` →  ``arch::RmDir``
 
+    .. change:: fixed
+
+        Ensure that the `CMAKE_CXX_STANDARD 
+        <https://cmake.org/cmake/help/latest/variable/CMAKE_CXX_STANDARD.html>`_ 
+        variable can be set to override the default C++ standard for all 
+        targets.
+
 .. release:: 0.1.0
     :date: 2022-11-19
 
