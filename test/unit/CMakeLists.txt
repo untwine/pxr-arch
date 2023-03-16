@@ -1,3 +1,19 @@
+if (WIN32)
+    # Expand GTest function to copy dependent DLLs in the same folder after
+    # building target to ensure that tests can run properly on Windows.
+    macro(gtest_discover_tests NAME)
+        add_custom_command(
+	    TARGET ${NAME} POST_BUILD
+	    COMMAND ${CMAKE_COMMAND}
+	        -E copy_if_different
+		$<TARGET_RUNTIME_DLLS:${NAME}>
+		$<TARGET_FILE_DIR:${NAME}>
+	    COMMAND_EXPAND_LISTS
+	)
+        _gtest_discover_tests(${NAME} ${ARGV})
+    endmacro()
+endif()
+
 add_executable(testArchAbi testArchAbi.cpp)
 target_link_libraries(testArchAbi
     PRIVATE
@@ -9,7 +25,7 @@ target_link_libraries(testArchAbi
 gtest_discover_tests(
     testArchAbi
     PROPERTIES
-        ENVIRONMENT "EXE_PATH=${CMAKE_CURRENT_BINARY_DIR}"
+        ENVIRONMENT "EXE_PATH=$<SHELL_PATH:$<TARGET_FILE_DIR:testArchAbi>>"
         ENVIRONMENT "PLUGIN_PATH=$<TARGET_FILE_DIR:archTestPlugin>"
 )
 
