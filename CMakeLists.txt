@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.21...3.25)
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the build type")
 
 project(arch
-    VERSION 0.2.0
+    VERSION 0.3.0
     HOMEPAGE_URL "https://github.com/untwine/arch"
     LANGUAGES CXX
 )
