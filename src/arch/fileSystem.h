@@ -188,7 +188,10 @@ static constexpr auto RmDir = rmdir;
 ARCH_API int64_t GetFileLength(const char *fileName);
 ARCH_API int64_t GetFileLength(FILE *file);
 
-/// Return a filename for this file, if one can be obtained.
+/// Return a filename for this file, if one can be obtained. Note that there
+/// are many reasons why it may be impossible to obtain a filename, even for an
+/// opened FILE *. Whenever possible avoid using this function and instead
+/// store the filename for future use.
 ARCH_API std::string GetFileName(FILE *file);
 
 /// Returns true if the data in \c stat struct \p st indicates that the target

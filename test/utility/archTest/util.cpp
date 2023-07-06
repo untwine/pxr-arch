@@ -79,7 +79,7 @@ void _TestCrash(CrashMode mode)
     switch (mode) {
         case CrashMode::Error:
             ARCH_ERROR("Testing ArchError");
-	    break;
+            break;
 
         case CrashMode::ReadInvalidAddresses:
             _ReadInvalidAddresses(false);
@@ -126,7 +126,8 @@ void Crash(CrashMode mode)
     }
 
     // Wait for the process to exit.
-    // We explicitly cast the status as DWORD cannot be safely casted into an int.
+    // We explicitly cast the status as DWORD cannot be safely casted into an
+    // int.
     DWORD exitCode;
     WaitForSingleObject(processInfo.hProcess, INFINITE);
     GetExitCodeProcess(processInfo.hProcess, &exitCode);

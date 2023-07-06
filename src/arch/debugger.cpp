@@ -91,7 +91,8 @@ static void _DebuggerInitPosix()
     // Handle the SIGTRAP signal so if no debugger is attached then
     // nothing happens when DebuggerTrap() is called.  If we
     // didn't handle this signal then the app would die.
-    struct sigaction act {};
+    struct sigaction act {
+    };
     sigemptyset(&act.sa_mask);
     act.sa_flags = SA_NODEFER;
     act.sa_handler = _DebuggerTrapHandler;
@@ -128,7 +129,10 @@ static void _DebuggerInit()
         "movq %%rsi, %[rsi];\n"
         "movq %%rdx, %[rdx];\n"
         "movq %%rcx, %[rcx];\n"
-        : [rdi] "=m"(rdi), [rsi] "=m"(rsi), [rdx] "=m"(rdx), [rcx] "=m"(rcx)
+        : [ rdi ] "=m"(rdi),
+          [ rsi ] "=m"(rsi),
+          [ rdx ] "=m"(rdx),
+          [ rcx ] "=m"(rcx)
         :  // input
         :  // clobbered
     );
@@ -145,7 +149,7 @@ static void _DebuggerInit()
         "movq %[rdx], %%rdx;\n"
         "movq %[rcx], %%rcx;\n"
         :  // output
-        : [rdi] "m"(rdi), [rsi] "m"(rsi), [rdx] "m"(rdx), [rcx] "m"(rcx)
+        : [ rdi ] "m"(rdi), [ rsi ] "m"(rsi), [ rdx ] "m"(rdx), [ rcx ] "m"(rcx)
         :  // clobbered
     );
 #endif
@@ -390,7 +394,8 @@ static bool AmIBeingDebugged()
 {
     int junk;
     int mib[4];
-    struct kinfo_proc info {};
+    struct kinfo_proc info {
+    };
     size_t size;
 
     // Initialize the flags so that, if sysctl fails for some bizarre
@@ -618,7 +623,8 @@ void Abort(bool logging)
         if (!logging) {
 #if !defined(ARCH_OS_WINDOWS)
             // Remove signal handler.
-            struct sigaction act {};
+            struct sigaction act {
+            };
             act.sa_handler = SIG_DFL;
             act.sa_flags = 0;
             sigemptyset(&act.sa_mask);

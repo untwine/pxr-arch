@@ -4,6 +4,12 @@
 Release Notes
 *************
 
+.. release:: Upcoming
+
+    .. change:: changed
+
+        Synced library with the ``arch`` module within USD v23.05.
+
 .. release:: 0.2.0
     :date: 2023-07-05
 

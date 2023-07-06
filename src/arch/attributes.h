@@ -257,16 +257,16 @@ struct _ConstructorEntry {
 
 // The used attribute is required to prevent these apparently unused functions
 // from being removed by the linker.
-#define ARCH_CONSTRUCTOR(_name, _priority, ...)      \
-    __attribute__((                                  \
-        used,                                        \
-        section(".pxrctor"),                         \
-        constructor((_priority) + 100))) static void \
-    _name(__VA_ARGS__)
-#define ARCH_DESTRUCTOR(_name, _priority, ...)                                 \
-    __attribute__((                                                            \
-        used, section(".pxrdtor"), destructor((_priority) + 100))) static void \
-    _name(__VA_ARGS__)
+#define ARCH_CONSTRUCTOR(_name, _priority, ...) \
+    __attribute__(                              \
+        (used,                                  \
+         section(".pxrctor"),                   \
+         constructor((_priority) + 100))) static void _name(__VA_ARGS__)
+#define ARCH_DESTRUCTOR(_name, _priority, ...) \
+    __attribute__(                             \
+        (used,                                 \
+         section(".pxrdtor"),                  \
+         destructor((_priority) + 100))) static void _name(__VA_ARGS__)
 
 #elif defined(ARCH_OS_WINDOWS)
 

@@ -298,6 +298,11 @@ std::vector<std::string> GetStackTrace(size_t maxDepth);
 ARCH_API
 void GetStackFrames(size_t maxDepth, std::vector<uintptr_t>* frames);
 
+/// Store at most \p maxDepth frames of the current stack into \p frames.
+/// Return the number of stack frames written to \p frames.
+ARCH_API
+size_t GetStackFrames(size_t maxDepth, uintptr_t* frames);
+
 /// Save frames of current stack.
 ///
 /// This function saves at maximum \p maxDepth frames of the current stack
@@ -308,6 +313,13 @@ ARCH_API
 void GetStackFrames(
     size_t maxDepth, size_t numFramesToSkipAtTop,
     std::vector<uintptr_t>* frames);
+
+/// Store at most \p maxDepth frames of the current stack into \p frames,
+/// skipping the first \p numFramesToSkipAtTop frames.  Return the number of
+/// stack frames written to \p frames.
+ARCH_API
+size_t GetStackFrames(
+    size_t maxDepth, size_t numFramesToSkipAtTop, uintptr_t* frames);
 
 /// Print stack frames to the given ostream.
 ARCH_API
