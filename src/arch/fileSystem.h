@@ -51,9 +51,9 @@
 #include <sys/mount.h>
 #include <unistd.h>
 #elif defined(ARCH_OS_WINDOWS)
+#include <windows.h>
 #include <io.h>
 #include <stringapiset.h>
-#include <windows.h>
 #endif
 
 namespace arch {

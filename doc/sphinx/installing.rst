@@ -6,8 +6,8 @@ Installing
 
 .. highlight:: bash
 
-The library can be installed using :term:`CMake` (any version over `3.20
-<https://cmake.org/cmake/help/latest/release/3.20.html>`_).
+The library can be installed using :term:`CMake` (any version over `3.21
+<https://cmake.org/cmake/help/latest/release/3.21.html>`_).
 
 .. _installing/dependencies:
 
@@ -50,14 +50,15 @@ Then you can build and install the library as follows::
 Here are a few :term:`CMake` options that can be used to influence the building
 process:
 
-=================== =================================================================
-Option              Description
-=================== =================================================================
-BUILD_TESTS         Indicate whether tests should be built. Default is true.
-BUILD_DOCS          Indicate whether documentation should be built. Default is true.
-BUILD_SHARED_LIBS   Indicate whether library should be built shared. Default is true.
-CMAKE_CXX_STANDARD  Indicate the C++ standard requested. Default is C++ 14.
-=================== =================================================================
+========================== =================================================================
+Option                     Description
+========================== =================================================================
+BUILD_TESTS                Indicate whether tests should be built. Default is true.
+BUILD_DOCS                 Indicate whether documentation should be built. Default is true.
+BUILD_SHARED_LIBS          Indicate whether library should be built shared. Default is true.
+CMAKE_CXX_STANDARD         Indicate the C++ standard requested. Default is C++ 14.
+ENABLE_PRECOMPILED_HEADERS Support pre-compiled headers. Default is false.
+========================== =================================================================
 
 The build type can be influenced by the `CMAKE_BUILD_TYPE
 <https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html>`_ option or

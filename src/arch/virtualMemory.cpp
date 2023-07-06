@@ -28,8 +28,8 @@
 #include "arch/systemInfo.h"
 
 #if defined(ARCH_OS_WINDOWS)
-#include <Memoryapi.h>
 #include <Windows.h>
+#include <Memoryapi.h>
 #else  // Assume POSIX
 #include <sys/mman.h>
 #endif

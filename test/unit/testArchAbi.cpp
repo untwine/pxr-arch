@@ -11,7 +11,7 @@ TEST(ArchABITest, GetExecutablePath)
     std::string path = arch::GetExecutablePath();
     std::string root = std::getenv("EXE_PATH");
 #if defined(ARCH_OS_WINDOWS)
-    std::string expected = root + "\testArchAbi";
+    std::string expected = root + "\\testArchAbi.exe";
 #else
     std::string expected = root + "/testArchAbi";
 #endif
@@ -22,7 +22,7 @@ TEST(ArchABITest, Library)
 {
     std::string path = std::getenv("PLUGIN_PATH");
 #if defined(ARCH_OS_WINDOWS)
-    path += "\\libarchTestPlugin.dll";
+    path += "\\archTestPlugin.dll";
 #elif defined(ARCH_OS_DARWIN)
     path += "/libarchTestPlugin.dylib";
 #else
