@@ -1,3 +1,9 @@
+set(PLATFORM_LIBS "")
+
+if (WIN32)
+    set(PLATFORM_LIBS Ws2_32.lib Dbghelp.lib)
+endif()
+
 add_library(arch
     arch/assumptions.cpp
     arch/attributes.cpp
@@ -33,7 +39,15 @@ target_link_libraries(arch
     PUBLIC
         Threads::Threads
         ${CMAKE_DL_LIBS}
+	${PLATFORM_LIBS}
 )
+
+if (ENABLE_PRECOMPILED_HEADERS)
+    target_precompile_headers(arch 
+        PRIVATE 
+            arch/pch.h
+    )
+endif()
 
 install(TARGETS arch EXPORT ${PROJECT_NAME})
 install(

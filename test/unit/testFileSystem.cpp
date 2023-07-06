@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 
 #include <cstdio>
+#include <algorithm>
 
 TEST(FileSystemTest, FileOperations)
 {

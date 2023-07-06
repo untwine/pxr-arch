@@ -475,7 +475,9 @@ static bool _DebuggerAttach()
     }
 
 #elif defined(ARCH_OS_WINDOWS)
-    DebugBreak();
+    if (IsDebuggerPresent() == TRUE) {
+        DebugBreak();
+    }
 #endif
 
     return false;

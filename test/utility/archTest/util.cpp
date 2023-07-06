@@ -79,6 +79,7 @@ void _TestCrash(CrashMode mode)
     switch (mode) {
         case CrashMode::Error:
             ARCH_ERROR("Testing ArchError");
+	    break;
 
         case CrashMode::ReadInvalidAddresses:
             _ReadInvalidAddresses(false);
@@ -125,10 +126,11 @@ void Crash(CrashMode mode)
     }
 
     // Wait for the process to exit.
+    // We explicitly cast the status as DWORD cannot be safely casted into an int.
     DWORD exitCode;
     WaitForSingleObject(processInfo.hProcess, INFINITE);
     GetExitCodeProcess(processInfo.hProcess, &exitCode);
-    status = exitCode;
+    status = (exitCode > 1) ? 3 : 0;
     CloseHandle(processInfo.hProcess);
     CloseHandle(processInfo.hThread);
 
@@ -152,9 +154,7 @@ void Crash(CrashMode mode)
 
     // We reserve status 0 for the child executing without error and
     // status 1 for it having an unexpected error.  Since we expect
-    // the child to fail we expect a status greater than 1.  Raising
-    // a signal with a default handler on Windows exits with status
-    // code 3, a fact we take advantage of in this test.
+    // the child to fail we expect a status greater than 1.
     ARCH_AXIOM(status > 1);
 }
 

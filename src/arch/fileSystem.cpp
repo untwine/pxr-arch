@@ -46,8 +46,8 @@
 #include "arch/hints.h"
 #include "arch/vsnprintf.h"
 #if defined(ARCH_OS_WINDOWS)
-#include <WinIoCtl.h>
 #include <Windows.h>
+#include <WinIoCtl.h>
 #include <io.h>
 #include <process.h>
 

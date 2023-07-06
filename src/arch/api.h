@@ -27,7 +27,7 @@
 
 #include "arch/export.h"
 
-#if (BUILD_SHARED_LIBS)
+#if BUILD_SHARED_LIBS == 0
 #define ARCH_API
 #define ARCH_API_TEMPLATE_CLASS(...)
 #define ARCH_API_TEMPLATE_STRUCT(...)
