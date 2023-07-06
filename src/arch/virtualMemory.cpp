@@ -27,6 +27,7 @@
 #include "arch/defines.h"
 #include "arch/systemInfo.h"
 
+#include <cstdint>
 #if defined(ARCH_OS_WINDOWS)
 #include <Windows.h>
 #include <Memoryapi.h>

@@ -48,7 +48,8 @@ int CloseAllFiles(int nExcept, const int* exceptFds)
 
     int status, retStatus, retErrno;
     int i, j, maxfd, maxExcept = -1;
-    struct rlimit limits {};
+    struct rlimit limits {
+    };
 
     // Figure out how many file descriptors there are.
     status = getrlimit(RLIMIT_NOFILE, &limits);

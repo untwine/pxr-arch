@@ -23,9 +23,13 @@
 // Modified by Jeremy Retailleau
 
 #include "arch/timing.h"
+#include "arch/defines.h"
+#include "arch/error.h"
+#include "arch/export.h"
 
 #include <algorithm>
 #include <atomic>
+#include <cmath>
 #include <iterator>
 #include <numeric>
 #include <type_traits>
@@ -231,7 +235,8 @@ uint64_t GetIntervalTimerTickOverhead() { return _IntervalTimerTickOverhead; }
 
 int64_t TicksToNanoseconds(uint64_t nTicks)
 {
-    return int64_t(static_cast<double>(nTicks) * _NanosecondsPerTick + .5);
+    return static_cast<int64_t>(
+        std::llround(static_cast<double>(nTicks) * _NanosecondsPerTick));
 }
 
 double TicksToSeconds(uint64_t nTicks)
@@ -241,8 +246,10 @@ double TicksToSeconds(uint64_t nTicks)
 
 uint64_t SecondsToTicks(double seconds)
 {
-    return static_cast<uint64_t>(1.0e9 * seconds / GetNanosecondsPerTick());
+    return static_cast<uint64_t>(
+        std::llround(1.0e9 * seconds / GetNanosecondsPerTick()));
 }
+
 
 double GetNanosecondsPerTick() { return _NanosecondsPerTick; }
 

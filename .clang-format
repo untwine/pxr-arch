@@ -18,4 +18,6 @@ SpacesInAngles: false
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 UseTab: Never
+SortIncludes: false
+FixNamespaceComments: false
 ...

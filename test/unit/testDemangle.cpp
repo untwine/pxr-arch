@@ -3,7 +3,8 @@
 
 #include <string>
 
-struct MangledStruct {};
+struct MangledStruct {
+};
 typedef MangledStruct MangledStructAlias;
 
 enum MangledEnum { ONE, TWO, THREE };
@@ -14,15 +15,18 @@ class MangledTemplatedClass {
 
 // Ad std::string is mangled as 'Ss' on Linux, check that the following
 // struct is properly demangled.
-struct FooSsSsSsBar {};
+struct FooSsSsSsBar {
+};
 
 namespace archTest {
 
-class MangledClass1 {};
+class MangledClass1 {
+};
 
 class MangledClass2 {
   public:
-    class SubClass {};
+    class SubClass {
+    };
 };
 
 }  // namespace archTest
