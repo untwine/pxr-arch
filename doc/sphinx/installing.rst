@@ -36,10 +36,10 @@ Building library
 ================
 
 Obtain a copy of the source by either downloading the
-`zipball <https://github.com/Untwine/arch/archive/main.zip>`_ or
+`zipball <https://github.com/untwine/arch/archive/main.zip>`_ or
 cloning the public repository::
 
-    git clone git@github.com:Untwine/arch.git
+    git clone git@github.com:untwine/arch.git
 
 Then you can build and install the library as follows::
 
@@ -90,7 +90,8 @@ Building documentation
 ======================
 
 Ensure that :term:`Doxygen` and :term:`Sphinx` with the `lowdown
-<https://pypi.org/project/Lowdown/>`_ extension are installed.
+<https://pypi.org/project/Lowdown/>`_ and `sphinxcontrib-doxylink
+<https://pypi.org/project/sphinxcontrib-doxylink/>`_ extensions are installed.
 
 Then build the documentation as follows::
 

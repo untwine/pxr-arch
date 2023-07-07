@@ -8,6 +8,18 @@ Release Notes
 
     .. change:: fixed
 
+        Added Github action to deploy documentation of Github Pages.
+
+    .. change:: fixed
+
+        Fixed :term:`Sphinx` configuration to generate links to the C++ symbols
+        documentation using the `sphinxcontrib-doxylink
+        <https://pypi.org/project/sphinxcontrib-doxylink/>`_ plugin.
+
+        .. seealso:: :ref:`installing/documentation`
+
+    .. change:: fixed
+
         Added test to ensure that submitted pull requests have been properly
         formatted.
 

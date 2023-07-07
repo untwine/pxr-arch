@@ -1,6 +1,6 @@
-# Discover required Sphinx target
+# Discover required Sphinx target.
 #
-# This module defines the following imported target:
+# This module defines the following imported targets:
 #     Sphinx::Build
 #
 # It also exposes the 'sphinx_add_docs' function which adds a target
@@ -22,14 +22,14 @@ find_program(SPHINX_EXECUTABLE NAMES sphinx-build)
 
 if (SPHINX_EXECUTABLE)
     execute_process(
-        COMMAND ${SPHINX_EXECUTABLE} --version
+        COMMAND "${SPHINX_EXECUTABLE}" --version
         OUTPUT_VARIABLE _version
         ERROR_VARIABLE _version
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
     if (_version MATCHES " ([0-9]+\\.[0-9]+\\.[0-9]+)$")
-        set(SPHINX_VERSION ${CMAKE_MATCH_1})
+        set(SPHINX_VERSION "${CMAKE_MATCH_1}")
     endif()
 
     mark_as_advanced(_version)
@@ -48,19 +48,17 @@ find_package_handle_standard_args(
 if (Sphinx_FOUND AND NOT TARGET Sphinx::Build)
     add_executable(Sphinx::Build IMPORTED GLOBAL)
     set_target_properties(Sphinx::Build PROPERTIES
-        IMPORTED_LOCATION ${SPHINX_EXECUTABLE}
+        IMPORTED_LOCATION "${SPHINX_EXECUTABLE}"
     )
 
     function(sphinx_add_docs targetName)
-        set(_comment "Generate documentation for ${targetName}")
-
-        set(_single_values SOURCE OUTPUT)
-        cmake_parse_arguments(PARSE_ARGV 1 _args "" "${_single_values}" "")
+        cmake_parse_arguments(PARSE_ARGV 1 "" "" "SOURCE;OUTPUT" "DEPENDS")
 
         add_custom_target(${targetName} VERBATIM
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${_args_OUTPUT}
-            COMMAND Sphinx::Build -b html ${_args_SOURCE} ${_args_OUTPUT}
-            COMMENT ${_comment}
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${_OUTPUT}
+            COMMAND Sphinx::Build -b html ${_SOURCE} ${_OUTPUT}
+            COMMENT "Generate documentation for ${targetName}"
+            DEPENDS ${_DEPENDS}
         )
     endfunction()
 endif()

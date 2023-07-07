@@ -26,7 +26,6 @@
 #define ARCH_VIRTUAL_MEMORY_H
 
 /// \file arch/virtualMemory.h
-/// \ingroup group_SystemFunctions
 /// Architecture dependent routines for virtual memory.
 
 #include <cstddef>
