@@ -4,6 +4,15 @@
 Release Notes
 *************
 
+.. release:: Upcoming
+
+    .. change:: fixed
+
+        Added test to ensure that submitted pull requests have been properly
+        formatted.
+
+        .. seealso:: :ref:`installing/clang-format`
+
 .. release:: 0.3.0
     :date: 2023-07-06
 
@@ -27,15 +36,15 @@ Release Notes
 
     .. change:: change
 
-        Raised :term:`CMake` minimum version to 3.21 as it is required for 
-        using `TARGET_RUNTIME_DLLS 
-        <https://cmake.org/cmake/help/v3.21/manual/cmake-generator-expressions.7.html#genex:TARGET_RUNTIME_DLLS>`_ 
+        Raised :term:`CMake` minimum version to 3.21 as it is required for
+        using `TARGET_RUNTIME_DLLS
+        <https://cmake.org/cmake/help/v3.21/manual/cmake-generator-expressions.7.html#genex:TARGET_RUNTIME_DLLS>`_
         generator expression for running the tests on Windows.
 
     .. change:: changed
 
-        Replaced the following macros in the :file:`arch/fileSystem.h` header 
-        with function aliases using `static constexpr 
+        Replaced the following macros in the :file:`arch/fileSystem.h` header
+        with function aliases using `static constexpr
         <https://en.cppreference.com/w/cpp/language/constexpr>`_ to ensure that
         the ``arch::`` namespace is used consistently throughout the library:
 
@@ -50,9 +59,9 @@ Release Notes
 
     .. change:: fixed
 
-        Ensured that the `CMAKE_CXX_STANDARD 
-        <https://cmake.org/cmake/help/latest/variable/CMAKE_CXX_STANDARD.html>`_ 
-        variable can be set to override the default C++ standard for all 
+        Ensured that the `CMAKE_CXX_STANDARD
+        <https://cmake.org/cmake/help/latest/variable/CMAKE_CXX_STANDARD.html>`_
+        variable can be set to override the default C++ standard for all
         targets.
 
     .. change:: fixed

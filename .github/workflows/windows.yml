@@ -27,7 +27,6 @@ jobs:
           run: |
             cmake \
               -G "Visual Studio 17 2022" -A x64 \
-              -D "CMAKE_CXX_FLAGS=-wd4273" \
               -D "CMAKE_TOOLCHAIN_FILE=${VCPKG_INSTALLATION_ROOT}\scripts\buildsystems\vcpkg.cmake" \
               -D "VCPKG_TARGET_TRIPLET=x64-windows" \
               -D "BUILD_DOCS=OFF" \
