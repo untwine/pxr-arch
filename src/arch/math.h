@@ -26,7 +26,6 @@
 #define ARCH_MATH_H
 
 /// \file arch/math.h
-/// \ingroup group_Math
 /// Architecture-specific math function calls.
 
 #include "arch/defines.h"
@@ -42,9 +41,6 @@
 #endif
 
 namespace arch {
-
-/// \addtogroup group_Math
-///@{
 
 #if defined(ARCH_CPU_INTEL) || defined(ARCH_CPU_ARM) || defined(doxygen)
 
@@ -153,9 +149,6 @@ inline int CountTrailingZeros(uint64_t x)
     return c;
 #endif
 }
-
-
-///@}
 
 }  // namespace arch
 

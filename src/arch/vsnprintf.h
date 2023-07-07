@@ -26,7 +26,6 @@
 #define ARCH_VSNPRINTF_H
 
 /// \file arch/vsnprintf.h
-/// \ingroup group_Strings
 /// Architecture dependent memory-safe sprintf capability
 
 #include <cstdarg>
@@ -37,9 +36,6 @@
 #include "arch/attributes.h"
 
 namespace arch {
-
-/// \addtogroup group_Strings
-///@{
 
 /// Return the number of characters (not including the null character)
 /// necessary for a particular sprintf into a string.
@@ -96,8 +92,6 @@ std::string VStringPrintf(const char *fmt, va_list ap)
 #ifndef doxygen
     ARCH_PRINTF_FUNCTION(1, 0);
 #endif
-
-/// @}
 
 }  // namespace arch
 

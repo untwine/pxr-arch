@@ -26,7 +26,6 @@
 #define ARCH_ALIGN_H
 
 /// \file arch/align.h
-/// \ingroup group_Memory
 /// Provide architecture-specific memory-alignment information.
 
 #if !defined(__cplusplus)
@@ -40,9 +39,6 @@
 #include "arch/defines.h"
 
 namespace arch {
-
-/// \addtogroup group_Memory
-///@{
 
 /// Return suitably aligned memory size.
 ///
@@ -88,8 +84,6 @@ void *AlignedAlloc(size_t alignment, size_t size);
 /// Free memory allocated by AlignedAlloc.
 ARCH_API
 void AlignedFree(void *ptr);
-
-///@}
 
 }  // namespace arch
 

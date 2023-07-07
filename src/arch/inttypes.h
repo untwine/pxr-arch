@@ -26,7 +26,6 @@
 #define ARCH_INTTYPES_H
 
 /// \file arch/inttypes.h
-/// \ingroup group_Bits
 /// Define integral types.
 ///
 /// By including this file, the "standard" integer types \c int16_t,

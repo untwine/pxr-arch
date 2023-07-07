@@ -26,7 +26,6 @@
 #define ARCH_ERRNO_H
 
 /// \file arch/errno.h
-/// \ingroup group_SystemFunctions
 /// Functions for dealing with system errors.
 
 #include <string>
@@ -34,9 +33,6 @@
 #include "arch/api.h"
 
 namespace arch {
-
-/// \addtogroup group_SystemFunctions
-///@{
 
 /// Return the error string for the current value of errno.
 ///
@@ -57,8 +53,6 @@ ARCH_API std::string StrError(int errorCode);
 /// This function is thread-safe.
 ARCH_API std::string StrSysError(unsigned long errorCode);
 #endif
-
-///@}
 
 }  // namespace arch
 

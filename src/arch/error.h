@@ -26,7 +26,6 @@
 #define ARCH_ERROR_H
 
 /// \file arch/error.h
-/// \ingroup group_Diagnostics
 /// Low-level fatal error reporting.
 
 #include <cstddef>
@@ -60,9 +59,6 @@ ARCH_API
 void _Warning(
     const char* msg, const char* funcName, size_t lineNo, const char* fileName);
 
-/// \addtogroup group_Diagnostics
-///@{
-
 /// Unconditionally aborts the program.
 ///
 /// \param msg is a literal string, a \c const \c char* (but not
@@ -82,8 +78,6 @@ void _Warning(
 /// \hideinitializer
 #define ARCH_AXIOM(cond) \
     if (!(cond)) ARCH_ERROR("[" #cond "] axiom failed")
-
-///@}
 
 }  // namespace arch
 
