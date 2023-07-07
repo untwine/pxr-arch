@@ -45,7 +45,6 @@ namespace arch {
 /// \c prettyFunction is __ARCH_PRETTY_FUNCTION__, and attempts to
 /// reconstruct a well formatted function name.
 ///
-/// \ingroup group_Diagnostic
 ARCH_API
 std::string GetPrettierFunctionName(
     const std::string &function, const std::string &prettyFunction);

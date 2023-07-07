@@ -26,7 +26,6 @@
 #define ARCH_FILE_SYSTEM_H
 
 /// \file arch/fileSystem.h
-/// \ingroup group_SystemFunctions
 /// Architecture dependent file system access
 
 #include <fcntl.h>
@@ -58,8 +57,6 @@
 
 namespace arch {
 
-/// \addtogroup group_SystemFunctions
-///@{
 #if !defined(ARCH_OS_WINDOWS)
 #ifdef _POSIX_VERSION
 #include <climits> /* for PATH_MAX */
@@ -124,7 +121,6 @@ typedef struct stat StatType;
 
 /// \file fileSystem.h
 /// Architecture dependent file system access
-/// \ingroup group_SystemFunctions
 ///
 
 /// Opens a file.
@@ -475,8 +471,6 @@ inline std::wstring WindowsUtf8ToUtf16(const std::string &str)
 }
 
 #endif
-
-///@}
 
 }  // namespace arch
 

@@ -26,7 +26,6 @@
 #define ARCH_DAEMON_H
 
 /// \file arch/daemon.h
-/// \ingroup group_Multithreading
 /// Create background or daemon processes.
 
 #include "arch/api.h"
@@ -59,7 +58,6 @@ namespace arch {
 /// \return -1 on error and \c errno will be set to an appropriate
 /// value.  Returns 0 on success.
 ///
-/// \ingroup group_Multithreading
 ARCH_API
 int CloseAllFiles(int nExcept, const int* exceptFds);
 

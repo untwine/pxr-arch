@@ -26,15 +26,11 @@
 #define ARCH_TIMING_H
 
 /// \file arch/timing.h
-/// \ingroup group_SystemFunctions
 /// High-resolution, low-cost timing routines.
 
 #include "arch/api.h"
 #include "arch/defines.h"
 #include "arch/inttypes.h"
-
-/// \addtogroup group_SystemFunctions
-///@{
 
 #if defined(ARCH_OS_LINUX) && defined(ARCH_CPU_INTEL)
 #include <x86intrin.h>
@@ -342,8 +338,6 @@ uint64_t MeasureExecutionTime(
             return (*static_cast<MeasureNType const *>(mN))(nTimes);
         });
 }
-
-///@}
 
 }  // namespace arch
 

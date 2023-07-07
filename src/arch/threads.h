@@ -26,7 +26,6 @@
 #define ARCH_THREADS_H
 
 /// \file arch/threads.h
-/// \ingroup group_Multithreading
 /// Architecture-specific thread function calls.
 
 #include "arch/api.h"
@@ -43,7 +42,6 @@
 namespace arch {
 
 /// Return true if the calling thread is the main thread, false otherwise.
-/// \ingroup group_Multithreading
 ARCH_API bool IsMainThread();
 
 /// Return the std::thread_id for the thread arch considers to be the "main"

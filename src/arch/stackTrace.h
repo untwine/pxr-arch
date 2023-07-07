@@ -26,7 +26,6 @@
 #define ARCH_STACK_TRACE_H
 
 /// \file arch/stackTrace.h
-/// \ingroup group_Diagnostics
 /// Architecture-specific call-stack tracing routines.
 
 #include <cinttypes>
@@ -41,9 +40,6 @@
 #include "arch/defines.h"
 
 namespace arch {
-
-/// \addtogroup group_Diagnostics
-///@{
 
 /// Dumps call-stack info to a file, prints a message to the terminal, and
 /// invokes crash handling script.
@@ -357,8 +353,6 @@ int CrashHandlerSystemv(
 #define ETIME ECANCELED
 #endif  // end ETIME
 #endif  // end ARCH_OS_DARWIN
-
-///@}
 
 }  // namespace arch
 

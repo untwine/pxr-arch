@@ -26,7 +26,6 @@
 #define ARCH_SYSTEM_INFO_H
 
 /// \file arch/systemInfo.h
-/// \ingroup group_SystemFunctions
 /// Provide architecture-specific system information.
 
 #include <string>
@@ -34,9 +33,6 @@
 #include "arch/api.h"
 
 namespace arch {
-
-/// \addtogroup group_SystemFunctions
-///@{
 
 /// Return current working directory as a string.
 ARCH_API
@@ -49,8 +45,6 @@ std::string GetExecutablePath();
 /// Return the system's memory page size.  Safe to assume power-of-two.
 ARCH_API
 int GetPageSize();
-
-///@}
 
 }  // namespace arch
 
