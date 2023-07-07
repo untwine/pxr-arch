@@ -1,0 +1,39 @@
+name: format-test
+
+on:
+  pull_request:
+    branches: [ dev, main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      -   uses: actions/checkout@v3
+
+      -   name: Create Build Environment
+          run: |
+            sudo apt update
+            sudo apt install -y clang-format
+            cmake -E make_directory ${{runner.workspace}}/build
+
+      -   name: Configure
+          working-directory: ${{runner.workspace}}/build
+          run: |
+            cmake \
+              -D "BUILD_DOCS=OFF" \
+              -D "BUILD_TESTS=OFF" \
+              ${GITHUB_WORKSPACE}
+
+      -   name: Format code
+          working-directory: ${{runner.workspace}}/build
+          run: cmake --build . --target format
+
+      -   name: Check for formatting errors
+          run: |
+            if [ -n "$(git status --porcelain)" ]; \
+              then echo "Code formatting errors found."; \
+              exit 1; fi
