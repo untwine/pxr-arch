@@ -94,19 +94,19 @@ find_package(ClangFormat 7)
 include(CMakePackageConfigHelpers)
 
 configure_package_config_file(
-    "cmake/archConfig.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/archConfig.cmake"
+    "cmake/arch-config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/arch-config.cmake"
     INSTALL_DESTINATION share/cmake/arch
 )
 
 write_basic_package_version_file(
-    "archConfigVersion.cmake"
+    "arch-config-version.cmake"
     COMPATIBILITY AnyNewerVersion
 )
 
 install(
     FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/archConfig.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/archConfigVersion.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/arch-config.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/arch-config-version.cmake"
     DESTINATION share/cmake/arch
 )
