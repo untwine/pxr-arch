@@ -4,6 +4,12 @@
 Release Notes
 *************
 
+.. release:: Upcoming
+
+    .. change:: fixed
+
+        Updated build and release configuration scripts.
+
 .. release:: 0.3.1
     :date: 2023-07-10
 
