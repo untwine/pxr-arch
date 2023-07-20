@@ -6,6 +6,7 @@ endif()
 
 add_library(arch
     arch/assumptions.cpp
+    arch/align.cpp
     arch/attributes.cpp
     arch/daemon.cpp
     arch/debugger.cpp
@@ -51,11 +52,39 @@ endif()
 
 install(TARGETS arch EXPORT ${PROJECT_NAME})
 install(
-    DIRECTORY
-        arch
+    FILES
+        arch/align.h
+        arch/api.h
+        arch/attributes.h
+        arch/buildMode.h
+        arch/daemon.h
+        arch/debugger.h
+        arch/defines.h
+        arch/demangle.h
+        arch/env.h
+        arch/errno.h
+        arch/error.h
+        arch/export.h
+        arch/fileSystem.h
+        arch/function.h
+        arch/functionLite.h
+        arch/hash.h
+        arch/hints.h
+        arch/inttypes.h
+        arch/library.h
+        arch/mallocHook.h
+        arch/math.h
+        arch/pragmas.h
+        arch/regex.h
+        arch/stackTrace.h
+        arch/symbols.h
+        arch/systemInfo.h
+        arch/threads.h
+        arch/timing.h
+        arch/virtualMemory.h
+        arch/vsnprintf.h
     DESTINATION
-        ${CMAKE_INSTALL_INCLUDEDIR}
-    FILES_MATCHING PATTERN "*.h"
+        ${CMAKE_INSTALL_INCLUDEDIR}/arch
 )
 
 install(EXPORT ${PROJECT_NAME}

@@ -4,6 +4,18 @@
 Release Notes
 *************
 
+.. release:: Upcoming
+
+    .. change:: fixed
+
+        Added source for :arch-cpp:`align.h` which has been unintentionally
+        left out when building the ``arch`` library.
+
+    .. change:: fixed
+
+        Explicitly defined public headers so that private ones can be
+        easily omitted.
+
 .. release:: 0.3.2
     :date: 2023-07-12
 
