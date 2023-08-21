@@ -1,0 +1,7 @@
+/*!
+\namespace pxr
+Scope of the Pixar libraries.
+
+\namespace pxr::arch
+Scope of the Arch library.
+*/

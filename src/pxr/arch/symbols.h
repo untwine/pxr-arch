@@ -26,7 +26,6 @@
 #define PXR_ARCH_SYMBOLS_H
 
 /// \file arch/symbols.h
-/// \ingroup group_arch_Diagnostics
 /// Architecture-specific symbol lookup routines.
 
 #include "./api.h"
@@ -48,7 +47,6 @@ namespace arch {
 /// the arguments except \p address can be \c NULL if the result isn't needed.
 /// This will return \c false if \c NULL is passed to \p address.
 ///
-/// \ingroup group_arch_Diagnostics
 ARCH_API
 bool GetAddressInfo(void* address,
                     std::string* objectPath, void** baseAddress,

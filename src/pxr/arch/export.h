@@ -26,7 +26,6 @@
 #define PXR_ARCH_EXPORT_H
 
 /// \file arch/export.h
-/// \ingroup group_arch_SymbolVisibility
 ///
 /// Defines symbol visibility macros.
 ///

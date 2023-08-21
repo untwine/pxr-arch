@@ -26,7 +26,6 @@
 #define PXR_ARCH_ERRNO_H
 
 /// \file arch/errno.h
-/// \ingroup group_arch_SystemFunctions
 /// Functions for dealing with system errors.
 
 #include "./api.h"
@@ -35,9 +34,6 @@
 namespace pxr {
 
 namespace arch {
-
-/// \addtogroup group_arch_SystemFunctions
-///@{
 
 /// Return the error string for the current value of errno.
 ///
@@ -58,8 +54,6 @@ ARCH_API std::string Strerror(int errorCode);
 /// This function is thread-safe.
 ARCH_API std::string StrSysError(unsigned long errorCode);
 #endif
-
-///@}
 
 }  // namespace arch
 

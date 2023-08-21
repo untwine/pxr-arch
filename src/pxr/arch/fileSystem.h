@@ -26,7 +26,6 @@
 #define PXR_ARCH_FILE_SYSTEM_H
 
 /// \file arch/fileSystem.h
-/// \ingroup group_arch_SystemFunctions
 /// Architecture dependent file system access
 
 #include "./api.h"
@@ -59,8 +58,6 @@ namespace pxr {
 
 namespace arch {
 
-/// \addtogroup group_arch_SystemFunctions
-///@{
 #if !defined(ARCH_OS_WINDOWS)
     #ifdef _POSIX_VERSION
         #include <limits.h>                     /* for PATH_MAX */
@@ -124,7 +121,6 @@ typedef struct stat StatType;
 
 /// \file fileSystem.h
 /// Architecture dependent file system access
-/// \ingroup group_arch_SystemFunctions
 ///
 
 /// Opens a file.
@@ -463,8 +459,6 @@ inline std::wstring WindowsUtf8ToUtf16(const std::string &str)
 }
 
 #endif
-
-///@}
 
 }  // namespace arch
 

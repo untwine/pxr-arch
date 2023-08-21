@@ -30,6 +30,7 @@ jobs:
         run: |
           cmake \
             -G "Visual Studio 17 2022" -A x64 \
+            -D "BUILD_DOCS=OFF" \
             -D "ENABLE_PRECOMPILED_HEADERS=ON" \
             ${GITHUB_WORKSPACE}
 

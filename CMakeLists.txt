@@ -19,6 +19,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Default options.
 option(BUILD_TESTS "Build tests" ON)
+option(BUILD_DOCS "Build documentation" ON)
 option(BUILD_SHARED_LIBS "Build Shared Library" ON)
 option(ENABLE_PRECOMPILED_HEADERS "Enable precompiled headers." OFF)
 
@@ -54,6 +55,9 @@ if (DEFINED ENV{CMAKE_BUILD_TYPE})
         CACHE STRING "Specifies the build type" FORCE)
 endif()
 
+# Discover custom module finders.
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
+
 # Silence "Up-to-date:" install messages
 set(CMAKE_INSTALL_MESSAGE NEVER)
 
@@ -70,6 +74,14 @@ if (BUILD_TESTS)
     enable_testing()
 
     add_subdirectory(test)
+endif()
+
+# Build documentation if required.
+if (BUILD_DOCS)
+    find_package(Sphinx 1.8.6 REQUIRED)
+    find_package(Doxygen 1.8.5 REQUIRED)
+
+    add_subdirectory(doc)
 endif()
 
 include(CMakePackageConfigHelpers)

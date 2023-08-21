@@ -66,10 +66,8 @@ namespace arch {
 
 /// library.h
 /// Architecture dependent loading and unloading of dynamic libraries.
-/// \ingroup group_arch_SystemFunctions
 
 /// Load an executable object file.
-/// \ingroup group_arch_SystemFunctions
 ///
 /// Opens the dynamic library that is specified by filename.
 /// Returning the handle to the module if successful; false otherwise.
@@ -78,18 +76,15 @@ void* LibraryOpen(const std::string &filename, int flag);
 
 /// Obtain a description of the most recent error that occurred from
 /// \c LibraryOpen.
-///\ingroup group_arch_SystemFunctions
 ARCH_API
 std::string LibraryError();
 
 /// Closes an object opened with \c LibraryOpen.
-/// \ingroup group_arch_SystemFunctions
 ARCH_API
 int LibraryClose(void* handle);
 
 /// Obtain the address of a symbol defined within an object opened with
 /// \c LibraryOpen.
-/// \ingroup group_arch_SystemFunctions
 ///
 /// Obtain the address of a symbol that is specified by name.
 /// Returning the address of the symbol if successful; nullptr otherwise.
