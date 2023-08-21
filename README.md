@@ -17,3 +17,8 @@ It is regularly rebased over the "release" branch of the original
 explicit divergence information from the latest updates and is currently
 synchronized with
 [v25.02](https://github.com/PixarAnimationStudios/OpenUSD/releases/tag/v25.02).
+
+## Documentation
+
+Full documentation, including installation and setup guides, can be found at
+https://untwine.github.io/pxr-arch/
