@@ -20,11 +20,13 @@ classifiers = [
 
 [project.urls]
 Repository = "https://github.com/untwine/pxr-arch"
+Documentation = "https://untwine.github.io/pxr-arch/"
 
 [tool.scikit-build]
 cmake.version = ">=3.21,<4"
 cmake.args = [
     "-DBUILD_TESTS=OFF",
+    "-DBUILD_DOCS=OFF",
     "-DBUILD_SHARED_LIBS=ON"
 ]
 wheel.py-api = "py3"
