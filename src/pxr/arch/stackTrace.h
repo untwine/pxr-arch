@@ -9,7 +9,6 @@
 #define PXR_ARCH_STACK_TRACE_H
 
 /// \file arch/stackTrace.h
-/// \ingroup group_arch_Diagnostics
 /// Architecture-specific call-stack tracing routines.
 
 #include "pxr/arch/pxr.h"
@@ -25,9 +24,6 @@
 #include <ctime>
 
 ARCH_NAMESPACE_OPEN_SCOPE
-
-/// \addtogroup group_arch_Diagnostics
-///@{
 
 /// Dumps call-stack info to a file, prints a message to the terminal, and 
 /// invokes crash handling script.
@@ -343,8 +339,6 @@ int ArchCrashHandlerSystemv(const char* pathname, char *const argv[],
 #define ETIME ECANCELED
 #endif  // end ETIME
 #endif  // end ARCH_OS_DARWIN
-
-///@}
 
 ARCH_NAMESPACE_CLOSE_SCOPE
 

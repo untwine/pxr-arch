@@ -9,7 +9,6 @@
 #define PXR_ARCH_ERROR_H
 
 /// \file arch/error.h
-/// \ingroup group_arch_Diagnostics
 /// Low-level fatal error reporting.
 
 #include "pxr/arch/pxr.h"
@@ -45,9 +44,6 @@ ARCH_API
 void Arch_Warning(const char* msg, const char* funcName,
                   size_t lineNo, const char* fileName);
 
-/// \addtogroup group_arch_Diagnostics
-///@{
-
 /// Unconditionally aborts the program.
 ///
 /// \param msg is a literal string, a \c const \c char* (but not
@@ -68,8 +64,6 @@ void Arch_Warning(const char* msg, const char* funcName,
 /// \hideinitializer
 #define ARCH_AXIOM(cond) \
     if (!(cond)) ARCH_ERROR("[" #cond "] axiom failed")
-
-///@}
 
 ARCH_NAMESPACE_CLOSE_SCOPE
 

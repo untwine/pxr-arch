@@ -9,7 +9,6 @@
 #define PXR_ARCH_FILE_SYSTEM_H
 
 /// \file arch/fileSystem.h
-/// \ingroup group_arch_SystemFunctions
 /// Architecture dependent file system access
 
 #include "pxr/arch/pxr.h"
@@ -41,8 +40,6 @@
 
 ARCH_NAMESPACE_OPEN_SCOPE
 
-/// \addtogroup group_arch_SystemFunctions
-///@{
 #if !defined(ARCH_OS_WINDOWS)
     #ifdef _POSIX_VERSION
         #include <limits.h>                     /* for PATH_MAX */
@@ -106,7 +103,6 @@ typedef struct stat ArchStatType;
 
 /// \file fileSystem.h
 /// Architecture dependent file system access
-/// \ingroup group_arch_SystemFunctions
 ///
 
 /// Opens a file.
@@ -406,8 +402,6 @@ inline std::wstring ArchWindowsUtf8ToUtf16(const std::string &str)
 }
 
 #endif
-
-///@}
 
 ARCH_NAMESPACE_CLOSE_SCOPE
 
