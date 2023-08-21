@@ -20,6 +20,7 @@ classifiers = [
 
 [project.urls]
 Repository = "https://github.com/untwine/pxr-arch"
+Documentation = "https://untwine.github.io/pxr-arch/"
 
 [tool.scikit-build]
 cmake.version = ">=3.21,<4"
@@ -31,4 +32,4 @@ cmake.args = [
     "-DCMAKE_INSTALL_INCLUDEDIR=pxr-arch/include",
     "-DCMAKE_INSTALL_DATAROOTDIR=pxr-arch",
 ]
-sdist.exclude = ["test", ".github"]
+sdist.exclude = ["test", "doc", ".github"]
