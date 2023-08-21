@@ -9,7 +9,6 @@
 #define PXR_ARCH_VSNPRINTF_H
 
 /// \file arch/vsnprintf.h
-/// \ingroup group_arch_Strings
 /// Architecture dependent memory-safe sprintf capability
 
 #include "pxr/arch/pxr.h"
@@ -21,9 +20,6 @@
 #include <string>
 
 ARCH_NAMESPACE_OPEN_SCOPE
-
-/// \addtogroup group_arch_Strings
-///@{
 
 /// Return the number of characters (not including the null character)
 /// necessary for a particular sprintf into a string.
@@ -79,10 +75,8 @@ ARCH_API
 std::string ArchVStringPrintf(const char *fmt, va_list ap)
 #ifndef doxygen
     ARCH_PRINTF_FUNCTION(1, 0)
+#endif /* doxygen */
     ;
-#endif
-
-/// @}
 
 ARCH_NAMESPACE_CLOSE_SCOPE
     

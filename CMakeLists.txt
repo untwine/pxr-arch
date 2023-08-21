@@ -19,6 +19,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Default options.
 option(BUILD_SHARED_LIBS "Build Shared Library" ON)
 option(BUILD_TESTS "Build tests" OFF)
+option(BUILD_DOCS "Build documentation" OFF)
 option(ENABLE_PRECOMPILED_HEADERS "Enable precompiled headers." OFF)
 
 if (NOT BUILD_SHARED_LIBS)
@@ -51,6 +52,14 @@ add_subdirectory(src)
 if (BUILD_TESTS)
     enable_testing()
     add_subdirectory(test)
+endif()
+
+# Build documentation if required.
+if (BUILD_DOCS)
+    find_package(Sphinx 1.8.6 REQUIRED)
+    find_package(Doxygen 1.8.5 REQUIRED)
+
+    add_subdirectory(doc)
 endif()
 
 include(CMakePackageConfigHelpers)

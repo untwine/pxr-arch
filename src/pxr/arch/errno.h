@@ -9,7 +9,6 @@
 #define PXR_ARCH_ERRNO_H
 
 /// \file arch/errno.h
-/// \ingroup group_arch_SystemFunctions
 /// Functions for dealing with system errors.
 
 #include "pxr/arch/pxr.h"
@@ -17,9 +16,6 @@
 #include <string>
 
 ARCH_NAMESPACE_OPEN_SCOPE
-
-/// \addtogroup group_arch_SystemFunctions
-///@{
 
 /// Return the error string for the current value of errno.
 ///
@@ -40,8 +36,6 @@ ARCH_API std::string ArchStrerror(int errorCode);
 /// This function is thread-safe.
 ARCH_API std::string ArchStrSysError(unsigned long errorCode);
 #endif
-
-///@}
 
 ARCH_NAMESPACE_CLOSE_SCOPE
 

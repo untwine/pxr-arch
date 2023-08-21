@@ -9,16 +9,12 @@
 #define PXR_ARCH_TIMING_H
 
 /// \file arch/timing.h
-/// \ingroup group_arch_SystemFunctions
 /// High-resolution, low-cost timing routines.
 
 #include "pxr/arch/pxr.h"
 #include "pxr/arch/api.h"
 #include "pxr/arch/defines.h"
 #include "pxr/arch/inttypes.h"
-
-/// \addtogroup group_arch_SystemFunctions
-///@{
 
 #if defined(ARCH_OS_LINUX) && defined(ARCH_CPU_INTEL)
 #include <x86intrin.h>
@@ -348,8 +344,6 @@ ArchMeasureExecutionTime(
             return (*static_cast<MeasureNType const *>(mN))(nTimes);
         });
 }
-
-///@}
 
 ARCH_NAMESPACE_CLOSE_SCOPE
 
