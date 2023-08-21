@@ -19,6 +19,7 @@ classifiers = [
 
 [project.urls]
 Repository = "https://github.com/untwine/pxr-arch"
+Documentation = "https://untwine.github.io/pxr-arch/"
 
 [project.optional-dependencies]
 dev = ["pxr-arch-dev==0.25.2"]
@@ -27,6 +28,7 @@ dev = ["pxr-arch-dev==0.25.2"]
 cmake.version = ">=3.21,<4"
 cmake.args = [
     "-DBUILD_TESTS=OFF",
+    "-DBUILD_DOCS=OFF",
     "-DBUILD_SHARED_LIBS=ON"
 ]
 wheel.exclude = ["pxr-arch"]
