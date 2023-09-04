@@ -7,8 +7,7 @@
 //
 // Modified by Jeremy Retailleau.
 
-#include <pxr/arch/error.h>
-#include "./testArchUtil.h"
+#include <archTest/util.h>
 
 using namespace pxr;
 
@@ -16,4 +15,6 @@ int main(int argc, char** argv)
 {
     ArchTestCrashArgParse(argc, argv);
     ArchTestCrash(ArchTestCrashMode::Error);
+
+    return 0;
 }
