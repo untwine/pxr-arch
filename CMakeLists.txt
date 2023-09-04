@@ -67,6 +67,9 @@ add_subdirectory(src)
 
 # Build and setup tests if required.
 if (BUILD_TESTS)
+    find_package(GTest REQUIRED)
+    include(GoogleTest)
+
     enable_testing()
     add_subdirectory(test)
 endif()
