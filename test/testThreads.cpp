@@ -1,4 +1,3 @@
-//
 // Copyright 2016 Pixar
 //
 // Licensed under the Apache License, Version 2.0 (the "Apache License")
@@ -21,21 +20,17 @@
 // KIND, either express or implied. See the Apache License for the specific
 // language governing permissions and limitations under the Apache License.
 //
+// Modified by Jeremy Retailleau.
 
-#include <pxr/arch/errno.h>
+#include <pxr/arch/threads.h>
 #include <pxr/arch/error.h>
-
-#include <cstdio>
 
 using namespace pxr;
 
-int main(int /*argc*/, char** /*argv*/)
+int main()
 {
-    for (int i = -1; i < 10; i++) {
-        const std::string msg = ArchStrerror(i);
-        ARCH_AXIOM(!msg.empty());
-        printf("%d -> '%s'\n", i, msg.c_str());
-    }
+    ARCH_AXIOM(ArchIsMainThread());
 
     return 0;
 }
+

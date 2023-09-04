@@ -1,5 +1,4 @@
-//
-// Copyright 2016 Pixar
+// Copyright 2017 Pixar
 //
 // Licensed under the Apache License, Version 2.0 (the "Apache License")
 // with the following modification; you may not use this file except in
@@ -21,28 +20,27 @@
 // KIND, either express or implied. See the Apache License for the specific
 // language governing permissions and limitations under the Apache License.
 //
-#ifndef PXR_ARCH_TEST_ARCH_ABI_H
-#define PXR_ARCH_TEST_ARCH_ABI_H
+// Modified by Jeremy Retailleau.
 
-#include "./api.h"
+#ifndef PXR_ARCH_TEST_ARCH_UTIL_H
+#define PXR_ARCH_TEST_ARCH_UTIL_H
 
 namespace pxr {
 
-struct ArchAbiBase1 {
-    void* dummy;
+// Crash types.
+enum class ArchTestCrashMode {
+    Error,
+    ReadInvalidAddresses,
+    ReadInvalidAddressesWithThread
 };
 
-struct ArchAbiBase2 {
-    virtual ~ArchAbiBase2() { }
-    virtual const char* name() const = 0;
-};
+// Cause the test to crash deliberately.
+void ArchTestCrash(ArchTestCrashMode mode);
 
-template <class T>
-struct ArchAbiDerived : public ArchAbiBase1, public ArchAbiBase2 {
-    virtual ~ArchAbiDerived() { }
-    virtual const char* name() const { return "ArchAbiDerived"; }
-};
+// On Windows we can't easily fork() so we just run the test again with
+// command line arguments to request a crash.
+void ArchTestCrashArgParse(int argc, char** argv);
 
 }  // namespace pxr
 
-#endif // PXR_ARCH_TEST_ARCH_ABI_H
+#endif // PXR_ARCH_TEST_ARCH_UTIL_H

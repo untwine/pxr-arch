@@ -1,4 +1,3 @@
-//
 // Copyright 2017 Pixar
 //
 // Licensed under the Apache License, Version 2.0 (the "Apache License")
@@ -21,8 +20,7 @@
 // KIND, either express or implied. See the Apache License for the specific
 // language governing permissions and limitations under the Apache License.
 //
-// WARNING: THIS FILE IS GENERATED.  DO NOT EDIT.
-//
+// Modified by Jeremy Retailleau.
 
 #include "./defines.h"
 #if defined(ARCH_OS_DARWIN)

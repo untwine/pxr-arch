@@ -1,4 +1,3 @@
-//
 // Copyright 2016 Pixar
 //
 // Licensed under the Apache License, Version 2.0 (the "Apache License")
@@ -21,12 +20,13 @@
 // KIND, either express or implied. See the Apache License for the specific
 // language governing permissions and limitations under the Apache License.
 //
+// Modified by Jeremy Retailleau.
 
 #include <pxr/arch/stackTrace.h>
 #include <pxr/arch/defines.h>
 #include <pxr/arch/error.h>
 #include <pxr/arch/fileSystem.h>
-#include <pxr/arch/testArchUtil.h>
+#include "./testArchUtil.h"
 
 #include <string>
 #include <cstdlib>

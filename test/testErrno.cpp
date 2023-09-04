@@ -1,4 +1,3 @@
-//
 // Copyright 2016 Pixar
 //
 // Licensed under the Apache License, Version 2.0 (the "Apache License")
@@ -21,18 +20,22 @@
 // KIND, either express or implied. See the Apache License for the specific
 // language governing permissions and limitations under the Apache License.
 //
+// Modified by Jeremy Retailleau.
 
-#include <pxr/arch/systemInfo.h>
+#include <pxr/arch/errno.h>
 #include <pxr/arch/error.h>
+
+#include <cstdio>
 
 using namespace pxr;
 
-using std::string;
-
-//most of these tests are just for code coverage
-int main(int /*argc*/, char const** /*argv*/)
+int main(int /*argc*/, char** /*argv*/)
 {
-    ARCH_AXIOM(ArchGetExecutablePath().find("testArch", 0) != string::npos);
+    for (int i = -1; i < 10; i++) {
+        const std::string msg = ArchStrerror(i);
+        ARCH_AXIOM(!msg.empty());
+        printf("%d -> '%s'\n", i, msg.c_str());
+    }
+
     return 0;
 }
-

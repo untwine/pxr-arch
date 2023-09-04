@@ -1,4 +1,3 @@
-//
 // Copyright 2016 Pixar
 //
 // Licensed under the Apache License, Version 2.0 (the "Apache License")
@@ -21,45 +20,19 @@
 // KIND, either express or implied. See the Apache License for the specific
 // language governing permissions and limitations under the Apache License.
 //
+// Modified by Jeremy Retailleau.
 
-#include <pxr/arch/vsnprintf.h>
+#include <pxr/arch/systemInfo.h>
 #include <pxr/arch/error.h>
-
-#include <cstdlib>
-#include <iostream>
-#include <string.h>
 
 using namespace pxr;
 
 using std::string;
 
-static int ArchSnprintf(char *str, size_t size, const char* fmt, ...) {
-    int n;
-    va_list ap;
-    va_start(ap, fmt);
-
-    n = ArchVsnprintf(str, size, fmt, ap);
-
-    va_end(ap);
-    return n;
-}
-
-int main()
+//most of these tests are just for code coverage
+int main(int /*argc*/, char const** /*argv*/)
 {
-    char str[1] = "";
-
-    // ArchSnprintf should report 3 characters not written 
-    ARCH_AXIOM(ArchSnprintf(str, strlen(str), "   ") == 3);
-
-    // ensure that a string longer than 4096 works
-    // create a long format string
-    char long_fmt[8192];
-    for(int i=0;i<8191;++i) {
-        long_fmt[i] = ' ';
-    }
-    long_fmt[8191] = '\0';
-
-    ARCH_AXIOM(ArchStringPrintf("%s", long_fmt).size() == 8191);
-
+    ARCH_AXIOM(ArchGetExecutablePath().find("testArch", 0) != string::npos);
     return 0;
 }
+

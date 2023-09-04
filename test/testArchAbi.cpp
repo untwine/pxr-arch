@@ -1,4 +1,3 @@
-//
 // Copyright 2016 Pixar
 //
 // Licensed under the Apache License, Version 2.0 (the "Apache License")
@@ -21,8 +20,9 @@
 // KIND, either express or implied. See the Apache License for the specific
 // language governing permissions and limitations under the Apache License.
 //
+// Modified by Jeremy Retailleau.
 
-#include <pxr/arch/testArchAbi.h>
+#include "./testArchAbi.h"
 #include <pxr/arch/error.h>
 #include <pxr/arch/library.h>
 #include <pxr/arch/systemInfo.h>
@@ -45,11 +45,11 @@ main(int /*argc*/, char** /*argv*/)
 
     // Load the plugin and get the factory function.
 #if defined(ARCH_OS_WINDOWS)
-    path += "\\lib\\testArchAbiPlugin.dll";
+    path += "\\testArchAbiPlugin.dll";
 #elif defined(ARCH_OS_DARWIN)
-    path += "/lib/libtestArchAbiPlugin.dylib";
+    path += "/libtestArchAbiPlugin.dylib";
 #else
-    path += "/lib/libtestArchAbiPlugin.so";
+    path += "/libtestArchAbiPlugin.so";
 #endif
     auto plugin = ArchLibraryOpen(path, ARCH_LIBRARY_LAZY);
     if (!plugin) {

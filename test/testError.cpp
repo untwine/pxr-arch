@@ -1,4 +1,3 @@
-//
 // Copyright 2016 Pixar
 //
 // Licensed under the Apache License, Version 2.0 (the "Apache License")
@@ -21,37 +20,16 @@
 // KIND, either express or implied. See the Apache License for the specific
 // language governing permissions and limitations under the Apache License.
 //
+// Written by dhl (10 Jul 2006)
+// Modified by Jeremy Retailleau.
 
-#include <pxr/arch/timing.h>
 #include <pxr/arch/error.h>
-#include <chrono>
-#include <thread>
+#include "./testArchUtil.h"
 
 using namespace pxr;
 
-int main()
+int main(int argc, char** argv)
 {
-    // Verify conversions for many tick counts.
-    for (size_t ticks = 0ul; ticks != 1ul << 24u; ++ticks) {
-        ARCH_AXIOM( (uint64_t) ArchTicksToNanoseconds(ticks) == 
-            uint64_t(static_cast<double>(ticks)*ArchGetNanosecondsPerTick() + .5));
-
-        double nanos = double(ArchTicksToNanoseconds(ticks)) / 1e9;
-        double secs = ArchTicksToSeconds(ticks);
-        double epsilon = 0.0001;
-        ARCH_AXIOM( (nanos - epsilon <= secs) && (nanos + epsilon >= secs) );
-    }
-
-    // Compute some time delta.
-    const auto t1 = ArchGetTickTime();
-    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
-    const auto t2 = ArchGetTickTime();
-    const auto delta = t2 - t1;
-
-    // Verify the delta is reasonable.  We allow a lot of leeway on the top
-    // end in case of heavy machine load.
-    ARCH_AXIOM(ArchTicksToSeconds(delta) > 1.4);
-    ARCH_AXIOM(ArchTicksToSeconds(delta) < 5.0);
-
-    return 0;
+    ArchTestCrashArgParse(argc, argv);
+    ArchTestCrash(ArchTestCrashMode::Error);
 }

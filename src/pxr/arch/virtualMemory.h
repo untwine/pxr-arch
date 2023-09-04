@@ -1,4 +1,3 @@
-//
 // Copyright 2019 Pixar
 //
 // Licensed under the Apache License, Version 2.0 (the "Apache License")
@@ -21,6 +20,8 @@
 // KIND, either express or implied. See the Apache License for the specific
 // language governing permissions and limitations under the Apache License.
 //
+// Modified by Jeremy Retailleau.
+
 #ifndef PXR_ARCH_VIRTUAL_MEMORY_H
 #define PXR_ARCH_VIRTUAL_MEMORY_H
 

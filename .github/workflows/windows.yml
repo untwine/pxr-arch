@@ -1,0 +1,49 @@
+name: test-windows
+
+on:
+  push:
+    branches: [ dev, main ]
+  pull_request:
+    branches: [ dev, main ]
+
+  # Run tests once a week on Sunday.
+  schedule:
+    - cron: "0 6 * * 0"
+
+permissions:
+  contents: read
+
+jobs:
+  test-windows:
+    runs-on: windows-2022
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Create Build Environment
+        run: |
+          cmake -E make_directory ${{runner.workspace}}/build
+
+      - name: Configure
+        shell: bash
+        working-directory: ${{runner.workspace}}/build
+        run: |
+          cmake \
+            -G "Visual Studio 17 2022" -A x64 \
+            -D "ENABLE_PRECOMPILED_HEADERS=ON" \
+            ${GITHUB_WORKSPACE}
+
+      - name: Build
+        shell: bash
+        working-directory: ${{runner.workspace}}/build
+        run: cmake --build . --config Release
+
+      - name: Test
+        shell: bash
+        working-directory: ${{runner.workspace}}/build
+        run: ctest -VV
+        env:
+          CTEST_OUTPUT_ON_FAILURE: True
+
+          # Avoid the just-in-time debugger where possible when running tests.
+          ARCH_AVOID_JIT: True

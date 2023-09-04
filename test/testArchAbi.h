@@ -1,4 +1,3 @@
-//
 // Copyright 2016 Pixar
 //
 // Licensed under the Apache License, Version 2.0 (the "Apache License")
@@ -21,16 +20,30 @@
 // KIND, either express or implied. See the Apache License for the specific
 // language governing permissions and limitations under the Apache License.
 //
-// Written by dhl (10 Jul 2006)
-//
+// Modified by Jeremy Retailleau.
 
-#include <pxr/arch/error.h>
-#include <pxr/arch/testArchUtil.h>
+#ifndef PXR_ARCH_TEST_ARCH_ABI_H
+#define PXR_ARCH_TEST_ARCH_ABI_H
 
-using namespace pxr;
+#include <pxr/arch/api.h>
 
-int main(int argc, char** argv)
-{
-    ArchTestCrashArgParse(argc, argv);
-    ArchTestCrash(ArchTestCrashMode::Error);
-}
+namespace pxr {
+
+struct ArchAbiBase1 {
+    void* dummy;
+};
+
+struct ArchAbiBase2 {
+    virtual ~ArchAbiBase2() { }
+    virtual const char* name() const = 0;
+};
+
+template <class T>
+struct ArchAbiDerived : public ArchAbiBase1, public ArchAbiBase2 {
+    virtual ~ArchAbiDerived() { }
+    virtual const char* name() const { return "ArchAbiDerived"; }
+};
+
+}  // namespace pxr
+
+#endif // PXR_ARCH_TEST_ARCH_ABI_H

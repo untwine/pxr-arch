@@ -1,4 +1,3 @@
-//
 // Copyright 2016 Pixar
 //
 // Licensed under the Apache License, Version 2.0 (the "Apache License")
@@ -21,16 +20,16 @@
 // KIND, either express or implied. See the Apache License for the specific
 // language governing permissions and limitations under the Apache License.
 //
+// Modified by Jeremy Retailleau.
 
-#include <pxr/arch/threads.h>
-#include <pxr/arch/error.h>
+#include <pxr/arch/export.h>
+#include "./testArchAbi.h"
+
 
 using namespace pxr;
 
-int main()
-{
-    ARCH_AXIOM(ArchIsMainThread());
+extern "C" {
 
-    return 0;
+ARCH_EXPORT ArchAbiBase2* newDerived() { return new ArchAbiDerived<int>; }
+
 }
-
