@@ -22,20 +22,16 @@
 //
 // Modified by Jeremy Retailleau.
 
-#include <pxr/arch/errno.h>
-#include <pxr/arch/error.h>
+#include <pxr/arch/export.h>
+#include <archTest/abi.h>
 
-#include <cstdio>
 
 using namespace pxr;
 
-int main(int /*argc*/, char** /*argv*/)
-{
-    for (int i = -1; i < 10; i++) {
-        const std::string msg = arch::Strerror(i);
-        ARCH_AXIOM(!msg.empty());
-        printf("%d -> '%s'\n", i, msg.c_str());
-    }
+extern "C" {
 
-    return 0;
+ARCH_EXPORT archTest::AbiBase2* newDerived()
+{
+    return new archTest::AbiDerived<int>;
+}
 }

@@ -22,6 +22,7 @@ jobs:
 
       - name: Create Build Environment
         run: |
+          vcpkg install --triplet=x64-windows gtest
           cmake -E make_directory ${{runner.workspace}}/build
 
       - name: Configure
@@ -30,6 +31,8 @@ jobs:
         run: |
           cmake \
             -G "Visual Studio 17 2022" -A x64 \
+            -D "CMAKE_TOOLCHAIN_FILE=${VCPKG_INSTALLATION_ROOT}\scripts\buildsystems\vcpkg.cmake" \
+            -D "VCPKG_TARGET_TRIPLET=x64-windows" \
             -D "BUILD_DOCS=OFF" \
             -D "ENABLE_PRECOMPILED_HEADERS=ON" \
             ${GITHUB_WORKSPACE}

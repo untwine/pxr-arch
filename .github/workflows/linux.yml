@@ -23,7 +23,7 @@ jobs:
       - name: Create Build Environment
         run: |
           sudo apt update
-          sudo apt install -y ninja-build
+          sudo apt install -y libgtest-dev ninja-build
           cmake -E make_directory ${{runner.workspace}}/build
 
       - name: Configure

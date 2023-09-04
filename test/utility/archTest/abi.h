@@ -20,16 +20,35 @@
 // KIND, either express or implied. See the Apache License for the specific
 // language governing permissions and limitations under the Apache License.
 //
-// Written by dhl (10 Jul 2006)
 // Modified by Jeremy Retailleau.
 
-#include <pxr/arch/error.h>
-#include "./testArchUtil.h"
+#ifndef PXR_ARCH_TEST_ABI_H
+#define PXR_ARCH_TEST_ABI_H
 
-using namespace pxr;
+#include <pxr/arch/api.h>
 
-int main(int argc, char** argv)
-{
-    arch::TestCrashArgParse(argc, argv);
-    TestCrash(arch::TestCrashMode::Error);
-}
+namespace pxr {
+
+namespace archTest {
+
+struct AbiBase1 {
+    void* dummy;
+};
+
+struct AbiBase2 {
+    virtual ~AbiBase2() = default;
+    virtual const char* name() const = 0;
+};
+
+template <class T>
+struct AbiDerived : public AbiBase1, public AbiBase2 {
+    AbiDerived() : AbiBase1(), AbiBase2() {}
+    ~AbiDerived() override = default;
+    const char* name() const override { return "AbiDerived"; }
+};
+
+}  // namespace archTest
+
+}  // namespace pxr
+
+#endif  // PXR_ARCH_TEST_ABI_H

@@ -24,7 +24,8 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 
-#include "./testArchUtil.h"
+#include "./util.h"
+
 #include <pxr/arch/debugger.h>
 #include <pxr/arch/defines.h>
 #include <pxr/arch/error.h>
@@ -55,7 +56,7 @@ using namespace std;
 
 namespace pxr {
 
-namespace arch {
+namespace archTest {
 
 namespace {
 
@@ -94,22 +95,22 @@ _ReadInvalidAddresses(bool spawnthread)
     }
 
     fprintf(stderr, "FAILED to crash! Aborting.\n");
-    Abort();
+    arch::Abort();
 }
 
 void
-_TestCrash(TestCrashMode mode)
+_TestCrash(CrashMode mode)
 {
     switch (mode) {
-    case TestCrashMode::Error:
+    case CrashMode::Error:
         ARCH_ERROR("Testing arch::Error");
         break;
 
-    case TestCrashMode::ReadInvalidAddresses:
+    case CrashMode::ReadInvalidAddresses:
         _ReadInvalidAddresses(false);
         break;
 
-    case TestCrashMode::ReadInvalidAddressesWithThread:
+    case CrashMode::ReadInvalidAddressesWithThread:
         _ReadInvalidAddresses(true);
         break;
     }
@@ -118,7 +119,7 @@ _TestCrash(TestCrashMode mode)
 } // anonymous namespace
 
 void
-TestCrash(TestCrashMode mode)
+Crash(CrashMode mode)
 {
     int status;
 
@@ -127,7 +128,7 @@ TestCrash(TestCrashMode mode)
     // Make a command line for a new copy of this program with an argument
     // to tell it to crash.
     std::string cmdLine =
-        '"' + GetExecutablePath() + "\" " +
+        '"' + arch::GetExecutablePath() + "\" " +
         crashArgument[static_cast<int>(mode)];
 
     // Start a new copy of this program and tell it to crash.
@@ -179,14 +180,14 @@ TestCrash(TestCrashMode mode)
 
 #if defined(ARCH_OS_WINDOWS)
 void
-TestCrashArgParse(int argc, char** argv)
+CrashArgParse(int argc, char** argv)
 {
     // Scan for crash argument.
     for (int i = 1; i != argc; ++i) {
         for (size_t j = 0, n = sizeof(crashArgument) / sizeof(crashArgument[0]);
                 j != n; ++j) {
             if (strcmp(argv[i], crashArgument[j]) == 0) {
-                _TestCrash(static_cast<TestCrashMode>(j));
+                _TestCrash(static_cast<CrashMode>(j));
                 _exit(1);
             }
         }
@@ -194,12 +195,12 @@ TestCrashArgParse(int argc, char** argv)
 }
 #else
 void
-TestCrashArgParse(int /*argc*/, char** /*argv*/)
+CrashArgParse(int /*argc*/, char** /*argv*/)
 {
     // Non-windows platforms don't need this.
 }
 #endif
 
-}  // namespace arch
+}  // namespace archTest
 
 }  // namespace pxr

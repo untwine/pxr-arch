@@ -91,6 +91,8 @@ Then build the documentation as follows::
 Running tests
 =============
 
+Ensure that :term:`GTest` is installed.
+
 Once the library and all tests are built, you can run the tests using
 :term:`Ctest` within the build folder as follows::
 

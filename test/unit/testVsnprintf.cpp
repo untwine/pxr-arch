@@ -22,32 +22,40 @@
 //
 // Modified by Jeremy Retailleau.
 
-#ifndef PXR_ARCH_TEST_ARCH_ABI_H
-#define PXR_ARCH_TEST_ARCH_ABI_H
+#include <pxr/arch/vsnprintf.h>
+#include <gtest/gtest.h>
 
-#include <pxr/arch/api.h>
+#include <cstdlib>
+#include <string>
 
-namespace pxr {
+using namespace pxr;
 
-namespace arch {
+static int Snprintf(char* str, size_t size, const char* fmt, ...)
+{
+    int n;
+    va_list ap;
+    va_start(ap, fmt);
 
-struct AbiBase1 {
-    void* dummy;
-};
+    n = arch::Vsnprintf(str, size, fmt, ap);
 
-struct AbiBase2 {
-    virtual ~AbiBase2() { }
-    virtual const char* name() const = 0;
-};
+    va_end(ap);
+    return n;
+}
 
-template <class T>
-struct AbiDerived : public AbiBase1, public AbiBase2 {
-    virtual ~AbiDerived() { }
-    virtual const char* name() const { return "AbiDerived"; }
-};
+TEST(VsnprintfTest, Print)
+{
+    char str[1] = "";
 
-}  // namespace arch
+    // Snprintf should report 3 characters not written
+    ASSERT_EQ(Snprintf(str, strlen(str), "   "), 3);
 
-}  // namespace pxr
+    // ensure that a string longer than 4096 works
+    // create a long format string
+    char long_fmt[8192];
+    for(int i=0;i<8191;++i) {
+        long_fmt[i] = ' ';
+    }
+    long_fmt[8191] = '\0';
 
-#endif // PXR_ARCH_TEST_ARCH_ABI_H
+    ASSERT_EQ(arch::StringPrintf("%s", long_fmt).size(), 8191);
+}

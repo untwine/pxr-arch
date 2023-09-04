@@ -22,7 +22,7 @@ jobs:
 
       - name: Create Build Environment
         run: |
-          brew install ninja
+          brew install ninja googletest
           cmake -E make_directory ${{runner.workspace}}/build
 
       - name: Configure

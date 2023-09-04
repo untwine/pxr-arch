@@ -20,46 +20,17 @@
 // KIND, either express or implied. See the Apache License for the specific
 // language governing permissions and limitations under the Apache License.
 //
+// Written by dhl (10 Jul 2006)
 // Modified by Jeremy Retailleau.
 
-#include <pxr/arch/vsnprintf.h>
-#include <pxr/arch/error.h>
-
-#include <cstdlib>
-#include <iostream>
-#include <string.h>
+#include <archTest/util.h>
 
 using namespace pxr;
 
-using std::string;
-
-static int Snprintf(char *str, size_t size, const char* fmt, ...) {
-    int n;
-    va_list ap;
-    va_start(ap, fmt);
-
-    n = arch::Vsnprintf(str, size, fmt, ap);
-
-    va_end(ap);
-    return n;
-}
-
-int main()
+int main(int argc, char** argv)
 {
-    char str[1] = "";
-
-    // Snprintf should report 3 characters not written
-    ARCH_AXIOM(Snprintf(str, strlen(str), "   ") == 3);
-
-    // ensure that a string longer than 4096 works
-    // create a long format string
-    char long_fmt[8192];
-    for(int i=0;i<8191;++i) {
-        long_fmt[i] = ' ';
-    }
-    long_fmt[8191] = '\0';
-
-    ARCH_AXIOM(arch::StringPrintf("%s", long_fmt).size() == 8191);
+    archTest::CrashArgParse(argc, argv);
+    archTest::Crash(archTest::CrashMode::Error);
 
     return 0;
 }

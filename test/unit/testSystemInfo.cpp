@@ -23,16 +23,13 @@
 // Modified by Jeremy Retailleau.
 
 #include <pxr/arch/systemInfo.h>
-#include <pxr/arch/error.h>
+#include <gtest/gtest.h>
 
 using namespace pxr;
 
 using std::string;
 
-//most of these tests are just for code coverage
-int main(int /*argc*/, char const** /*argv*/)
+TEST(SystemInfoTest, GetExecutablePath)
 {
-    ARCH_AXIOM(arch::GetExecutablePath().find("testArch", 0) != string::npos);
-    return 0;
+    ASSERT_NE(arch::GetExecutablePath().find("testArch", 0), string::npos);
 }
-

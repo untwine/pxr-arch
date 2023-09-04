@@ -22,14 +22,14 @@
 //
 // Modified by Jeremy Retailleau.
 
-#include <pxr/arch/export.h>
-#include "./testArchAbi.h"
-
+#include <pxr/arch/errno.h>
+#include <gtest/gtest.h>
 
 using namespace pxr;
 
-extern "C" {
-
-ARCH_EXPORT arch::AbiBase2* newDerived() { return new arch::AbiDerived<int>; }
-
+TEST(ErrnoTest, ErrorMessages)
+{
+    for (int i = -1; i < 10; i++) {
+        ASSERT_NE(arch::Strerror(i), "");
+    }
 }

@@ -22,32 +22,24 @@
 //
 // Modified by Jeremy Retailleau.
 
-#include <pxr/arch/stackTrace.h>
-#include <pxr/arch/defines.h>
-#include <pxr/arch/error.h>
 #include <pxr/arch/fileSystem.h>
-#include "./testArchUtil.h"
+#include <pxr/arch/stackTrace.h>
+#include <archTest/util.h>
+#include <gtest/gtest.h>
 
+#include <cstdio>
 #include <string>
-#include <cstdlib>
 
 using namespace pxr;
 
-int main(int argc, char** argv)
+TEST(StackTraceTest, TestCrash)
 {
-    // Verify the "is crashing" flag is initialized properly, and doesn't
-    // get modified until we call the fatal process state handler below.
-    ARCH_AXIOM(!arch::IsAppCrashing());
-
-    arch::SetProgramNameForErrors( "testArch ArchError" );
-    arch::TestCrashArgParse(argc, argv);
-
-    ARCH_AXIOM(!arch::IsAppCrashing());
+    ASSERT_FALSE(arch::IsAppCrashing());
 
     std::string log = arch::MakeTmpFileName("statusLogTester");
     FILE *logFile;
 
-    ARCH_AXIOM((logFile = arch::OpenFile(log.c_str(), "w")) != NULL);
+    ASSERT_NE((logFile = arch::OpenFile(log.c_str(), "w")), nullptr);
     fputs("fake log\n", logFile);
     fputs("let's throw in a weird printf %1024$s specifier\n", logFile);
     fclose(logFile);
@@ -55,18 +47,18 @@ int main(int argc, char** argv)
     arch::LogStackTrace("Crashing", true, log.c_str());
     arch::UnlinkFile(log.c_str());
 
-    ARCH_AXIOM(!arch::IsAppCrashing());
+    ASSERT_FALSE(arch::IsAppCrashing());
     arch::LogCurrentProcessState("Test Non-Fatal");
 
-    ARCH_AXIOM(!arch::IsAppCrashing());
+    ASSERT_FALSE(arch::IsAppCrashing());
     arch::LogFatalProcessState("Test Fatal");
 
     // Now we should be marked as crashing
-    ARCH_AXIOM(arch::IsAppCrashing());
+    ASSERT_TRUE(arch::IsAppCrashing());
 
     // test crashing with and without spawning
-    TestCrash(arch::TestCrashMode::ReadInvalidAddresses);
-    TestCrash(arch::TestCrashMode::ReadInvalidAddressesWithThread);
+    archTest::Crash(archTest::CrashMode::ReadInvalidAddresses);
+    archTest::Crash(archTest::CrashMode::ReadInvalidAddressesWithThread);
 
     // test GetStackTrace
     std::vector<std::string> stackTrace = arch::GetStackTrace(20);
@@ -78,8 +70,14 @@ int main(int argc, char** argv)
     // Release builds on windows can't get symbolic names.
     found |= !stackTrace.empty();
 #endif
-    ARCH_AXIOM(found);
-
-    return 0;
+    ASSERT_TRUE(found);
 }
 
+int main(int argc, char** argv)
+{
+    arch::SetProgramNameForErrors("testArch ArchError");
+    archTest::CrashArgParse(argc, argv);
+
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}

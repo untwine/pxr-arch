@@ -22,29 +22,29 @@
 //
 // Modified by Jeremy Retailleau.
 
-#ifndef PXR_ARCH_TEST_ARCH_UTIL_H
-#define PXR_ARCH_TEST_ARCH_UTIL_H
+#ifndef PXR_ARCH_TEST_UTIL_H
+#define PXR_ARCH_TEST_UTIL_H
 
 namespace pxr {
 
-namespace arch {
+namespace archTest {
 
 // Crash types.
-enum class TestCrashMode {
+enum class CrashMode {
     Error,
     ReadInvalidAddresses,
     ReadInvalidAddressesWithThread
 };
 
 // Cause the test to crash deliberately.
-void TestCrash(TestCrashMode mode);
+void Crash(CrashMode mode);
 
 // On Windows we can't easily fork() so we just run the test again with
 // command line arguments to request a crash.
-void TestCrashArgParse(int argc, char** argv);
+void CrashArgParse(int argc, char** argv);
 
-}  // namespace arch
+}  // namespace archTest
 
 }  // namespace pxr
 
-#endif // PXR_ARCH_TEST_ARCH_UTIL_H
+#endif  // PXR_ARCH_TEST_UTIL_H
