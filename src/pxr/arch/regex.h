@@ -32,7 +32,9 @@
 
 namespace pxr {
 
-class ArchRegex {
+namespace arch {
+
+class Regex {
 public:
     enum : unsigned int {
         CASE_INSENSITIVE = 1u,
@@ -40,18 +42,18 @@ public:
     };
 
     /// Create an empty regex.
-    ArchRegex() = default;
+    Regex() = default;
 
-    ArchRegex(ArchRegex &&) noexcept = default;
-    ArchRegex(ArchRegex const &) = default;
-    ArchRegex &operator=(ArchRegex &&) noexcept = default;
-    ArchRegex &operator=(ArchRegex const &) = default;
+    Regex(Regex &&) noexcept = default;
+    Regex(Regex const &) = default;
+    Regex &operator=(Regex &&) noexcept = default;
+    Regex &operator=(Regex const &) = default;
 
     /// Create with pattern and optional flags.
-    ARCH_API ArchRegex(const std::string& pattern, unsigned int flags = 0);
+    ARCH_API Regex(const std::string& pattern, unsigned int flags = 0);
 
     /// Destructor.
-    ARCH_API ~ArchRegex();
+    ARCH_API ~Regex();
 
     /// Returns \c true if the regex is valid.
     ARCH_API explicit operator bool() const;
@@ -73,6 +75,8 @@ private:
     std::string _error;
     std::shared_ptr<const _Impl> _impl;
 };
+
+}  // namespace arch
 
 }  // namespace pxr
 

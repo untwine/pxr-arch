@@ -40,6 +40,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 /// \addtogroup group_arch_Strings
 ///@{
 
@@ -48,67 +50,69 @@ namespace pxr {
 /// Given a variable \c v, the construct \c typeid(v).name() returns
 /// the type-name of \c v; unfortunately, the returned type-name is
 /// sometimes extremely encoded (otherwise known as "mangled").
-/// \c ArchDemangle parses the passed in type-name \c typeName into a
+/// \c Demangle parses the passed in type-name \c typeName into a
 /// readable form, and overwrites \c typeName.  If \c typeName
 /// cannot be unmangled, the function returns \c false without altering
 /// \c typeName. Otherwise \c true is returned.
-ARCH_API bool ArchDemangle(std::string* typeName);
+ARCH_API bool Demangle(std::string* typeName);
 
 /// Return demangled RTTI-generated type name.
 ///
 /// If \c typeName can be demangled, the function returns the demangled
 /// string; otherwise, the function returns the empty string.
 ///
-/// \see ArchDemangle()
+/// \see Demangle()
 ARCH_API std::string
-ArchGetDemangled(const std::string& typeName);
+GetDemangled(const std::string& typeName);
 
 /// Return demangled RTTI-generated type name.
 ///
-/// \see ArchDemangle()
+/// \see Demangle()
 /// \overload
 ARCH_API std::string
-ArchGetDemangled(const char *typeName);
+GetDemangled(const char *typeName);
 
 /// Return demangled RTTI-generated type name.
 ///
 /// Returns the demangled name associated with typeInfo (i.e. typeInfo.name()).
 ///
-/// \see ArchDemangle()
+/// \see Demangle()
 /// \overload
 inline std::string
-ArchGetDemangled(const std::type_info& typeInfo) {
-    return ArchGetDemangled(typeInfo.name());
+GetDemangled(const std::type_info& typeInfo) {
+    return GetDemangled(typeInfo.name());
 }
 
 /// Return demangled RTTI-generated type name.
 ///
 /// Returns the demangled name associated with typeIndex (i.e. typeIndex.name()).
 ///
-/// \see ArchDemangle()
+/// \see Demangle()
 /// \overload
 inline std::string
-ArchGetDemangled(const std::type_index& typeIndex) {
-    return ArchGetDemangled(typeIndex.name());
+GetDemangled(const std::type_index& typeIndex) {
+    return GetDemangled(typeIndex.name());
 }
 
 /// Return demangled RTTI generated-type name.
 ///
 /// Returns the demangled name of type T.
 ///
-/// \see ArchDemangle()
+/// \see Demangle()
 /// \overload
 template <typename T>
 inline std::string
-ArchGetDemangled() {
-    return ArchGetDemangled(typeid(T).name());
+GetDemangled() {
+    return GetDemangled(typeid(T).name());
 }
 
 ///@}
 
 /// \private
 ARCH_API
-void Arch_DemangleFunctionName(std::string* functionName);
+void _DemangleFunctionName(std::string* functionName);
+
+}  // namespace arch
 
 }  // namespace pxr
 

@@ -59,6 +59,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 using std::pair;
 using std::string;
 using std::set;
@@ -72,7 +74,7 @@ static inline HANDLE _FileToWinHANDLE(FILE *file)
 }
 #endif // ARCH_OS_WINDOWS
 
-FILE* ArchOpenFile(char const* fileName, char const* mode)
+FILE* OpenFile(char const* fileName, char const* mode)
 {
 #if defined(ARCH_OS_WINDOWS)
     bool hasPlus = strchr(mode, '+') != nullptr;
@@ -113,7 +115,7 @@ FILE* ArchOpenFile(char const* fileName, char const* mode)
 
     // Call CreateFileW.
     HANDLE hfile = CreateFileW(
-        ArchWindowsUtf8ToUtf16(fileName).c_str(),
+        WindowsUtf8ToUtf16(fileName).c_str(),
         desiredAccess,
         shareMode,
         /* securityAttributes=*/nullptr,
@@ -150,14 +152,14 @@ FILE* ArchOpenFile(char const* fileName, char const* mode)
 }
 
 #if defined(ARCH_OS_WINDOWS)
-int ArchRmDir(const char* path)
+int RmDir(const char* path)
 {
-    return RemoveDirectoryW(ArchWindowsUtf8ToUtf16(path).c_str()) ? 0 : -1;
+    return RemoveDirectoryW(WindowsUtf8ToUtf16(path).c_str()) ? 0 : -1;
 }
 #endif
 
 bool
-ArchStatIsWritable(const ArchStatType *st)
+StatIsWritable(const StatType *st)
 {
 #if defined(ARCH_OS_LINUX) || defined (ARCH_OS_DARWIN)
     if (st) {
@@ -178,23 +180,23 @@ ArchStatIsWritable(const ArchStatType *st)
 }
 
 bool
-ArchGetModificationTime(const char* pathname, double* time)
+GetModificationTime(const char* pathname, double* time)
 {
-    ArchStatType st;
+    StatType st;
 #if defined(ARCH_OS_WINDOWS)
-    if (_wstat64(ArchWindowsUtf8ToUtf16(pathname).c_str(), &st) == 0)
+    if (_wstat64(WindowsUtf8ToUtf16(pathname).c_str(), &st) == 0)
 #else
     if (stat(pathname, &st) == 0)
 #endif
     {
-        *time = ArchGetModificationTime(st);
+        *time = GetModificationTime(st);
         return true;
     }
     return false;
 }
 
 double
-ArchGetModificationTime(const ArchStatType& st)
+GetModificationTime(const StatType& st)
 {
 #if defined(ARCH_OS_LINUX)
     return st.st_mtim.tv_sec + 1e-9*st.st_mtim.tv_nsec;
@@ -208,7 +210,7 @@ ArchGetModificationTime(const ArchStatType& st)
 #endif
 }
 
-namespace { // Helpers for ArchNormPath.
+namespace { // Helpers for NormPath.
 
 enum TokenType { Dot, DotDot, Elem };
 
@@ -370,7 +372,7 @@ _NormPath(string const &inPath)
 
 #if defined(ARCH_OS_WINDOWS)
 string
-ArchNormPath(const string& inPath, bool stripDriveSpecifier)
+NormPath(const string& inPath, bool stripDriveSpecifier)
 {
     // Convert backslashes to forward slashes.
     string path = inPath;
@@ -379,7 +381,7 @@ ArchNormPath(const string& inPath, bool stripDriveSpecifier)
     // Extract the drive specifier.  Note that we don't correctly handle
     // UNC paths or paths that start with \\? (which allow longer paths).
     //
-    // Also make sure drive letters are always lower-case out of ArchNormPath
+    // Also make sure drive letters are always lower-case out of NormPath
     // on Windows -- this is so that we can be sure we can reliably use the
     // paths as keys in tables, etc.
     string prefix;
@@ -396,14 +398,14 @@ ArchNormPath(const string& inPath, bool stripDriveSpecifier)
 }
 #else
 string
-ArchNormPath(const string& inPath, bool /*stripDriveSpecifier*/)
+NormPath(const string& inPath, bool /*stripDriveSpecifier*/)
 {
     return _NormPath(inPath);
 }
 #endif // defined(ARCH_OS_WINDOWS)
 
 string
-ArchAbsPath(const string& path)
+AbsPath(const string& path)
 {
     if (path.empty()) {
         return path;
@@ -413,16 +415,16 @@ ArchAbsPath(const string& path)
     // @TODO support 32,767 long paths on windows by prepending "\\?\" to the
     // path
     wchar_t buffer[ARCH_PATH_MAX];
-    if (GetFullPathNameW(ArchWindowsUtf8ToUtf16(path).c_str(),
+    if (GetFullPathNameW(WindowsUtf8ToUtf16(path).c_str(),
                          ARCH_PATH_MAX, buffer, nullptr)) {
-        return ArchWindowsUtf16ToUtf8(buffer);
+        return WindowsUtf16ToUtf8(buffer);
     }
     else {
         return path;
     }
 #else
     if (path[0] == '/') {
-        return ArchNormPath(path);
+        return NormPath(path);
     }
 
     std::unique_ptr<char[]> cwd(new char[ARCH_PATH_MAX]);
@@ -431,14 +433,14 @@ ArchAbsPath(const string& path)
         return path;
     }
 
-    return ArchNormPath(string(cwd.get()) + "/" + path);
+    return NormPath(string(cwd.get()) + "/" + path);
 #endif
 }
 
 bool 
-ArchGetStatMode(const char *pathname, int *mode)
+GetStatMode(const char *pathname, int *mode)
 {
-    ArchStatType st;
+    StatType st;
 #if defined(ARCH_OS_WINDOWS)
     if (__stat64(pathname, &st) == 0) {
 #else
@@ -451,7 +453,7 @@ ArchGetStatMode(const char *pathname, int *mode)
 }
 
 double
-ArchGetAccessTime(const struct stat& st)
+GetAccessTime(const struct stat& st)
 {
 #if defined(ARCH_OS_LINUX)
     return st.st_atim.tv_sec + 1e-9*st.st_atim.tv_nsec;
@@ -466,7 +468,7 @@ ArchGetAccessTime(const struct stat& st)
 }
 
 double
-ArchGetStatusChangeTime(const struct stat& st)
+GetStatusChangeTime(const struct stat& st)
 {
 #if defined(ARCH_OS_LINUX)
     return st.st_ctim.tv_sec + 1e-9*st.st_ctim.tv_nsec;
@@ -494,7 +496,7 @@ _GetFileLength(HANDLE handle)
 #endif
 
 int64_t
-ArchGetFileLength(FILE *file)
+GetFileLength(FILE *file)
 {
     if (!file)
         return -1;
@@ -510,7 +512,7 @@ ArchGetFileLength(FILE *file)
 }
 
 int64_t
-ArchGetFileLength(const char* fileName)
+GetFileLength(const char* fileName)
 {
 #if defined (ARCH_OS_LINUX) || defined (ARCH_OS_DARWIN)
     struct stat buf;
@@ -519,7 +521,7 @@ ArchGetFileLength(const char* fileName)
     // Open a handle with 0 as the desired access and full sharing.
     // This opens the file even if exclusively locked.
     HANDLE handle =
-        CreateFileW(ArchWindowsUtf8ToUtf16(fileName).c_str(), 0,
+        CreateFileW(WindowsUtf8ToUtf16(fileName).c_str(), 0,
                    FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
                    nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (handle) {
@@ -534,13 +536,13 @@ ArchGetFileLength(const char* fileName)
 }
 
 string
-ArchGetFileName(FILE *file)
+GetFileName(FILE *file)
 {
 #if defined (ARCH_OS_LINUX)
     string result;
     char buf[PATH_MAX];
     ssize_t r = readlink(
-        ArchStringPrintf("/proc/self/fd/%d", fileno(file)).c_str(),
+        StringPrintf("/proc/self/fd/%d", fileno(file)).c_str(),
         buf, sizeof(buf));
     if (r != -1) {
         result.assign(buf, buf + r);
@@ -579,9 +581,9 @@ ArchGetFileName(FILE *file)
 }
 
 string
-ArchMakeTmpFileName(const string& prefix, const string& suffix)
+MakeTmpFileName(const string& prefix, const string& suffix)
 {
-    string  tmpDir = ArchGetTmpDir();
+    string  tmpDir = GetTmpDir();
 
     static std::atomic<int> nCalls(1);
     const int n = nCalls++;
@@ -592,17 +594,17 @@ ArchMakeTmpFileName(const string& prefix, const string& suffix)
 #endif
 
     if (n == 1)
-        return ArchStringPrintf("%s/%s.%d%s", tmpDir.c_str(), prefix.c_str(),
-                                pid, suffix.c_str());
+        return StringPrintf("%s/%s.%d%s", tmpDir.c_str(), prefix.c_str(),
+                            pid, suffix.c_str());
     else
-        return ArchStringPrintf("%s/%s.%d.%d%s", tmpDir.c_str(), prefix.c_str(),
-                                pid, n, suffix.c_str());
+        return StringPrintf("%s/%s.%d.%d%s", tmpDir.c_str(), prefix.c_str(),
+                            pid, n, suffix.c_str());
 }
 
 int
-ArchMakeTmpFile(const std::string& prefix, std::string* pathname)
+MakeTmpFile(const std::string& prefix, std::string* pathname)
 {
-    return ArchMakeTmpFile(ArchGetTmpDir(), prefix, pathname);
+    return MakeTmpFile(GetTmpDir(), prefix, pathname);
 }
 
 #if defined (ARCH_OS_WINDOWS)
@@ -649,18 +651,18 @@ MakeUnique(
 #endif
 
 int
-ArchMakeTmpFile(const std::string& tmpdir,
-                const std::string& prefix, std::string* pathname)
+MakeTmpFile(const std::string& tmpdir,
+            const std::string& prefix, std::string* pathname)
 {
     // Format the template.
     std::string sTemplate =
-        ArchStringPrintf("%s/%s.XXXXXX", tmpdir.c_str(), prefix.c_str());
+        StringPrintf("%s/%s.XXXXXX", tmpdir.c_str(), prefix.c_str());
 
 #if defined(ARCH_OS_WINDOWS)
     int fd = -1;
     auto cTemplate =
         MakeUnique(sTemplate, [&fd](const char* name){
-                    _wsopen_s(&fd, ArchWindowsUtf8ToUtf16(name).c_str(),
+                    _wsopen_s(&fd, WindowsUtf8ToUtf16(name).c_str(),
                               _O_CREAT | _O_EXCL | _O_RDWR | _O_BINARY,
                               _SH_DENYNO, _S_IREAD | _S_IWRITE);
             return fd != -1;
@@ -691,20 +693,20 @@ ArchMakeTmpFile(const std::string& tmpdir,
 }
 
 std::string
-ArchMakeTmpSubdir(const std::string& tmpdir,
-                  const std::string& prefix)
+MakeTmpSubdir(const std::string& tmpdir,
+              const std::string& prefix)
 {
     std::string retstr;
 
     // Format the template.
     std::string sTemplate =
-        ArchStringPrintf("%s/%s.XXXXXX", tmpdir.c_str(), prefix.c_str());
+        StringPrintf("%s/%s.XXXXXX", tmpdir.c_str(), prefix.c_str());
 
 #if defined(ARCH_OS_WINDOWS)
     retstr =
         MakeUnique(sTemplate, [](const char* name){
             return CreateDirectoryW(
-                ArchWindowsUtf8ToUtf16(name).c_str(), NULL) != FALSE;
+                WindowsUtf8ToUtf16(name).c_str(), NULL) != FALSE;
         });
 #else
     // Copy template to a writable buffer.
@@ -729,7 +731,7 @@ static const char* _TmpDir = 0;
 
 ARCH_HIDDEN
 void
-Arch_InitTmpDir()
+_InitTmpDir()
 {
 #if defined(ARCH_OS_WINDOWS)
     wchar_t tmpPath[MAX_PATH];
@@ -744,12 +746,12 @@ Arch_InitTmpDir()
 
     // Strip the trailing slash
     tmpPath[sizeOfPath-1] = 0;
-    _TmpDir = _strdup(ArchWindowsUtf16ToUtf8(tmpPath).c_str());
+    _TmpDir = _strdup(WindowsUtf16ToUtf8(tmpPath).c_str());
 #else
-    const std::string tmpdir = ArchGetEnv("TMPDIR");
+    const std::string tmpdir = GetEnv("TMPDIR");
     if (!tmpdir.empty()) {
         // This function is not exposed in the header; it is only used during
-        // Arch_InitConfig. If this is called more than once when TMPDIR is
+        // _InitConfig. If this is called more than once when TMPDIR is
         // set, the following call will leak a string.
         _TmpDir = strdup(tmpdir.c_str());
     } else {
@@ -763,13 +765,13 @@ Arch_InitTmpDir()
 }
 
 const char *
-ArchGetTmpDir()
+GetTmpDir()
 {
     return _TmpDir;
 }
 
 void
-Arch_Unmapper::operator()(char const *mapStart) const
+_Unmapper::operator()(char const *mapStart) const
 {
     void *ptr = static_cast<void *>(const_cast<char *>(mapStart));
     if (!ptr)
@@ -782,20 +784,20 @@ Arch_Unmapper::operator()(char const *mapStart) const
 }
 
 void
-Arch_Unmapper::operator()(char *mapStart) const
+_Unmapper::operator()(char *mapStart) const
 {
     (*this)(static_cast<char const *>(mapStart));
 }
 
 template <class Mapping>
 static inline Mapping
-Arch_MapFileImpl(FILE *file, std::string *errMsg)
+_MapFileImpl(FILE *file, std::string *errMsg)
 {
     using PtrType = typename Mapping::pointer;
     constexpr bool isConst =
         std::is_const<typename Mapping::element_type>::value;
 
-    auto length = ArchGetFileLength(file);
+    auto length = GetFileLength(file);
     if (length < 0)
         return Mapping();
 
@@ -814,13 +816,13 @@ Arch_MapFileImpl(FILE *file, std::string *errMsg)
                       /*offsetHigh=*/ 0, /*offsetLow=*/0, unsignedLength));
     // Close the mapping handle, and return the view pointer.
     CloseHandle(hFileMap);
-    return Mapping(ptr, Arch_Unmapper(length));
+    return Mapping(ptr, _Unmapper(length));
 #else // Assume POSIX
     auto m = mmap(nullptr, length,
                   isConst ? PROT_READ : PROT_READ | PROT_WRITE,
                   MAP_PRIVATE, fileno(file), 0);
     Mapping ret(m == MAP_FAILED ? nullptr : static_cast<PtrType>(m),
-                Arch_Unmapper(length));
+                _Unmapper(length));
     if (!ret && errMsg) {
         int err = errno;
         if (err == EINVAL) {
@@ -829,23 +831,23 @@ Arch_MapFileImpl(FILE *file, std::string *errMsg)
             *errMsg = "system limit on mapped regions exceeded, "
                 "or out of memory";
         } else {
-            *errMsg = ArchStrerror();
+            *errMsg = Strerror();
         }
     }
     return ret;
 #endif
 }
 
-ArchConstFileMapping
-ArchMapFileReadOnly(FILE *file, std::string *errMsg)
+ConstFileMapping
+MapFileReadOnly(FILE *file, std::string *errMsg)
 {
-    return Arch_MapFileImpl<ArchConstFileMapping>(file, errMsg);
+    return _MapFileImpl<ConstFileMapping>(file, errMsg);
 }
 
-ArchMutableFileMapping
-ArchMapFileReadWrite(FILE *file, std::string *errMsg)
+MutableFileMapping
+MapFileReadWrite(FILE *file, std::string *errMsg)
 {
-    return Arch_MapFileImpl<ArchMutableFileMapping>(file, errMsg);
+    return _MapFileImpl<MutableFileMapping>(file, errMsg);
 }
 
 namespace
@@ -867,32 +869,32 @@ using _UniqueFILE = std::unique_ptr<FILE, _Fcloser>;
 
 template <class Mapping>
 static inline Mapping
-Arch_MapFileImpl(std::string const& path, std::string *errMsg)
+_MapFileImpl(std::string const& path, std::string *errMsg)
 {
-    _UniqueFILE f(ArchOpenFile(path.c_str(), "rb"));
+    _UniqueFILE f(OpenFile(path.c_str(), "rb"));
     if (!f) {
         if (errMsg) {
-            *errMsg = ArchStrerror();
+            *errMsg = Strerror();
         }
         return Mapping();
     }
-    return Arch_MapFileImpl<Mapping>(f.get(), errMsg);
+    return _MapFileImpl<Mapping>(f.get(), errMsg);
 }
 
-ArchConstFileMapping
-ArchMapFileReadOnly(std::string const& path, std::string *errMsg)
+ConstFileMapping
+MapFileReadOnly(std::string const& path, std::string *errMsg)
 {
-    return Arch_MapFileImpl<ArchConstFileMapping>(path, errMsg);
+    return _MapFileImpl<ConstFileMapping>(path, errMsg);
 }
 
-ArchMutableFileMapping
-ArchMapFileReadWrite(std::string const& path, std::string *errMsg)
+MutableFileMapping
+MapFileReadWrite(std::string const& path, std::string *errMsg)
 {
-    return Arch_MapFileImpl<ArchMutableFileMapping>(path, errMsg);
+    return _MapFileImpl<MutableFileMapping>(path, errMsg);
 }
 
 ARCH_API
-void ArchMemAdvise(void const *addr, size_t len, ArchMemAdvice adv)
+void MemAdvise(void const *addr, size_t len, MemAdvice adv)
 {
 #if defined(ARCH_OS_WINDOWS)
     // No windows implementation yet.  Look at
@@ -903,12 +905,12 @@ void ArchMemAdvise(void const *addr, size_t len, ArchMemAdvice adv)
     uintptr_t addrInt = reinterpret_cast<uintptr_t>(addr);
     uintptr_t alignedAddrInt = addrInt & mask;
 
-    // This must follow ArchMemAdvice exactly.
+    // This must follow MemAdvice exactly.
     int adviceMap[] = {
-        /* ArchMemAdviceNormal       = */ POSIX_MADV_NORMAL,
-        /* ArchMemAdviceWillNeed     = */ POSIX_MADV_WILLNEED,
-        /* ArchMemAdviceDontNeed     = */ POSIX_MADV_DONTNEED,
-        /* ArchMemAdviceRandomAccess = */ POSIX_MADV_RANDOM
+        /* MemAdviceNormal       = */ POSIX_MADV_NORMAL,
+        /* MemAdviceWillNeed     = */ POSIX_MADV_WILLNEED,
+        /* MemAdviceDontNeed     = */ POSIX_MADV_DONTNEED,
+        /* MemAdviceRandomAccess = */ POSIX_MADV_RANDOM
     };
 
     int rval = posix_madvise(reinterpret_cast<void *>(alignedAddrInt),
@@ -917,13 +919,13 @@ void ArchMemAdvise(void const *addr, size_t len, ArchMemAdvice adv)
         fprintf(stderr, "failed call to posix_madvise(%zd, %zd)"
                 "ret=%d, errno=%d '%s'\n",
                 alignedAddrInt, len + (addrInt-alignedAddrInt),
-                rval, errno, ArchStrerror().c_str());
+                rval, errno, Strerror().c_str());
     }
 #endif
 }
 
 bool
-ArchQueryMappedMemoryResidency(
+QueryMappedMemoryResidency(
     void const *addr, size_t len, unsigned char *pageMap)
 {
 #if defined(ARCH_OS_LINUX)
@@ -941,7 +943,7 @@ ArchQueryMappedMemoryResidency(
 }
 
 int64_t
-ArchPRead(FILE *file, void *buffer, size_t count, int64_t offset)
+PRead(FILE *file, void *buffer, size_t count, int64_t offset)
 {
     if (count == 0)
         return 0;
@@ -996,7 +998,7 @@ ArchPRead(FILE *file, void *buffer, size_t count, int64_t offset)
 }
 
 int64_t
-ArchPWrite(FILE *file, void const *bytes, size_t count, int64_t offset)
+PWrite(FILE *file, void const *bytes, size_t count, int64_t offset)
 {
     if (offset < 0)
         return -1;
@@ -1054,7 +1056,7 @@ ArchPWrite(FILE *file, void const *bytes, size_t count, int64_t offset)
 
 #if defined(ARCH_OS_WINDOWS)
 
-static inline DWORD ArchModeToAccess(int mode)
+static inline DWORD ModeToAccess(int mode)
 {
     switch (mode) {
     case X_OK: return FILE_GENERIC_EXECUTE;
@@ -1064,7 +1066,7 @@ static inline DWORD ArchModeToAccess(int mode)
     }
 }
 
-static int Arch_FileAccessError()
+static int _FileAccessError()
 {
     switch (GetLastError()) {
     case ERROR_FILE_NOT_FOUND:
@@ -1104,13 +1106,13 @@ static int Arch_FileAccessError()
     }
 }
 
-int ArchFileAccess(const char* path, int mode)
+int FileAccess(const char* path, int mode)
 {
     // Simple existence check is handled specially.
-    std::wstring wpath{ ArchWindowsUtf8ToUtf16(path) };
+    std::wstring wpath{ WindowsUtf8ToUtf16(path) };
     if (mode == F_OK) {
         return (GetFileAttributesW(wpath.c_str()) != INVALID_FILE_ATTRIBUTES)
-                ? 0 : Arch_FileAccessError();
+                ? 0 : _FileAccessError();
     }
 
     const SECURITY_INFORMATION securityInfo = OWNER_SECURITY_INFORMATION |
@@ -1121,7 +1123,7 @@ int ArchFileAccess(const char* path, int mode)
     DWORD length = 0;
     if (!GetFileSecurityW(wpath.c_str(), securityInfo, NULL, 0, &length)) {
         if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
-            return Arch_FileAccessError();
+            return _FileAccessError();
         }
     }
 
@@ -1130,7 +1132,7 @@ int ArchFileAccess(const char* path, int mode)
     PSECURITY_DESCRIPTOR security = (PSECURITY_DESCRIPTOR)buffer.get();
     if (!GetFileSecurityW(
             wpath.c_str(), securityInfo, security, length, &length)) {
-        return Arch_FileAccessError();
+        return _FileAccessError();
     }
 
 
@@ -1162,7 +1164,7 @@ int ArchFileAccess(const char* path, int mode)
         mapping.GenericExecute = FILE_GENERIC_EXECUTE;
         mapping.GenericAll = FILE_ALL_ACCESS;
 
-        DWORD accessMask = ArchModeToAccess(mode);
+        DWORD accessMask = ModeToAccess(mode);
         MapGenericMask(&accessMask, &mapping);
 
         if (AccessCheck(security,
@@ -1219,10 +1221,10 @@ typedef struct _REPARSE_DATA_BUFFER {
 } REPARSE_DATA_BUFFER, *PREPARSE_DATA_BUFFER;
 #define SYMLINK_FLAG_RELATIVE 0x00000001
 
-std::string ArchReadLink(const char* path)
+std::string ReadLink(const char* path)
 {
     HANDLE handle = ::CreateFileW(
-        ArchWindowsUtf8ToUtf16(path).c_str(), GENERIC_READ, FILE_SHARE_READ,
+        WindowsUtf8ToUtf16(path).c_str(), GENERIC_READ, FILE_SHARE_READ,
         NULL, OPEN_EXISTING,
         FILE_FLAG_OPEN_REPARSE_POINT |
         FILE_FLAG_BACKUP_SEMANTICS, NULL);
@@ -1263,7 +1265,7 @@ std::string ArchReadLink(const char* path)
             if ((reparse->SymbolicLinkReparseBuffer.Flags &
                  SYMLINK_FLAG_RELATIVE) == SYMLINK_FLAG_RELATIVE)
             {
-                string fullpath = ArchAbsPath(path);
+                string fullpath = AbsPath(path);
                 string::size_type i = fullpath.find_last_of("/\\");
                 if (i != string::npos)
                 {
@@ -1313,7 +1315,7 @@ std::string ArchReadLink(const char* path)
 #else
 
 std::string
-ArchReadLink(const char* path)
+ReadLink(const char* path)
 {
     if (!path || !path[0]) {
         return std::string();
@@ -1361,20 +1363,20 @@ ArchReadLink(const char* path)
 #endif
 
 ARCH_API
-void ArchFileAdvise(
-    FILE *file, int64_t offset, size_t count, ArchFileAdvice adv)
+void FileAdvise(
+    FILE *file, int64_t offset, size_t count, FileAdvice adv)
 {
 #if defined(ARCH_OS_WINDOWS)
     // No windows implementation yet.  Not clear what's equivalent.
 #elif defined(ARCH_OS_DARWIN)
     // No macOS implementation; posix_fadvise does not exist on that platform.
 #else // assume POSIX
-    // This must follow ArchFileAdvice exactly.
+    // This must follow FileAdvice exactly.
     int adviceMap[] = {
-        /* ArchFileAdviceNormal       = */ POSIX_FADV_NORMAL,
-        /* ArchFileAdviceWillNeed     = */ POSIX_FADV_WILLNEED,
-        /* ArchFileAdviceDontNeed     = */ POSIX_FADV_DONTNEED,
-        /* ArchFileAdviceRandomAccess = */ POSIX_FADV_RANDOM
+        /* FileAdviceNormal       = */ POSIX_FADV_NORMAL,
+        /* FileAdviceWillNeed     = */ POSIX_FADV_WILLNEED,
+        /* FileAdviceDontNeed     = */ POSIX_FADV_DONTNEED,
+        /* FileAdviceRandomAccess = */ POSIX_FADV_RANDOM
     };
     int rval = posix_fadvise(fileno(file), offset, static_cast<off_t>(count),
                              adviceMap[adv]);
@@ -1382,9 +1384,11 @@ void ArchFileAdvise(
         fprintf(stderr, "failed call to posix_fadvise(%d, %zd, %zd)"
                 "ret=%d, errno=%d '%s'\n",
                 fileno(file), offset, static_cast<off_t>(count),
-                rval, errno, ArchStrerror().c_str());
+                rval, errno, Strerror().c_str());
     }
 #endif
 }
+
+}  // namespace arch
 
 }  // namespace pxr

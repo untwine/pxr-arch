@@ -43,6 +43,8 @@ using std::string;
 
 namespace pxr {
 
+namespace arch {
+
 // This function returns a heap allocated string with the demangled RTTI
 // name of the std::string type.  On some platforms this is complicated,
 // similar to basic_string<char, char_traits<chars>, allocator<char>>.
@@ -144,7 +146,7 @@ _DemangleOld(string* mangledTypeName)
  * library.  It should also work for gcc4.0 (I think).
  * 
  * Currently this doesn't do the correct thing with function names, so
- * Arch_DemangleFunctionName has been changed to call _DemangleOld if
+ * _DemangleFunctionName has been changed to call _DemangleOld if
  * using a version of gcc >= 3.1.
  */
 static bool
@@ -195,13 +197,13 @@ _NewDemangledStringTypeName()
 }
 
 bool
-ArchDemangle(string* mangledTypeName)
+Demangle(string* mangledTypeName)
 {
 #if defined(_PARANOID_CHECK_MODE)
     string copy = *mangledTypeName;
     if (_DemangleNew(mangledTypeName)) {
         if (_DemangleOld(&copy) && copy != *mangledTypeName) {
-            fprintf(stderr, "ArchDemangle: disagreement between old and new\n"
+            fprintf(stderr, "arch::Demangle: disagreement between old and new\n"
                     "demangling schemes: '%s' (old way) vs '%s' (new way)\n", 
                     copy.c_str(), mangledTypeName->c_str());
         }
@@ -219,7 +221,7 @@ ArchDemangle(string* mangledTypeName)
 }
 
 void
-Arch_DemangleFunctionName(string* mangledFunctionName)
+_DemangleFunctionName(string* mangledFunctionName)
 {
     if (mangledFunctionName->size() > 2 &&
         (*mangledFunctionName)[0] == '_' && (*mangledFunctionName)[1] == 'Z') {
@@ -238,39 +240,41 @@ _NewDemangledStringTypeName()
 }
 
 bool
-ArchDemangle(string* mangledTypeName)
+Demangle(string* mangledTypeName)
 {
     _FixupStringNames(mangledTypeName);
     return true;
 }
 
 void
-Arch_DemangleFunctionName(string* mangledFunctionName)
+_DemangleFunctionName(string* mangledFunctionName)
 {
-    ArchDemangle(mangledFunctionName);
+    Demangle(mangledFunctionName);
 }
 
 #endif // _AT_LEAST_GCC_THREE_ONE_OR_CLANG
 
 string
-ArchGetDemangled(const string& typeName)
+GetDemangled(const string& typeName)
 {
     string r = typeName;
-    if (ArchDemangle(&r))
+    if (Demangle(&r))
         return r;
     return string();
 }
 
 string
-ArchGetDemangled(const char *typeName)
+GetDemangled(const char *typeName)
 {
     if (typeName) {
         string r = typeName;
-        if (ArchDemangle(&r)) {
+        if (Demangle(&r)) {
             return r;
         }
     }
     return string();
 }
+
+}  // namespace arch
 
 }  // namespace pxr

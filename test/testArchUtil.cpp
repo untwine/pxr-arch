@@ -55,17 +55,19 @@ using namespace std;
 
 namespace pxr {
 
+namespace arch {
+
 namespace {
 
 /*
- * Arch_ReadInvalidAddresses
+ * _ReadInvalidAddresses
  *     causes the calling program to crash by reading from bad addresses, so
  *     that crash handling behavior can be tested.  If 'spawnthread'
  *     is true, it spawns a thread which is alive during the crash.  If the
  *     program fails to crash, this aborts.
  */
 void
-Arch_ReadInvalidAddresses(bool spawnthread)
+_ReadInvalidAddresses(bool spawnthread)
 {
     std::thread t;
     if (spawnthread) {
@@ -92,23 +94,23 @@ Arch_ReadInvalidAddresses(bool spawnthread)
     }
 
     fprintf(stderr, "FAILED to crash! Aborting.\n");
-    ArchAbort();
+    Abort();
 }
 
 void
-Arch_TestCrash(ArchTestCrashMode mode)
+_TestCrash(TestCrashMode mode)
 {
     switch (mode) {
-    case ArchTestCrashMode::Error:
-        ARCH_ERROR("Testing ArchError");
+    case TestCrashMode::Error:
+        ARCH_ERROR("Testing arch::Error");
         break;
 
-    case ArchTestCrashMode::ReadInvalidAddresses:
-        Arch_ReadInvalidAddresses(false);
+    case TestCrashMode::ReadInvalidAddresses:
+        _ReadInvalidAddresses(false);
         break;
 
-    case ArchTestCrashMode::ReadInvalidAddressesWithThread:
-        Arch_ReadInvalidAddresses(true);
+    case TestCrashMode::ReadInvalidAddressesWithThread:
+        _ReadInvalidAddresses(true);
         break;
     }
 }
@@ -116,7 +118,7 @@ Arch_TestCrash(ArchTestCrashMode mode)
 } // anonymous namespace
 
 void
-ArchTestCrash(ArchTestCrashMode mode)
+TestCrash(TestCrashMode mode)
 {
     int status;
 
@@ -125,7 +127,7 @@ ArchTestCrash(ArchTestCrashMode mode)
     // Make a command line for a new copy of this program with an argument
     // to tell it to crash.
     std::string cmdLine =
-        '"' + ArchGetExecutablePath() + "\" " +
+        '"' + GetExecutablePath() + "\" " +
         crashArgument[static_cast<int>(mode)];
 
     // Start a new copy of this program and tell it to crash.
@@ -154,7 +156,7 @@ ArchTestCrash(ArchTestCrashMode mode)
     // Fork and crash in the child.
     int childPid;
     if ( (childPid = fork()) == 0 )   {
-        Arch_TestCrash(mode);
+        _TestCrash(mode);
         _exit(0);
     }
     else if (childPid == -1) {
@@ -177,14 +179,14 @@ ArchTestCrash(ArchTestCrashMode mode)
 
 #if defined(ARCH_OS_WINDOWS)
 void
-ArchTestCrashArgParse(int argc, char** argv)
+TestCrashArgParse(int argc, char** argv)
 {
     // Scan for crash argument.
     for (int i = 1; i != argc; ++i) {
         for (size_t j = 0, n = sizeof(crashArgument) / sizeof(crashArgument[0]);
                 j != n; ++j) {
             if (strcmp(argv[i], crashArgument[j]) == 0) {
-                Arch_TestCrash(static_cast<ArchTestCrashMode>(j));
+                _TestCrash(static_cast<TestCrashMode>(j));
                 _exit(1);
             }
         }
@@ -192,10 +194,12 @@ ArchTestCrashArgParse(int argc, char** argv)
 }
 #else
 void
-ArchTestCrashArgParse(int /*argc*/, char** /*argv*/)
+TestCrashArgParse(int /*argc*/, char** /*argv*/)
 {
     // Non-windows platforms don't need this.
 }
 #endif
+
+}  // namespace arch
 
 }  // namespace pxr

@@ -34,6 +34,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 /// \addtogroup group_arch_SystemFunctions
 ///@{
 
@@ -43,21 +45,23 @@ namespace pxr {
 /// from errno. POSIX.1c defines errno as a macro which provides access to a
 /// thread-local integer. This function is thread-safe.
 /// \overload
-ARCH_API std::string ArchStrerror();
+ARCH_API std::string Strerror();
 
 /// Return the error string for the specified value of errno.
 ///
 /// This function is thread-safe.
-ARCH_API std::string ArchStrerror(int errorCode);
+ARCH_API std::string Strerror(int errorCode);
 
 #if defined(ARCH_OS_WINDOWS)
 /// Return the error string for the specified error code.
 ///
 /// This function is thread-safe.
-ARCH_API std::string ArchStrSysError(unsigned long errorCode);
+ARCH_API std::string StrSysError(unsigned long errorCode);
 #endif
 
 ///@}
+
+}  // namespace arch
 
 }  // namespace pxr
 

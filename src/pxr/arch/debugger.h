@@ -33,6 +33,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 /// Stop in a debugger.
 ///
 /// This function will do one of the following:  start a debugger
@@ -40,14 +42,14 @@ namespace pxr {
 /// already attached debugger;  stop and wait for a debugger to
 /// attach, or nothing.
 ///
-/// On Linux this will start a debugger using \c ArchDebuggerAttach()
+/// On Linux this will start a debugger using \c DebuggerAttach()
 /// if no debugger is attached.  If a debugger is (or was) attached it
 /// will stop on this function due to \c SIGTRAP.  Alternatively, users
 /// can configure the debugger to not stop on \c SIGTRAP and instead
-/// break on \c ArchDebuggerTrap().
+/// break on \c DebuggerTrap().
 ///
-/// If a debugger is not attached, \c ArchDebuggerAttach() does not
-/// attach one, and \c ArchDebuggerWait() has been most recently
+/// If a debugger is not attached, \c DebuggerAttach() does not
+/// attach one, and \c DebuggerWait() has been most recently
 /// called with \c true then this will wait for a debugger to attach,
 /// otherwise it does nothing and the process does not stop.  The user
 /// can continue the process from the debugger simply by issuing the
@@ -56,17 +58,17 @@ namespace pxr {
 /// background.
 /// 
 ARCH_API
-void ArchDebuggerTrap() ARCH_NOINLINE;
+void DebuggerTrap() ARCH_NOINLINE;
 
 /// Cause debug traps to wait for the debugger or not.
 ///
-/// When \p wait is \c true the next call to \c ArchDebuggerTrap()
+/// When \p wait is \c true the next call to \c DebuggerTrap()
 /// will cause the process to wait for a signal.  The user can attach
 /// a debugger to continue the process.  The process will not wait
 /// again until another call to this function with \p wait \c true.
 /// 
 ARCH_API
-void ArchDebuggerWait(bool wait);
+void DebuggerWait(bool wait);
 
 /// Attach a debugger.
 ///
@@ -78,13 +80,13 @@ void ArchDebuggerWait(bool wait);
 /// Returns true if ARCH_DEBUGGER is set and the debugger was successfully
 /// launched, otherwise returns false.
 ARCH_API
-bool ArchDebuggerAttach() ARCH_NOINLINE;
+bool DebuggerAttach() ARCH_NOINLINE;
 
 /// Test if a debugger is attached
 ///
 /// Attempts to detect if a debugger is currently attached to the process.
 ARCH_API
-bool ArchDebuggerIsAttached() ARCH_NOINLINE;
+bool DebuggerIsAttached() ARCH_NOINLINE;
 
 /// Abort.  This will try to avoid the JIT debugger if any if ARCH_AVOID_JIT
 /// is in the environment and the debugger isn't already attached.  In that
@@ -92,19 +94,21 @@ bool ArchDebuggerIsAttached() ARCH_NOINLINE;
 /// attempt to bypass any crash logging.
 [[noreturn]]
 ARCH_API
-void ArchAbort(bool logging = true);
+void Abort(bool logging = true);
 
 /// Stop in the debugger.
 ///
-/// This macro expands to \c ArchDebuggerTrap() and, if necessary and
+/// This macro expands to \c DebuggerTrap() and, if necessary and
 /// possible, code to prevent optimization so the caller appears in the
 /// debugger's stack trace.  The calling functions should also use the
 /// \c ARCH_NOINLINE function attribute.
 #if defined(ARCH_COMPILER_GCC) || defined(ARCH_COMPILER_CLANG)
-#define ARCH_DEBUGGER_TRAP do { pxr::ArchDebuggerTrap(); asm(""); } while (0)
+#define ARCH_DEBUGGER_TRAP do { pxr::arch::DebuggerTrap(); asm(""); } while (0)
 #else
-#define ARCH_DEBUGGER_TRAP do { pxr::ArchDebuggerTrap(); } while (0)
+#define ARCH_DEBUGGER_TRAP do { pxr::arch::DebuggerTrap(); } while (0)
 #endif
+
+}  // namespace arch
 
 }  // namespace pxr
 

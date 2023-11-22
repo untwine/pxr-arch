@@ -31,14 +31,16 @@
 
 namespace pxr {
 
+namespace arch {
+
 std::string
-ArchStrerror()
+Strerror()
 {
-    return ArchStrerror(errno);
+    return Strerror(errno);
 }
 
 std::string
-ArchStrerror(int errorCode)
+Strerror(int errorCode)
 {
     char msg_buf[256];
    
@@ -63,7 +65,7 @@ ArchStrerror(int errorCode)
 }
 
 #if defined(ARCH_OS_WINDOWS)
-std::string ArchStrSysError(unsigned long errorCode)
+std::string StrSysError(unsigned long errorCode)
 {
     if(errorCode == 0)
         return std::string();
@@ -84,5 +86,7 @@ std::string ArchStrSysError(unsigned long errorCode)
     return message;
 }
 #endif
+
+}  // namespace arch
 
 }  // namespace pxr

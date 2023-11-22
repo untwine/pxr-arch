@@ -42,13 +42,15 @@
 
 namespace pxr {
 
+namespace arch {
+
 /// Return true if the calling thread is the main thread, false otherwise.
 /// \ingroup group_arch_Multithreading
-ARCH_API bool ArchIsMainThread();
+ARCH_API bool IsMainThread();
 
 /// Return the std::thread_id for the thread arch considers to be the "main"
 /// thread.
-ARCH_API std::thread::id ArchGetMainThreadId();
+ARCH_API std::thread::id GetMainThreadId();
 
 /// ARCH_SPIN_PAUSE -- 'pause' on x86, 'yield' on arm.
 #if defined(ARCH_CPU_INTEL)
@@ -66,6 +68,8 @@ ARCH_API std::thread::id ArchGetMainThreadId();
 #else
 #define ARCH_SPIN_PAUSE()
 #endif
+
+}  // namespace arch
 
 }  // namespace pxr
 

@@ -28,23 +28,27 @@
 
 namespace pxr {
 
+namespace arch {
+
 void
-Arch_Error(const char* cond, const char* funcName, size_t lineNo, const char* fileName)
+_Error(const char* cond, const char* funcName, size_t lineNo, const char* fileName)
 {
-    fprintf(stderr, " ArchError: %s\n", cond);
+    fprintf(stderr, "     Error: %s\n", cond);
     fprintf(stderr, "  Function: %s\n", funcName);
     fprintf(stderr, "      File: %s\n", fileName);
     fprintf(stderr, "      Line: %zu\n", lineNo);
-    ArchAbort();
+    Abort();
 }
 
 void
-Arch_Warning(const char* cond, const char* funcName, size_t lineNo, const char* fileName)
+_Warning(const char* cond, const char* funcName, size_t lineNo, const char* fileName)
 {
-    fprintf(stderr, " ArchWarn: %s\n", cond);
+    fprintf(stderr, "     Warn: %s\n", cond);
     fprintf(stderr, " Function: %s\n", funcName);
     fprintf(stderr, "     File: %s\n", fileName);
     fprintf(stderr, "     Line: %zu\n", lineNo);
 }
+
+}  // namespace arch
 
 }  // namespace pxr

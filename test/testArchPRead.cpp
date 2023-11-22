@@ -57,11 +57,11 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    const int64_t fileSize = ArchGetFileLength(f.get());
+    const int64_t fileSize = arch::GetFileLength(f.get());
     printf("Reading %s (%zu bytes)...\n", filename.c_str(), fileSize);
 
     std::unique_ptr<char[]> fileContents(new char[fileSize]);
-    const int64_t numRead = ArchPRead(f.get(), fileContents.get(), fileSize, 0);
+    const int64_t numRead = arch::PRead(f.get(), fileContents.get(), fileSize, 0);
     if (numRead != fileSize) {
         printf("ERROR: Read %zu bytes, expected %zu\n", numRead, fileSize);
         return 1;

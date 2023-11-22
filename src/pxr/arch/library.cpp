@@ -33,13 +33,15 @@
 
 namespace pxr {
 
+namespace arch {
+
 #if defined(ARCH_OS_WINDOWS)
 namespace {
 DWORD arch_lastLibraryError = 0;
 }
 #endif
 
-void* ArchLibraryOpen(const std::string &filename, int flag)
+void* LibraryOpen(const std::string &filename, int flag)
 {
 #if defined(ARCH_OS_WINDOWS)
     arch_lastLibraryError = 0;
@@ -57,18 +59,18 @@ void* ArchLibraryOpen(const std::string &filename, int flag)
 #endif
 }
 
-std::string ArchLibraryError()
+std::string LibraryError()
 {
 #if defined(ARCH_OS_WINDOWS)
     const DWORD error = arch_lastLibraryError;
-    return error ? ArchStrSysError(error) : std::string();
+    return error ? StrSysError(error) : std::string();
 #else
     const char* const error = dlerror();
     return error ? std::string(error) : std::string();
 #endif
 }
 
-int ArchLibraryClose(void* handle)
+int LibraryClose(void* handle)
 {
 #if defined(ARCH_OS_WINDOWS)
     arch_lastLibraryError = 0;
@@ -84,7 +86,7 @@ int ArchLibraryClose(void* handle)
     return status;
 }
 
-void* ArchLibraryGetSymbolAddress(void* handle, const char* name)
+void* LibraryGetSymbolAddress(void* handle, const char* name)
 {
 #if defined(ARCH_OS_WINDOWS)
     return GetProcAddress(reinterpret_cast<HMODULE>(handle), name);
@@ -92,5 +94,7 @@ void* ArchLibraryGetSymbolAddress(void* handle, const char* name)
     return dlsym(handle, name);
 #endif
 }
+
+}  // namespace arch
 
 }  // namespace pxr

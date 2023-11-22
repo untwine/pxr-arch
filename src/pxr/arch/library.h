@@ -62,6 +62,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 /// library.h
 /// Architecture dependent loading and unloading of dynamic libraries.
 /// \ingroup group_arch_SystemFunctions
@@ -72,27 +74,29 @@ namespace pxr {
 /// Opens the dynamic library that is specified by filename.
 /// Returning the handle to the module if successful; false otherwise.
 ARCH_API 
-void* ArchLibraryOpen(const std::string &filename, int flag);
+void* LibraryOpen(const std::string &filename, int flag);
 
 /// Obtain a description of the most recent error that occurred from
-/// \c ArchLibraryOpen.
+/// \c LibraryOpen.
 ///\ingroup group_arch_SystemFunctions
 ARCH_API
-std::string ArchLibraryError();
+std::string LibraryError();
 
-/// Closes an object opened with \c ArchLibraryOpen.
+/// Closes an object opened with \c LibraryOpen.
 /// \ingroup group_arch_SystemFunctions
 ARCH_API
-int ArchLibraryClose(void* handle);
+int LibraryClose(void* handle);
 
 /// Obtain the address of a symbol defined within an object opened with
-/// \c ArchLibraryOpen.
+/// \c LibraryOpen.
 /// \ingroup group_arch_SystemFunctions
 ///
 /// Obtain the address of a symbol that is specified by name.
 /// Returning the address of the symbol if successful; nullptr otherwise.
 ARCH_API
-void* ArchLibraryGetSymbolAddress(void* handle, const char* name);
+void* LibraryGetSymbolAddress(void* handle, const char* name);
+
+}  // namespace arch
 
 }  // namespace pxr
 

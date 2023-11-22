@@ -38,8 +38,10 @@
 
 namespace pxr {
 
+namespace arch {
+
 bool
-ArchGetAddressInfo(
+GetAddressInfo(
     void* address,
     std::string* objectPath, void** baseAddress,
     std::string* symbolName, void** symbolAddress)
@@ -57,7 +59,7 @@ ArchGetAddressInfo(
             //
             // This may be incorrect if the current working directory was 
             // changed after the source object was loaded.
-            *objectPath = ArchAbsPath(info.dli_fname);
+            *objectPath = AbsPath(info.dli_fname);
         }
         if (baseAddress) {
             *baseAddress = info.dli_fbase;
@@ -89,7 +91,7 @@ ArchGetAddressInfo(
     if (objectPath) {
         wchar_t modName[ARCH_PATH_MAX] = {0};
         if (GetModuleFileNameW(module, modName, ARCH_PATH_MAX)) {
-            objectPath->assign(ArchWindowsUtf16ToUtf8(modName));
+            objectPath->assign(WindowsUtf16ToUtf8(modName));
         }
     }
 
@@ -142,5 +144,7 @@ ArchGetAddressInfo(
 
 #endif
 }
+
+}  // namespace arch
 
 }  // namespace pxr

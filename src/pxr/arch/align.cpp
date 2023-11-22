@@ -36,9 +36,11 @@
 
 namespace pxr {
 
+namespace arch {
+
 /// Aligned memory allocation.
 void *
-ArchAlignedAlloc(size_t alignment, size_t size)
+AlignedAlloc(size_t alignment, size_t size)
 {
 #if defined(ARCH_OS_DARWIN) || (defined(ARCH_OS_LINUX) && defined(__GLIBCXX__) && !defined(_GLIBCXX_HAVE_ALIGNED_ALLOC))
     // alignment must be >= sizeof(void*)
@@ -59,9 +61,9 @@ ArchAlignedAlloc(size_t alignment, size_t size)
 #endif
 }
 
-/// Free memory allocated by ArchAlignedAlloc.
+/// Free memory allocated by AlignedAlloc.
 void
-ArchAlignedFree(void* ptr)
+AlignedFree(void* ptr)
 {
 #if defined(ARCH_OS_DARWIN) || (defined(ARCH_OS_LINUX) && defined(__GLIBCXX__) && !defined(_GLIBCXX_HAVE_ALIGNED_ALLOC))
     free(ptr);
@@ -71,5 +73,7 @@ ArchAlignedFree(void* ptr)
     free(ptr);
 #endif
 }
+
+}  // namespace arch
 
 }  // namespace pxr

@@ -39,6 +39,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 namespace {
 
 // Minimal access to a Mach-O header, providing just enough to find a
@@ -152,31 +154,31 @@ MachO::find(const char* segname, const char* sectname) const
 }
 
 static
-std::vector<Arch_ConstructorEntry>
+std::vector<_ConstructorEntry>
 GetConstructorEntries(
     const struct mach_header* mh, intptr_t slide,
     const char* segname, const char* sectname)
 {
-    std::vector<Arch_ConstructorEntry> result;
+    std::vector<_ConstructorEntry> result;
 
     // Find the section.
     const auto info = MachO(mh, slide).find(segname, sectname);
 
     // Done if not found or empty.
-    const ptrdiff_t numEntries = info.size / sizeof(Arch_ConstructorEntry);
+    const ptrdiff_t numEntries = info.size / sizeof(_ConstructorEntry);
     if (numEntries == 0) {
         return result;
     }
 
     // Copy the entries for sorting.  We could sort in place but we want
     // to return a vector anyway.
-    const Arch_ConstructorEntry* entries =
-        reinterpret_cast<const Arch_ConstructorEntry*>(info.address);
+    const _ConstructorEntry* entries =
+        reinterpret_cast<const _ConstructorEntry*>(info.address);
     result.assign(entries, entries + numEntries);
 
     // Sort.
     std::sort(result.begin(), result.end(),
-        [](const Arch_ConstructorEntry& lhs, const Arch_ConstructorEntry& rhs){
+        [](const _ConstructorEntry& lhs, const _ConstructorEntry& rhs){
             return lhs.priority < rhs.priority;
         });
 
@@ -267,6 +269,8 @@ static void InstallDyldCallbacks()
 
 } // anonymous namespace
 
+}  // namespace arch
+
 }  // namespace pxr
 
 #elif defined(ARCH_OS_WINDOWS)
@@ -279,6 +283,8 @@ static void InstallDyldCallbacks()
 #include <vector>
 
 namespace pxr {
+
+namespace arch {
 
 namespace {
 
@@ -326,29 +332,29 @@ ImageNT::Find(const char* sectname) const
 }
 
 static
-std::vector<Arch_ConstructorEntry>
+std::vector<_ConstructorEntry>
 GetConstructorEntries(HMODULE hModule, const char* sectname)
 {
-    std::vector<Arch_ConstructorEntry> result;
+    std::vector<_ConstructorEntry> result;
 
     // Find the section.
     const auto info = ImageNT(hModule).Find(sectname);
 
     // Done if not found or empty.
-    const DWORD numEntries = info.size / sizeof(Arch_ConstructorEntry);
+    const DWORD numEntries = info.size / sizeof(_ConstructorEntry);
     if (numEntries == 0) {
         return result;
     }
 
     // Copy the entries for sorting.  We could sort in place but we want
     // to return a vector anyway.
-    const Arch_ConstructorEntry* entries =
-        reinterpret_cast<const Arch_ConstructorEntry*>(info.address);
+    const _ConstructorEntry* entries =
+        reinterpret_cast<const _ConstructorEntry*>(info.address);
     result.assign(entries, entries + numEntries);
 
     // Sort.
     std::sort(result.begin(), result.end(),
-        [](const Arch_ConstructorEntry& lhs, const Arch_ConstructorEntry& rhs){
+        [](const _ConstructorEntry& lhs, const _ConstructorEntry& rhs){
             return lhs.priority < rhs.priority;
         });
 
@@ -408,19 +414,21 @@ GetCurrentModule(void* ptr)
 
 } // anonymous namespace
 
-Arch_ConstructorInit::Arch_ConstructorInit()
+_ConstructorInit::_ConstructorInit()
 {
     // Get the module containing this object, which we expect to be static
     // global.
     RunConstructors(GetCurrentModule(this));
 }
 
-Arch_ConstructorInit::~Arch_ConstructorInit()
+_ConstructorInit::~_ConstructorInit()
 {
     // Get the module containing this object, which we expect to be static
     // global.
     RunDestructors(GetCurrentModule(this));
 }
+
+}  // namespace arch
 
 }  // namespace pxr
 

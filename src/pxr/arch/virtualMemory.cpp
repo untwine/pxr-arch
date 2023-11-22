@@ -36,35 +36,37 @@
 
 namespace pxr {
 
+namespace arch {
+
 template <class T>
 static inline T *RoundToPageAddr(T *addr) {
-    static uint64_t PAGEMASK = ~(static_cast<uint64_t>(ArchGetPageSize())-1);
+    static uint64_t PAGEMASK = ~(static_cast<uint64_t>(GetPageSize())-1);
     return reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(addr) & PAGEMASK);
 }
 
 #if defined (ARCH_OS_WINDOWS)
 
 void *
-ArchReserveVirtualMemory(size_t numBytes)
+ReserveVirtualMemory(size_t numBytes)
 {
     return VirtualAlloc(NULL, numBytes, MEM_RESERVE, PAGE_NOACCESS);
 }
 
 bool
-ArchCommitVirtualMemoryRange(void *start, size_t numBytes)
+CommitVirtualMemoryRange(void *start, size_t numBytes)
 {
     return VirtualAlloc(start, numBytes, MEM_COMMIT, PAGE_READWRITE) != NULL;
 }
 
 bool
-ArchFreeVirtualMemory(void *start, size_t /*numBytes*/)
+FreeVirtualMemory(void *start, size_t /*numBytes*/)
 {
     return VirtualFree(start, 0, MEM_RELEASE);
 }
 
 bool
-ArchSetMemoryProtection(void const *start, size_t numBytes,
-                        ArchMemoryProtection protection)
+SetMemoryProtection(void const *start, size_t numBytes,
+                    MemoryProtection protection)
 {
     void *pageStart = RoundToPageAddr(const_cast<void *>(start));
     SIZE_T len = numBytes + (reinterpret_cast<char const *>(start)-
@@ -84,7 +86,7 @@ ArchSetMemoryProtection(void const *start, size_t numBytes,
 #else // not ARCH_OS_WINDOWS, assume POSIX (mmap, mprotect)
 
 void *
-ArchReserveVirtualMemory(size_t numBytes)
+ReserveVirtualMemory(size_t numBytes)
 {
     void *addr = mmap(NULL, numBytes, PROT_NONE,
                       MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -94,7 +96,7 @@ ArchReserveVirtualMemory(size_t numBytes)
 }
 
 bool
-ArchCommitVirtualMemoryRange(void *start, size_t numBytes)
+CommitVirtualMemoryRange(void *start, size_t numBytes)
 {
     void *pageStart = RoundToPageAddr(start);
     size_t len = numBytes + (reinterpret_cast<char *>(start)-
@@ -104,14 +106,14 @@ ArchCommitVirtualMemoryRange(void *start, size_t numBytes)
 }
 
 bool
-ArchFreeVirtualMemory(void *start, size_t numBytes)
+FreeVirtualMemory(void *start, size_t numBytes)
 {
     return munmap(start, numBytes) == 0;
 }
 
 bool
-ArchSetMemoryProtection(void const *start, size_t numBytes,
-                        ArchMemoryProtection protection)
+SetMemoryProtection(void const *start, size_t numBytes,
+                    MemoryProtection protection)
 {
     void *pageStart = RoundToPageAddr(const_cast<void *>(start));
     size_t len = numBytes + (reinterpret_cast<char const *>(start)-
@@ -129,5 +131,7 @@ ArchSetMemoryProtection(void const *start, size_t numBytes,
 }
 
 #endif // POSIX
+
+}  // namespace arch
 
 }  // namespace pxr

@@ -30,6 +30,6 @@ using namespace pxr;
 
 int main(int argc, char** argv)
 {
-    ArchTestCrashArgParse(argc, argv);
-    ArchTestCrash(ArchTestCrashMode::Error);
+    arch::TestCrashArgParse(argc, argv);
+    TestCrash(arch::TestCrashMode::Error);
 }

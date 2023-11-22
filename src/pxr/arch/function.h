@@ -38,6 +38,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 /// Return well formatted function name.
 ///
 /// This function assumes \c function is __ARCH_FUNCTION__ and
@@ -46,8 +48,10 @@ namespace pxr {
 ///
 /// \ingroup group_arch_Diagnostic
 ARCH_API
-std::string ArchGetPrettierFunctionName(const std::string &function,
-                                        const std::string &prettyFunction);
+std::string GetPrettierFunctionName(const std::string &function,
+                                    const std::string &prettyFunction);
+
+}  // namespace arch
 
 }  // namespace pxr
 

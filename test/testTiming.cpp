@@ -33,25 +33,25 @@ int main()
 {
     // Verify conversions for many tick counts.
     for (size_t ticks = 0ul; ticks != 1ul << 24u; ++ticks) {
-        ARCH_AXIOM( (uint64_t) ArchTicksToNanoseconds(ticks) == 
-            uint64_t(static_cast<double>(ticks)*ArchGetNanosecondsPerTick() + .5));
+        ARCH_AXIOM( (uint64_t) arch::TicksToNanoseconds(ticks) ==
+            uint64_t(static_cast<double>(ticks)*arch::GetNanosecondsPerTick() + .5));
 
-        double nanos = double(ArchTicksToNanoseconds(ticks)) / 1e9;
-        double secs = ArchTicksToSeconds(ticks);
+        double nanos = double(arch::TicksToNanoseconds(ticks)) / 1e9;
+        double secs = arch::TicksToSeconds(ticks);
         double epsilon = 0.0001;
         ARCH_AXIOM( (nanos - epsilon <= secs) && (nanos + epsilon >= secs) );
     }
 
     // Compute some time delta.
-    const auto t1 = ArchGetTickTime();
+    const auto t1 = arch::GetTickTime();
     std::this_thread::sleep_for(std::chrono::milliseconds(1500));
-    const auto t2 = ArchGetTickTime();
+    const auto t2 = arch::GetTickTime();
     const auto delta = t2 - t1;
 
     // Verify the delta is reasonable.  We allow a lot of leeway on the top
     // end in case of heavy machine load.
-    ARCH_AXIOM(ArchTicksToSeconds(delta) > 1.4);
-    ARCH_AXIOM(ArchTicksToSeconds(delta) < 5.0);
+    ARCH_AXIOM(arch::TicksToSeconds(delta) > 1.4);
+    ARCH_AXIOM(arch::TicksToSeconds(delta) < 5.0);
 
     return 0;
 }

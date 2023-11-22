@@ -36,6 +36,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 /// Return true if ptmalloc is being used as the memory allocator
 ///
 /// ptmalloc3 is an external shared library providing implementations of the
@@ -44,7 +46,7 @@ namespace pxr {
 /// determine if it is the active allocator.
 ///
 /// \ingroup group_arch_Memory
-ARCH_API bool ArchIsPtmallocActive();
+ARCH_API bool IsPtmallocActive();
 
 /// Return true if the C++ STL allocator was requested to be turned off.
 ///
@@ -53,26 +55,26 @@ ARCH_API bool ArchIsPtmallocActive();
 /// platforms.
 ///
 /// \ingroup group_arch_Memory
-ARCH_API bool ArchIsStlAllocatorOff();
+ARCH_API bool IsStlAllocatorOff();
 
-/// \class ArchMallocHook
+/// \class MallocHook
 /// \ingroup group_arch_Memory
 ///
 /// Override default malloc() functionality.
 ///
-/// The \c ArchMallocHook class is used on supported systems to install a
+/// The \c MallocHook class is used on supported systems to install a
 /// call-back function in place of the standard malloc/realloc/free/memalign
 /// function calls. Supported systems are currently restricted to 64-bit linux
 /// systems.
 ///
 /// The call-back function can access the original allocation function by
-/// calling, for example, \c ArchMallocHook::Malloc, or it is free to perform
+/// calling, for example, \c MallocHook::Malloc, or it is free to perform
 /// its own allocation.
 ///
-/// The \c ArchMallocHook is a POD (plain old datastructure) which means that
+/// The \c MallocHook is a POD (plain old datastructure) which means that
 /// to use it properly, it should be declared at global scope, ensuring
 /// zero-initialization.
-class ArchMallocHook {
+class MallocHook {
 public:
     /// Initialize hooks.
     ///
@@ -154,6 +156,8 @@ private:
     void* (*_underlyingMemalignFunc)(size_t, size_t);
     void  (*_underlyingFreeFunc)(void*);
 };
+
+}  // namespace arch
 
 }  // namespace pxr
 

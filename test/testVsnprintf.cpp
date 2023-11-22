@@ -33,12 +33,12 @@ using namespace pxr;
 
 using std::string;
 
-static int ArchSnprintf(char *str, size_t size, const char* fmt, ...) {
+static int Snprintf(char *str, size_t size, const char* fmt, ...) {
     int n;
     va_list ap;
     va_start(ap, fmt);
 
-    n = ArchVsnprintf(str, size, fmt, ap);
+    n = arch::Vsnprintf(str, size, fmt, ap);
 
     va_end(ap);
     return n;
@@ -48,8 +48,8 @@ int main()
 {
     char str[1] = "";
 
-    // ArchSnprintf should report 3 characters not written 
-    ARCH_AXIOM(ArchSnprintf(str, strlen(str), "   ") == 3);
+    // Snprintf should report 3 characters not written
+    ARCH_AXIOM(Snprintf(str, strlen(str), "   ") == 3);
 
     // ensure that a string longer than 4096 works
     // create a long format string
@@ -59,7 +59,7 @@ int main()
     }
     long_fmt[8191] = '\0';
 
-    ARCH_AXIOM(ArchStringPrintf("%s", long_fmt).size() == 8191);
+    ARCH_AXIOM(arch::StringPrintf("%s", long_fmt).size() == 8191);
 
     return 0;
 }

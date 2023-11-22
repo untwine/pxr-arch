@@ -57,8 +57,10 @@ using std::string;
 
 namespace pxr {
 
+namespace arch {
+
 std::string
-ArchGetCwd()
+GetCwd()
 {
     // Try a fixed size buffer.
     char buffer[ARCH_PATH_MAX];
@@ -109,7 +111,7 @@ _DynamicSizedRead(
 }
 
 std::string
-ArchGetExecutablePath()
+GetExecutablePath()
 {
 #if defined(ARCH_OS_LINUX)
 
@@ -188,7 +190,7 @@ ArchGetExecutablePath()
 }
 
 int
-ArchGetPageSize()
+GetPageSize()
 {
 #if defined(ARCH_OS_LINUX) || defined(ARCH_OS_DARWIN)
     return sysconf(_SC_PAGE_SIZE);
@@ -201,5 +203,7 @@ ArchGetPageSize()
 #endif
 
 }
+
+}  // namespace arch
 
 }  // namespace pxr

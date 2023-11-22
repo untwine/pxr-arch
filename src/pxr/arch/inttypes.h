@@ -55,7 +55,11 @@
 
 namespace pxr {
 
+namespace arch {
+
 typedef unsigned char uchar;
+
+}  // namespace arch
 
 }  // namespace pxr
 

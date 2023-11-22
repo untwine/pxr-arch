@@ -35,6 +35,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 #if defined(doxygen)
 
 /// Macro used to indicate a function takes a printf-like specification.
@@ -201,7 +203,7 @@ namespace pxr {
 // Helper to do on-demand static initialziation.  We need to insert per-library
 // static initializers if the ARCH_CONSTRUCTOR macros are used, etc, but we
 // don't want that to happen otherwise.  This mechanism makes that possible.  It
-// works by creating a class template (Arch_PerLibInit) that has hidden
+// works by creating a class template (_PerLibInit) that has hidden
 // visibility and a static member of its template parameter (StaticInit).  In
 // its constructor, it "uses" its static member 'init', in order to ensure it
 // gets instantiated.  Since it's a static member, it gets initialized only if
@@ -214,19 +216,19 @@ namespace pxr {
 // there would be exactly *one* initialization no matter how many libraries are
 // loaded.
 template <class StaticInit>
-struct ARCH_HIDDEN Arch_PerLibInit {
-    Arch_PerLibInit() { /* "use" of init here forces instantiation */
+struct ARCH_HIDDEN _PerLibInit {
+    _PerLibInit() { /* "use" of init here forces instantiation */
         (void)init; }
 private:
     static StaticInit init;
 };
 template <class StaticInit>
-StaticInit Arch_PerLibInit<StaticInit>::init;
+StaticInit _PerLibInit<StaticInit>::init;
 
 #define _ARCH_CAT_NOEXPAND(a, b) a ## b
 #define _ARCH_CAT(a, b) _ARCH_CAT_NOEXPAND(a, b)
 #define _ARCH_ENSURE_PER_LIB_INIT(T, prefix) \
-    static pxr::Arch_PerLibInit<T> _ARCH_CAT(prefix, __COUNTER__)
+    static pxr::arch::_PerLibInit<T> _ARCH_CAT(prefix, __COUNTER__)
 
 #if defined(doxygen)
 
@@ -235,33 +237,33 @@ StaticInit Arch_PerLibInit<StaticInit>::init;
 #elif defined(ARCH_OS_DARWIN)
 
 // Entry for a constructor/destructor in the custom section.
-struct Arch_ConstructorEntry {
+struct _ConstructorEntry {
     typedef void (*Type)(void);
     Type function;
     unsigned int version:24;    // USD version
     unsigned int priority:8;    // Priority of function
 };
 
-// Emit a Arch_ConstructorEntry in the __Data,pxrctor section.
-#   define ARCH_CONSTRUCTOR(_name, _priority, ...)                                 \
-    static void _name(__VA_ARGS__);                                                \
-    static const pxr::Arch_ConstructorEntry _ARCH_CAT_NOEXPAND(arch_ctor_, _name)  \
-        __attribute__((used, section("__DATA,pxrctor"))) = {                       \
-        reinterpret_cast<pxr::Arch_ConstructorEntry::Type>(&_name),                \
-        0u,                                                                        \
-        _priority                                                                  \
-    };                                                                             \
+// Emit a _ConstructorEntry in the __Data,pxrctor section.
+#   define ARCH_CONSTRUCTOR(_name, _priority, ...)                                  \
+    static void _name(__VA_ARGS__);                                                 \
+    static const pxr::arch::_ConstructorEntry _ARCH_CAT_NOEXPAND(arch_ctor_, _name) \
+        __attribute__((used, section("__DATA,pxrctor"))) = {                        \
+        reinterpret_cast<pxr::arch::_ConstructorEntry::Type>(&_name),               \
+        0u,                                                                         \
+        _priority                                                                   \
+    };                                                                              \
     static void _name(__VA_ARGS__)
     
-// Emit a Arch_ConstructorEntry in the __Data,pxrdtor section.
-#   define ARCH_DESTRUCTOR(_name, _priority, ...)                                  \
-    static void _name(__VA_ARGS__);                                                \
-    static const pxr::Arch_ConstructorEntry _ARCH_CAT_NOEXPAND(arch_dtor_, _name)  \
-        __attribute__((used, section("__DATA,pxrdtor"))) = {                       \
-        reinterpret_cast<pxr::Arch_ConstructorEntry::Type>(&_name),                \
-        0u,                                                                        \
-        _priority                                                                  \
-    };                                                                             \
+// Emit a _ConstructorEntry in the __Data,pxrdtor section.
+#   define ARCH_DESTRUCTOR(_name, _priority, ...)                                   \
+    static void _name(__VA_ARGS__);                                                 \
+    static const pxr::arch::_ConstructorEntry _ARCH_CAT_NOEXPAND(arch_dtor_, _name) \
+        __attribute__((used, section("__DATA,pxrdtor"))) = {                        \
+        reinterpret_cast<pxr::arch::_ConstructorEntry::Type>(&_name),               \
+        0u,                                                                         \
+        _priority                                                                   \
+    };                                                                              \
     static void _name(__VA_ARGS__)
 
 #elif defined(ARCH_COMPILER_GCC) || defined(ARCH_COMPILER_CLANG)
@@ -281,7 +283,7 @@ struct Arch_ConstructorEntry {
     
 // Entry for a constructor/destructor in the custom section.
     __declspec(align(16))
-    struct Arch_ConstructorEntry {
+    struct _ConstructorEntry {
         typedef void (__cdecl *Type)(void);
         Type function;
         unsigned int version:24;    // USD version
@@ -295,12 +297,12 @@ struct Arch_ConstructorEntry {
 // Objects of this type run the ARCH_CONSTRUCTOR and ARCH_DESTRUCTOR functions
 // for the library containing the object in the c'tor and d'tor, respectively.
 // Each HMODULE is handled at most once.
-struct Arch_ConstructorInit {
-    ARCH_API Arch_ConstructorInit();
-    ARCH_API ~Arch_ConstructorInit();
+struct _ConstructorInit {
+    ARCH_API _ConstructorInit();
+    ARCH_API ~_ConstructorInit();
 };
 
-// Emit a Arch_ConstructorEntry in the .pxrctor section.  The namespace and
+// Emit a _ConstructorEntry in the .pxrctor section.  The namespace and
 // extern are to convince the compiler and linker to leave the object in the
 // final library/executable instead of stripping it out.  In clang/gcc we use
 // __attribute__((used)) to do that.
@@ -308,29 +310,29 @@ struct Arch_ConstructorInit {
     static void _name(__VA_ARGS__);                                            \
     namespace {                                                                \
     __declspec(allocate(".pxrctor"))                                           \
-    extern const pxr::Arch_ConstructorEntry                                    \
+    extern const pxr::arch::_ConstructorEntry                                  \
     _ARCH_CAT_NOEXPAND(arch_ctor_, _name) = {                                  \
-        reinterpret_cast<pxr::Arch_ConstructorEntry::Type>(&_name),            \
+        reinterpret_cast<pxr::arch::_ConstructorEntry::Type>(&_name),          \
         0u,                                                                    \
         _priority                                                              \
     };                                                                         \
     }                                                                          \
-    _ARCH_ENSURE_PER_LIB_INIT(pxr::Arch_ConstructorInit, _archCtorInit);       \
+    _ARCH_ENSURE_PER_LIB_INIT(pxr::arch::_ConstructorInit, _archCtorInit);     \
     static void _name(__VA_ARGS__)
 
-    // Emit a Arch_ConstructorEntry in the .pxrdtor section.
+    // Emit a _ConstructorEntry in the .pxrdtor section.
 #   define ARCH_DESTRUCTOR(_name, _priority, ...)                              \
     static void _name(__VA_ARGS__);                                            \
     namespace {                                                                \
     __declspec(allocate(".pxrdtor"))                                           \
-    extern const pxr::Arch_ConstructorEntry                                    \
+    extern const pxr::arch::_ConstructorEntry                                  \
     _ARCH_CAT_NOEXPAND(arch_dtor_, _name) = {                                  \
-        reinterpret_cast<pxr::Arch_ConstructorEntry::Type>(&_name),            \
+        reinterpret_cast<pxr::arch::_ConstructorEntry::Type>(&_name),          \
         0u,                                                                    \
         _priority                                                              \
     };                                                                         \
     }                                                                          \
-    _ARCH_ENSURE_PER_LIB_INIT(pxr::Arch_ConstructorInit, _archCtorInit);       \
+    _ARCH_ENSURE_PER_LIB_INIT(pxr::arch::_ConstructorInit, _archCtorInit);     \
     static void _name(__VA_ARGS__)
 
 #else
@@ -339,6 +341,8 @@ struct Arch_ConstructorInit {
 // rather than fail mysteriously at runtime.
 
 #endif
+
+}  // namespace arch
 
 }  // namespace pxr
 

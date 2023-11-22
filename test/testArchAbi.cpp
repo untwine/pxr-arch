@@ -33,13 +33,13 @@
 
 using namespace pxr;
 
-typedef ArchAbiBase2* (*NewDerived)();
+typedef arch::AbiBase2* (*NewDerived)();
 
 int
 main(int /*argc*/, char** /*argv*/)
 {
     // Compute the plugin directory.
-    std::string path = ArchGetExecutablePath();
+    std::string path = arch::GetExecutablePath();
     // Get directories.
     path = path.substr(0, path.find_last_of("/\\"));
 
@@ -51,14 +51,14 @@ main(int /*argc*/, char** /*argv*/)
 #else
     path += "/libtestArchAbiPlugin.so";
 #endif
-    auto plugin = ArchLibraryOpen(path, ARCH_LIBRARY_LAZY);
+    auto plugin = arch::LibraryOpen(path, ARCH_LIBRARY_LAZY);
     if (!plugin) {
-        std::string error = ArchLibraryError();
+        std::string error = arch::LibraryError();
         std::cerr << "Failed to load plugin: " << error << std::endl;
         ARCH_AXIOM(plugin);
     }
 
-    NewDerived newPluginDerived = (NewDerived)ArchLibraryGetSymbolAddress(
+    NewDerived newPluginDerived = (NewDerived)arch::LibraryGetSymbolAddress(
         plugin, "newDerived");
     if (!newPluginDerived) {
         std::cerr << "Failed to find factory symbol" << std::endl;
@@ -66,8 +66,8 @@ main(int /*argc*/, char** /*argv*/)
     }
 
     // Create a derived object in this executable and in the plugin.
-    ArchAbiBase2* mainDerived = new ArchAbiDerived<int>;
-    ArchAbiBase2* pluginDerived = newPluginDerived();
+    arch::AbiBase2* mainDerived = new arch::AbiDerived<int>;
+    arch::AbiBase2* pluginDerived = newPluginDerived();
 
     // Compare.  The types should be equal and the dynamic cast should not
     // change the pointer.
@@ -75,10 +75,10 @@ main(int /*argc*/, char** /*argv*/)
         << "Derived types are equal: "
         << ((typeid(*mainDerived) == typeid(*pluginDerived)) ? "yes" : "no")
         << ", cast: " << pluginDerived
-        << "->" << dynamic_cast<ArchAbiDerived<int>*>(pluginDerived)
+        << "->" << dynamic_cast<arch::AbiDerived<int>*>(pluginDerived)
         << std::endl;
     ARCH_AXIOM(typeid(*mainDerived) == typeid(*pluginDerived));
-    ARCH_AXIOM(pluginDerived == dynamic_cast<ArchAbiDerived<int>*>(pluginDerived));
+    ARCH_AXIOM(pluginDerived == dynamic_cast<arch::AbiDerived<int>*>(pluginDerived));
 
     return 0;
 }

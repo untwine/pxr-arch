@@ -36,27 +36,27 @@ using namespace pxr;
 ARCH_PRAGMA_DEPRECATED_POSIX_NAME
 
 static bool
-TestArchNormPath()
+TestNormPath()
 {
-    ARCH_AXIOM(ArchNormPath("") == ".");
-    ARCH_AXIOM(ArchNormPath(".") == ".");
-    ARCH_AXIOM(ArchNormPath("..") == "..");
-    ARCH_AXIOM(ArchNormPath("foobar/../barbaz") == "barbaz");
-    ARCH_AXIOM(ArchNormPath("/") == "/");
-    ARCH_AXIOM(ArchNormPath("//") == "//");
-    ARCH_AXIOM(ArchNormPath("///") == "/");
-    ARCH_AXIOM(ArchNormPath("///foo/.//bar//") == "/foo/bar");
-    ARCH_AXIOM(ArchNormPath("///foo/.//bar//.//..//.//baz") == "/foo/baz");
-    ARCH_AXIOM(ArchNormPath("///..//./foo/.//bar") == "/foo/bar");
-    ARCH_AXIOM(ArchNormPath(
+    ARCH_AXIOM(arch::NormPath("") == ".");
+    ARCH_AXIOM(arch::NormPath(".") == ".");
+    ARCH_AXIOM(arch::NormPath("..") == "..");
+    ARCH_AXIOM(arch::NormPath("foobar/../barbaz") == "barbaz");
+    ARCH_AXIOM(arch::NormPath("/") == "/");
+    ARCH_AXIOM(arch::NormPath("//") == "//");
+    ARCH_AXIOM(arch::NormPath("///") == "/");
+    ARCH_AXIOM(arch::NormPath("///foo/.//bar//") == "/foo/bar");
+    ARCH_AXIOM(arch::NormPath("///foo/.//bar//.//..//.//baz") == "/foo/baz");
+    ARCH_AXIOM(arch::NormPath("///..//./foo/.//bar") == "/foo/bar");
+    ARCH_AXIOM(arch::NormPath(
             "foo/bar/../../../../../../baz") == "../../../../baz");
 
 #if defined(ARCH_OS_WINDOWS)
-    ARCH_AXIOM(ArchNormPath("C:\\foo\\bar") == "c:/foo/bar");
-    ARCH_AXIOM(ArchNormPath("C:foo\\bar") == "c:foo/bar");
-    ARCH_AXIOM(ArchNormPath(
+    ARCH_AXIOM(arch::NormPath("C:\\foo\\bar") == "c:/foo/bar");
+    ARCH_AXIOM(arch::NormPath("C:foo\\bar") == "c:foo/bar");
+    ARCH_AXIOM(arch::NormPath(
             "C:\\foo\\bar", /* stripDriveSpecifier = */ true) == "/foo/bar");
-    ARCH_AXIOM(ArchNormPath(
+    ARCH_AXIOM(arch::NormPath(
             "C:foo\\bar", /* stripDriveSpecifier = */ true) == "foo/bar");
 #endif
 
@@ -80,43 +80,43 @@ _AbsPathFilter(const std::string& path)
 }
 
 static bool
-TestArchAbsPath()
+TestAbsPath()
 {
-    ARCH_AXIOM(ArchAbsPath("") == "");
-    ARCH_AXIOM(ArchAbsPath("foo") != "foo");
-    ARCH_AXIOM(_AbsPathFilter(ArchAbsPath("/foo/bar")) == "/foo/bar");
-    ARCH_AXIOM(_AbsPathFilter(ArchAbsPath("/foo/bar/../baz")) == "/foo/baz");
+    ARCH_AXIOM(arch::AbsPath("") == "");
+    ARCH_AXIOM(arch::AbsPath("foo") != "foo");
+    ARCH_AXIOM(_AbsPathFilter(arch::AbsPath("/foo/bar")) == "/foo/bar");
+    ARCH_AXIOM(_AbsPathFilter(arch::AbsPath("/foo/bar/../baz")) == "/foo/baz");
 
     return true;
 }
 
 int main()
 {
-    std::string firstName = ArchMakeTmpFileName("archFS");
+    std::string firstName = arch::MakeTmpFileName("archFS");
     FILE *firstFile;
 
     char const * const testContent = "text in a file";
 
     // Open a file, check that its length is 0, write to it, close it, and then
     // check that its length is now the number of characters written.
-    ARCH_AXIOM((firstFile = ArchOpenFile(firstName.c_str(), "wb")) != NULL);
+    ARCH_AXIOM((firstFile = arch::OpenFile(firstName.c_str(), "wb")) != NULL);
     fflush(firstFile);
-    ARCH_AXIOM(ArchGetFileLength(firstName.c_str()) == 0);
+    ARCH_AXIOM(arch::GetFileLength(firstName.c_str()) == 0);
     fputs(testContent, firstFile);
     fclose(firstFile);
-    ARCH_AXIOM(ArchGetFileLength(firstName.c_str()) == strlen(testContent));
+    ARCH_AXIOM(arch::GetFileLength(firstName.c_str()) == strlen(testContent));
 
     // Map the file and assert the bytes are what we expect they are.
-    ARCH_AXIOM((firstFile = ArchOpenFile(firstName.c_str(), "rb")) != NULL);
-    ArchConstFileMapping cfm = ArchMapFileReadOnly(firstFile);
+    ARCH_AXIOM((firstFile = arch::OpenFile(firstName.c_str(), "rb")) != NULL);
+    arch::ConstFileMapping cfm = arch::MapFileReadOnly(firstFile);
     fclose(firstFile);
     ARCH_AXIOM(cfm);
     ARCH_AXIOM(memcmp(testContent, cfm.get(), strlen(testContent)) == 0);
     cfm.reset();
 
     // Try again with a mutable mapping.
-    ARCH_AXIOM((firstFile = ArchOpenFile(firstName.c_str(), "rb")) != NULL);
-    ArchMutableFileMapping mfm = ArchMapFileReadWrite(firstFile);
+    ARCH_AXIOM((firstFile = arch::OpenFile(firstName.c_str(), "rb")) != NULL);
+    arch::MutableFileMapping mfm = arch::MapFileReadWrite(firstFile);
     fclose(firstFile);
     ARCH_AXIOM(mfm);
     ARCH_AXIOM(memcmp(testContent, mfm.get(), strlen(testContent)) == 0);
@@ -124,32 +124,32 @@ int main()
     mfm.get()[0] = 'T'; mfm.get()[2] = 's';
     ARCH_AXIOM(memcmp("Test", mfm.get(), strlen("Test")) == 0);
     mfm.reset();
-    ArchUnlinkFile(firstName.c_str());
+    arch::UnlinkFile(firstName.c_str());
 
-    // Test ArchPWrite and ArchPRead.
+    // Test PWrite and PRead.
     int64_t len = strlen(testContent);
-    ARCH_AXIOM((firstFile = ArchOpenFile(firstName.c_str(), "w+b")) != NULL);
-    ARCH_AXIOM(ArchPWrite(firstFile, testContent, len, 0) == len);
+    ARCH_AXIOM((firstFile = arch::OpenFile(firstName.c_str(), "w+b")) != NULL);
+    ARCH_AXIOM(arch::PWrite(firstFile, testContent, len, 0) == len);
     std::unique_ptr<char[]> buf(new char[len]);
-    ARCH_AXIOM(ArchPRead(firstFile, buf.get(), len, 0) == len);
+    ARCH_AXIOM(arch::PRead(firstFile, buf.get(), len, 0) == len);
     ARCH_AXIOM(memcmp(testContent, buf.get(), len) == 0);
     char const * const newText = "overwritten in a file";
-    ARCH_AXIOM(ArchPWrite(firstFile, newText, strlen(newText),
+    ARCH_AXIOM(arch::PWrite(firstFile, newText, strlen(newText),
                       5/*index of 'in a file'*/) == strlen(newText));
     std::unique_ptr<char[]> buf2(new char[strlen("written in a")]);
-    ARCH_AXIOM(ArchPRead(firstFile, buf2.get(), strlen("written in a"),
+    ARCH_AXIOM(arch::PRead(firstFile, buf2.get(), strlen("written in a"),
                      9/*index of 'written in a'*/) == strlen("written in a"));
     ARCH_AXIOM(memcmp("written in a", buf2.get(), strlen("written in a")) == 0);
 
     // create and remove a tmp subdir
     std::string retpath;
-    retpath = ArchMakeTmpSubdir(ArchGetTmpDir(), "myprefix");
+    retpath = arch::MakeTmpSubdir(arch::GetTmpDir(), "myprefix");
     ARCH_AXIOM (retpath != "");
-    ArchRmDir(retpath.c_str());
+    arch::RmDir(retpath.c_str());
 
     // Test other utilities
-    TestArchNormPath();
-    TestArchAbsPath();
+    TestNormPath();
+    TestAbsPath();
 
     return 0;
 }

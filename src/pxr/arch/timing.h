@@ -51,6 +51,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 /// Return the current time in system-dependent units.
 ///
 /// The current time is returned as a number of "ticks", where each tick
@@ -59,7 +61,7 @@ namespace pxr {
 /// microsecond.  The cost of this routine is in the 10s-to-100s of nanoseconds
 /// on GHz class machines.
 inline uint64_t
-ArchGetTickTime()
+GetTickTime()
 {
 #if defined(ARCH_OS_DARWIN)
     // On Darwin we'll use mach_absolute_time().
@@ -78,15 +80,15 @@ ArchGetTickTime()
 
 
 /// Get a "start" tick time for measuring an interval of time, followed by a
-/// later call to ArchGetStopTickTime().  Or see ArchIntervalTimer.  This is
-/// like ArchGetTickTime but it includes compiler & CPU fencing & reordering
+/// later call to GetStopTickTime().  Or see IntervalTimer.  This is
+/// like GetTickTime but it includes compiler & CPU fencing & reordering
 /// constraints in an attempt to get the best measurement possible.
 inline uint64_t
-ArchGetStartTickTime()
+GetStartTickTime()
 {
     uint64_t t;
 #if defined (ARCH_OS_DARWIN)
-    return ArchGetTickTime();
+    return GetTickTime();
 #elif defined (ARCH_CPU_ARM)
     std::atomic_signal_fence(std::memory_order_seq_cst);
     asm volatile("mrs %0, cntvct_el0" : "=r"(t));
@@ -119,15 +121,15 @@ ArchGetStartTickTime()
 }
 
 /// Get a "stop" tick time for measuring an interval of time.  See
-/// ArchGetStartTickTime() or ArchIntervalTimer.  This is like ArchGetTickTime
+/// GetStartTickTime() or IntervalTimer.  This is like GetTickTime
 /// but it includes compiler & CPU fencing & reordering constraints in an
 /// attempt to get the best measurement possible.
 inline uint64_t
-ArchGetStopTickTime()
+GetStopTickTime()
 {
     uint64_t t;
 #if defined (ARCH_OS_DARWIN)
-    return ArchGetTickTime();
+    return GetTickTime();
 #elif defined (ARCH_CPU_ARM)
     std::atomic_signal_fence(std::memory_order_seq_cst);
     asm volatile("mrs %0, cntvct_el0" : "=r"(t));
@@ -162,11 +164,11 @@ ArchGetStopTickTime()
      (defined(ARCH_COMPILER_CLANG) || defined(ARCH_COMPILER_GCC)))
 
 /// A simple timer class for measuring an interval of time using the
-/// ArchTickTimer facilities.
-struct ArchIntervalTimer
+/// TickTimer facilities.
+struct IntervalTimer
 {
     /// Construct a timer and start timing if \p start is true.
-    explicit ArchIntervalTimer(bool start=true)
+    explicit IntervalTimer(bool start=true)
         : _started(start) {
         if (_started) {
             Start();
@@ -196,7 +198,7 @@ struct ArchIntervalTimer
  
     /// Read and return the current time.
     uint64_t GetCurrentTicks() {
-        return ArchGetStopTickTime();
+        return GetStopTickTime();
     }
 
     /// Read the current time and return the difference between it and the start
@@ -224,18 +226,18 @@ private:
 
 #else
 
-struct ArchIntervalTimer
+struct IntervalTimer
 {
-    explicit ArchIntervalTimer(bool start=true)
+    explicit IntervalTimer(bool start=true)
         : _started(start) {
         if (_started) {
-            _startTicks = ArchGetStartTickTime();
+            _startTicks = GetStartTickTime();
         }
     }
 
     void Start() {
         _started = true;
-        _startTicks = ArchGetStartTickTime();
+        _startTicks = GetStartTickTime();
     }
 
     bool IsStarted() const {
@@ -247,14 +249,14 @@ struct ArchIntervalTimer
     }
 
     uint64_t GetCurrentTicks() {
-        return ArchGetStopTickTime();
+        return GetStopTickTime();
     }
 
     uint64_t GetElapsedTicks() {
         if (!_started) {
             return 0;
         }
-        return ArchGetStopTickTime() - _startTicks;
+        return GetStopTickTime() - _startTicks;
     }
 private:
     bool _started = false;
@@ -265,57 +267,57 @@ private:
 
 /// Return the tick time resolution.  Although the number of ticks per second
 /// may be very large, on many current systems the tick timers do not update at
-/// that rate.  Rather, sequential calls to ArchGetTickTime() may report
+/// that rate.  Rather, sequential calls to GetTickTime() may report
 /// increases of 10s to 100s of ticks, with a minimum increment betwewen calls.
 /// This function returns that minimum increment as measured at startup time.
 ///
 /// Note that if this value is of sufficient size, then short times measured
 /// with tick timers are potentially subject to significant noise.  In
 /// particular, an interval of measured tick time is liable to be off by +/- one
-/// ArchGetTickQuantum().
+/// GetTickQuantum().
 ARCH_API
-uint64_t ArchGetTickQuantum();
+uint64_t GetTickQuantum();
 
-/// Return the ticks taken to record an interval of time with ArchIntervalTimer,
+/// Return the ticks taken to record an interval of time with IntervalTimer,
 /// as measured at startup time.
 ARCH_API
-uint64_t ArchGetIntervalTimerTickOverhead();
+uint64_t GetIntervalTimerTickOverhead();
 
 
 /// Convert a duration measured in "ticks", as returned by
-/// \c ArchGetTickTime(), to nanoseconds.
+/// \c GetTickTime(), to nanoseconds.
 ///
 /// An example to test the timing routines would be:
 /// \code
-///     ArchIntervalTimer iTimer;
+///     IntervalTimer iTimer;
 ///     sleep(10);
 ///
 ///     // duration should be approximately 10/// 1e9 = 1e10 nanoseconds.
-///     int64_t duration = ArchTicksToNanoseconds(iTimer.GetElapsedTicks());
+///     int64_t duration = TicksToNanoseconds(iTimer.GetElapsedTicks());
 /// \endcode
 ///
 ARCH_API
-int64_t ArchTicksToNanoseconds(uint64_t nTicks);
+int64_t TicksToNanoseconds(uint64_t nTicks);
 
 /// Convert a duration measured in "ticks", as returned by
-/// \c ArchGetTickTime(), to seconds.
+/// \c GetTickTime(), to seconds.
 ARCH_API
-double ArchTicksToSeconds(uint64_t nTicks);
+double TicksToSeconds(uint64_t nTicks);
 
 /// Convert a duration in seconds to "ticks", as returned by
-/// \c ArchGetTickTime().
+/// \c GetTickTime().
 ARCH_API
-uint64_t ArchSecondsToTicks(double seconds);
+uint64_t SecondsToTicks(double seconds);
     
 /// Get nanoseconds per tick. Useful when converting ticks obtained from
-/// \c ArchTickTime()
+/// \c TickTime()
 ARCH_API
-double ArchGetNanosecondsPerTick();
+double GetNanosecondsPerTick();
 
 ARCH_API
 uint64_t
-Arch_MeasureExecutionTime(uint64_t maxTicks, bool *reachedConsensus,
-                          void const *m, uint64_t (*callM)(void const *, int));
+_MeasureExecutionTime(uint64_t maxTicks, bool *reachedConsensus,
+                      void const *m, uint64_t (*callM)(void const *, int));
 
 /// Run \p fn repeatedly attempting to determine a consensus fastest execution
 /// time with low noise, for up to \p maxTicks, then return the consensus
@@ -323,18 +325,18 @@ Arch_MeasureExecutionTime(uint64_t maxTicks, bool *reachedConsensus,
 /// a best estimate instead.  If \p reachedConsensus is not null, set it to
 /// indicate whether or not a consensus was reached.  This function ignores \p
 /// maxTicks greater than 5 billion ticks and runs for up to 5 billion ticks
-/// instead. The \p fn will run for an indeterminate number of times, so it 
-/// should be side-effect free.  Also, it should do essentially the same work 
+/// instead. The \p fn will run for an indeterminate number of times, so it
+/// should be side-effect free.  Also, it should do essentially the same work
 /// on every invocation so that timing its execution makes sense.
 template <class Fn>
 uint64_t
-ArchMeasureExecutionTime(
+MeasureExecutionTime(
     Fn const &fn,
     uint64_t maxTicks = 1e7,
     bool *reachedConsensus = nullptr)
 {
     auto measureN = [&fn](int nTimes) -> uint64_t {
-        ArchIntervalTimer iTimer;
+        IntervalTimer iTimer;
         for (int i = nTimes; i--; ) {
             std::atomic_signal_fence(std::memory_order_seq_cst);
             (void)fn();
@@ -345,7 +347,7 @@ ArchMeasureExecutionTime(
 
     using MeasureNType = decltype(measureN);
     
-    return Arch_MeasureExecutionTime(
+    return _MeasureExecutionTime(
         maxTicks, reachedConsensus,
         static_cast<void const *>(&measureN),
         [](void const *mN, int nTimes) {
@@ -354,6 +356,8 @@ ArchMeasureExecutionTime(
 }
 
 ///@}
+
+}  // namespace arch
 
 }  // namespace pxr
 

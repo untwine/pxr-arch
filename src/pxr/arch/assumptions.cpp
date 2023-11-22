@@ -46,8 +46,10 @@
 
 namespace pxr {
 
+namespace arch {
+
 static size_t
-Arch_ObtainCacheLineSize()
+_ObtainCacheLineSize()
 {
 #if defined(ARCH_OS_LINUX)
     return sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
@@ -85,13 +87,13 @@ Arch_ObtainCacheLineSize()
 
     return lineSize;
 #else
-#error Arch_ObtainCacheLineSize not implemented for OS.
+#error _ObtainCacheLineSize not implemented for OS.
 #endif
 }
 
 ARCH_HIDDEN
 void
-Arch_ValidateAssumptions()
+_ValidateAssumptions()
 {
     enum SomeEnum { BLAH };
 
@@ -119,11 +121,11 @@ Arch_ValidateAssumptions()
     /*
      * Check the demangler on a very simple type.
      */
-    if (ArchGetDemangled<int>() != "int") {
+    if (GetDemangled<int>() != "int") {
         ARCH_WARNING("C++ demangling appears badly broken.");
     }
     
-    size_t cacheLineSize = Arch_ObtainCacheLineSize();
+    size_t cacheLineSize = _ObtainCacheLineSize();
 
 #if defined(ARCH_OS_DARWIN) && defined(ARCH_CPU_INTEL)
     /*
@@ -151,7 +153,7 @@ Arch_ValidateAssumptions()
      * on the current hardware architecture.
      */ 
     if (ARCH_CACHE_LINE_SIZE != cacheLineSize) {
-        ARCH_WARNING("ARCH_CACHE_LINE_SIZE != Arch_ObtainCacheLineSize()");
+        ARCH_WARNING("ARCH_CACHE_LINE_SIZE != _ObtainCacheLineSize()");
     }
 
     /*
@@ -167,5 +169,7 @@ Arch_ValidateAssumptions()
         }
     }    
 }
+
+}  // namespace arch
 
 }  // namespace pxr

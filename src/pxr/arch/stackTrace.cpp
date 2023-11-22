@@ -101,6 +101,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 using namespace std;
 
 #define MAX_STACK_DEPTH 4096
@@ -109,7 +111,7 @@ using namespace std;
 // XXX Darwin
 // total hack -- no idea if this will work if we die in malloc...
 typedef int (*ForkFunc)(void);
-ForkFunc Arch_nonLockingFork =
+ForkFunc _nonLockingFork =
 #if defined(ARCH_OS_LINUX)
     (ForkFunc)dlsym(RTLD_NEXT, "__libc_fork");
 #elif defined(ARCH_OS_DARWIN)
@@ -125,7 +127,7 @@ ForkFunc Arch_nonLockingFork =
 static time_t _appLaunchTime;
 
 // This bool determines whether a stack trace should be
-// logged upon catching a crash. Use ArchSetFatalStackLogging
+// logged upon catching a crash. Use SetFatalStackLogging
 // to set this value.
 static bool _shouldLogStackToDb = false;
 
@@ -139,7 +141,7 @@ static const char* const* _sessionCrashLogArgv = nullptr;
 
 // This string stores the program name to be used when
 // displaying error information.  Initialized in
-// Arch_InitConfig() to ArchGetExecutablePath()
+// _InitConfig() to GetExecutablePath()
 static char * _progNameForErrors = NULL;
 
 // Flag indicating whether the crash signal handler has been invoked.
@@ -149,13 +151,13 @@ static volatile std::sig_atomic_t _isCrashing = 0;
 namespace {
 // Key-value map for program info. Stores additional
 // program info to be used when displaying error information.
-class Arch_ProgInfo
+class _ProgInfo
 {
 public:
 
-    Arch_ProgInfo() : _progInfoForErrors(NULL) {}
+    _ProgInfo() : _progInfoForErrors(NULL) {}
 
-    ~Arch_ProgInfo();
+    ~_ProgInfo();
 
     void SetProgramInfoForErrors(const std::string& key,
                                  const std::string& value);
@@ -174,14 +176,14 @@ private:
     char *_progInfoForErrors;
 };
 
-Arch_ProgInfo::~Arch_ProgInfo() 
+_ProgInfo::~_ProgInfo()
 {
     if (_progInfoForErrors)
         free(_progInfoForErrors);
 }
 
 void
-Arch_ProgInfo::SetProgramInfoForErrors(
+_ProgInfo::SetProgramInfoForErrors(
     const std::string& key, const std::string& value)
 {
     std::lock_guard<std::mutex> lock(_progInfoForErrorsMutex);
@@ -208,7 +210,7 @@ Arch_ProgInfo::SetProgramInfoForErrors(
 }
 
 std::string 
-Arch_ProgInfo::GetProgramInfoForErrors(const std::string& key) const
+_ProgInfo::GetProgramInfoForErrors(const std::string& key) const
 {
     std::lock_guard<std::mutex> lock(_progInfoForErrorsMutex);
 
@@ -221,7 +223,7 @@ Arch_ProgInfo::GetProgramInfoForErrors(const std::string& key) const
 } 
 
 void 
-Arch_ProgInfo::PrintInfoForErrors() const
+_ProgInfo::PrintInfoForErrors() const
 {
     std::lock_guard<std::mutex> lock(_progInfoForErrorsMutex);
     if (_progInfoForErrors) {
@@ -231,10 +233,10 @@ Arch_ProgInfo::PrintInfoForErrors() const
 
 } // anon-namespace
 
-static Arch_ProgInfo &
-ArchStackTrace_GetProgInfo()
+static _ProgInfo &
+StackTrace_GetProgInfo()
 {
-    static Arch_ProgInfo progInfo;
+    static _ProgInfo progInfo;
     return progInfo;
 }
 
@@ -244,7 +246,7 @@ namespace {
 
 // Key-value map for extra log info.  Stores unowned pointers to text to be
 // emitted in stack trace logs in case of fatal errors or crashes.
-class Arch_LogInfo
+class _LogInfo
 {
 public:
 
@@ -259,8 +261,8 @@ private:
 };
 
 void
-Arch_LogInfo::SetExtraLogInfoForErrors(const std::string &key,
-                                       std::vector<std::string> const *lines)
+_LogInfo::SetExtraLogInfoForErrors(const std::string &key,
+                                   std::vector<std::string> const *lines)
 {
     std::lock_guard<std::mutex> lock(_logInfoForErrorsMutex);
     if (!lines || lines->empty()) {
@@ -271,7 +273,7 @@ Arch_LogInfo::SetExtraLogInfoForErrors(const std::string &key,
 }
 
 void 
-Arch_LogInfo::EmitAnyExtraLogInfo(FILE *outFile, size_t max) const
+_LogInfo::EmitAnyExtraLogInfo(FILE *outFile, size_t max) const
 {
     // This function can't cause any heap allocation, be careful.
     // XXX -- std::string::c_str and fprintf can do allocations.
@@ -294,10 +296,10 @@ Arch_LogInfo::EmitAnyExtraLogInfo(FILE *outFile, size_t max) const
 
 } // anon-namespace
 
-static Arch_LogInfo &
-ArchStackTrace_GetLogInfo()
+static _LogInfo &
+StackTrace_GetLogInfo()
 {
-    static Arch_LogInfo logInfo;
+    static _LogInfo logInfo;
     return logInfo;
 }
 
@@ -305,11 +307,11 @@ ArchStackTrace_GetLogInfo()
 static void
 _atexitCallback()
 {
-    ArchLogSessionInfo();
+    LogSessionInfo();
 }
 
 void
-ArchEnableSessionLogging()
+EnableSessionLogging()
 {
     static int unused = atexit(_atexitCallback);
     (void)unused;
@@ -385,7 +387,7 @@ const char* asgetenv(const char* name)
 {
     if (name) {
         const size_t len = asstrlen(name);
-        for (char** i = ArchEnviron(); *i; ++i) {
+        for (char** i = Environ(); *i; ++i) {
             const char* var = *i;
             if (asstrneq(var, name, len)) {
                 if (var[len] == '=') {
@@ -464,11 +466,11 @@ int _GetStackTraceName(char* buf, size_t len)
 
     // Count the string length required.
     size_t required =
-        asstrlen(ArchGetTmpDir()) +
+        asstrlen(GetTmpDir()) +
         1 +     // "/"
         asstrlen(stackTracePrefix) +
         1 +     // "_"
-        asstrlen(ArchGetProgramNameForErrors()) +
+        asstrlen(GetProgramNameForErrors()) +
         1 +     // "."
         asNumDigits(getpid()) +
         1;      // "\0"
@@ -481,11 +483,11 @@ int _GetStackTraceName(char* buf, size_t len)
         return -1;
     }
     else {
-        end = asstrcpy(end, ArchGetTmpDir());
+        end = asstrcpy(end, GetTmpDir());
         end = asstrcpy(end, "/");
         end = asstrcpy(end, stackTracePrefix);
         end = asstrcpy(end, "_");
-        end = asstrcpy(end, ArchGetProgramNameForErrors());
+        end = asstrcpy(end, GetProgramNameForErrors());
         end = asstrcpy(end, ".");
         end = asitoa(end, getpid());
     }
@@ -518,7 +520,7 @@ int _GetStackTraceName(char* buf, size_t len)
 #endif
     }
     if (fd != -1) {
-        ArchCloseFile(fd);
+        CloseFile(fd);
         fd = 0;
     }
     return fd;
@@ -574,14 +576,14 @@ _MakeArgv(
 #if !defined(ARCH_OS_WINDOWS)
 /* We use a 'non-locking' fork so that we won't get hung up if we've
  * had malloc corruption when we crash.  The crash recovery behavior
- * can be tested with ArchTestCrash(), which should crash with this
+ * can be tested with TestCrash(), which should crash with this
  * malloc corruption.
  */
 static int
 nonLockingFork()
 {
-    if (Arch_nonLockingFork != NULL) {
-        return (Arch_nonLockingFork)();
+    if (_nonLockingFork != NULL) {
+        return (_nonLockingFork)();
     }
     return fork();
 }
@@ -659,7 +661,7 @@ nonLockingLinux__execve (const char *file,
 #if !defined(ARCH_OS_WINDOWS)
 /* This is the corresponding execv which works with nonLockingFork().
  * currently, it's only different from execv for linux.  The crash
- * recovery behavior can be tested with ArchTestCrash().
+ * recovery behavior can be tested with TestCrash().
  */
 static int
 nonLockingExecv(const char *path, char *const argv[])
@@ -706,7 +708,7 @@ getBase(const char* path)
  * Run an external program to write post-mortem information to logfile for
  * process pid.  This waits until the program completes.
  *
- * This is an internal function used by ArchLogPostMortem().  It must call
+ * This is an internal function used by LogPostMortem().  It must call
  * only async-safe functions.
  */
 
@@ -748,15 +750,15 @@ int _LogStackTraceForPid(bool isFatal,
     }
 
     // Invoke the command.
-    ArchCrashHandlerSystemv(argv[0], (char *const*)argv,
-                            300 /* wait up to 300 seconds */ , NULL, NULL);
+    CrashHandlerSystemv(argv[0], (char *const*)argv,
+                        300 /* wait up to 300 seconds */ , NULL, NULL);
     return 1;
 }
 
 void
-ArchSetProcessStateLogCommand(const char* command, 
-                              const char *const argv[], 
-                              const char *const fatalArgv[])
+SetProcessStateLogCommand(const char* command,
+                          const char *const argv[],
+                          const char *const fatalArgv[])
 {
     _processStateCmd  = command;
     _nonFatalArgv = argv;
@@ -764,33 +766,33 @@ ArchSetProcessStateLogCommand(const char* command,
 }
 
 /*
- * Arch_SetAppLaunchTime()
+ * _SetAppLaunchTime()
  * -------------------------------
  * Stores the current time as the application's launch time.
  * This function is internal.
  */
 ARCH_HIDDEN
 void
-Arch_SetAppLaunchTime()
+_SetAppLaunchTime()
 {
     _appLaunchTime = time(NULL);
 }
 
 /*
- * ArchGetAppLaunchTime()
+ * GetAppLaunchTime()
  * -------------------------------
  * Returns the application's launch time, or NULL if a timestamp hasn't
- * been created with ArchSetAppLaunchTime().  
+ * been created with SetAppLaunchTime().
  */
 time_t
-ArchGetAppLaunchTime()
+GetAppLaunchTime()
 {
     // Defaults to NULL
     return _appLaunchTime;
 }
  
 /*
- * ArchSetFatalStackLogging()
+ * SetFatalStackLogging()
  * -------------------------------
  * This enables the logging of the stack trace and other build
  * information upon intercepting a crash.
@@ -798,51 +800,51 @@ ArchGetAppLaunchTime()
  * This function can be called from python.
  */
 void
-ArchSetFatalStackLogging( bool flag )
+SetFatalStackLogging( bool flag )
 {
     _shouldLogStackToDb = flag;   
 }
 
 /*
- * ArchGetFatalStackLogging()
+ * GetFatalStackLogging()
  * ---------------------------
  * Returns the current value of the logging flag.
  *
  * This function can be called from python.
  */
 bool
-ArchGetFatalStackLogging()
+GetFatalStackLogging()
 {
     return _shouldLogStackToDb;
 }
 
 void
-ArchSetProgramInfoForErrors(const std::string& key,
-                            const std::string& value)
+SetProgramInfoForErrors(const std::string& key,
+                        const std::string& value)
 {
-    ArchStackTrace_GetProgInfo().SetProgramInfoForErrors(key, value);
+    StackTrace_GetProgInfo().SetProgramInfoForErrors(key, value);
 }
 
 std::string
-ArchGetProgramInfoForErrors(const std::string& key) 
+GetProgramInfoForErrors(const std::string& key)
 {
-    return ArchStackTrace_GetProgInfo().GetProgramInfoForErrors(key);
+    return StackTrace_GetProgInfo().GetProgramInfoForErrors(key);
 } 
 
 void
-ArchSetExtraLogInfoForErrors(const std::string &key,
-                             std::vector<std::string> const *lines)
+SetExtraLogInfoForErrors(const std::string &key,
+                         std::vector<std::string> const *lines)
 {
-    ArchStackTrace_GetLogInfo().SetExtraLogInfoForErrors(key, lines);
+    StackTrace_GetLogInfo().SetExtraLogInfoForErrors(key, lines);
 }
 
 /*
- * ArchSetProgramNameForErrors
+ * SetProgramNameForErrors
  * ---------------------------
  * Set's the program name that is to be used for diagnostic output.  
  */
 void
-ArchSetProgramNameForErrors( const char *progName )
+SetProgramNameForErrors( const char *progName )
 {
      
     if (_progNameForErrors)
@@ -855,14 +857,14 @@ ArchSetProgramNameForErrors( const char *progName )
 }
 
 /*
- * ArchGetProgramNameForErrors
+ * GetProgramNameForErrors
  * ----------------------------
  * Returns the currently set program name used for
  * reporting error information.  Returns "libArch"
  * if a value hasn't been set.
  */
 const char *
-ArchGetProgramNameForErrors()
+GetProgramNameForErrors()
 {
     if (_progNameForErrors)
         return _progNameForErrors;
@@ -945,8 +947,8 @@ _InvokeSessionLogger(const char* progname, const char *stackTrace)
     }
 
     // Invoke the command.
-    ArchCrashHandlerSystemv(argv[0], (char *const*)argv, 
-                            60 /* wait up to 60 seconds */, NULL, NULL);
+    CrashHandlerSystemv(argv[0], (char *const*)argv,
+                        60 /* wait up to 60 seconds */, NULL, NULL);
 }
 
 /*
@@ -960,8 +962,8 @@ _FinishLoggingFatalStackTrace(const char *progname, const char *stackTrace,
 {
     if (!crashingHard && sessionLog) {
         // If we were given a session log, cat it to the end of the stack.
-        if (FILE* stackFd = ArchOpenFile(stackTrace, "a")) {
-            if (FILE* sessionLogFd = ArchOpenFile(sessionLog, "r")) {
+        if (FILE* stackFd = OpenFile(stackTrace, "a")) {
+            if (FILE* sessionLogFd = OpenFile(sessionLog, "r")) {
                 fputs("\n\n********** Session Log **********\n\n", stackFd);
                 // Cat the session log
                 char line[4096];
@@ -983,16 +985,16 @@ _FinishLoggingFatalStackTrace(const char *progname, const char *stackTrace,
 }
 
 void
-ArchLogSessionInfo(const char *crashStackTrace)
+LogSessionInfo(const char *crashStackTrace)
 {
     if (_shouldLogStackToDb)
     {
-        _InvokeSessionLogger(ArchGetProgramNameForErrors(), crashStackTrace);
+        _InvokeSessionLogger(GetProgramNameForErrors(), crashStackTrace);
     }
 }
 
 void
-ArchSetLogSession(
+SetLogSession(
     const char* command,
     const char* const argv[],
     const char* const crashArgv[])
@@ -1003,7 +1005,7 @@ ArchSetLogSession(
 }
 
 bool
-ArchIsAppCrashing()
+IsAppCrashing()
 {
     return _isCrashing;
 }
@@ -1021,10 +1023,10 @@ _SetAppIsCrashing(bool crashing)
  * Use of char*'s is deliberate: only async-safe calls allowed past this point!
  */
 static void
-_ArchLogProcessStateHelper(bool isFatal,
-                           const char* reason,
-                           const char* message = nullptr,
-                           const char* extraLogMsg = nullptr)
+_LogProcessStateHelper(bool isFatal,
+                       const char* reason,
+                       const char* message = nullptr,
+                       const char* extraLogMsg = nullptr)
 {
     static std::atomic_flag busy = ATOMIC_FLAG_INIT;
 
@@ -1038,10 +1040,10 @@ _ArchLogProcessStateHelper(bool isFatal,
         _SetAppIsCrashing(true);
     }
 
-    const char* progname = ArchGetProgramNameForErrors();
+    const char* progname = GetProgramNameForErrors();
 
     // If we can attach a debugger then just exit here.
-    if (ArchDebuggerAttach()) {
+    if (DebuggerAttach()) {
         ARCH_DEBUGGER_TRAP;
         _exit(0);
     }
@@ -1057,7 +1059,7 @@ _ArchLogProcessStateHelper(bool isFatal,
     }
 
     // Write reason for stack trace to logfile.
-    if (FILE* stackFd = ArchOpenFile(logfile, "a")) {
+    if (FILE* stackFd = OpenFile(logfile, "a")) {
         if (reason) {
             fputs("This stack trace was requested because: ", stackFd);
             fputs(reason, stackFd);
@@ -1067,7 +1069,7 @@ _ArchLogProcessStateHelper(bool isFatal,
             fputs(message, stackFd);
             fputs("\n", stackFd);
         }
-        ArchStackTrace_GetLogInfo().EmitAnyExtraLogInfo(stackFd);
+        StackTrace_GetLogInfo().EmitAnyExtraLogInfo(stackFd);
         if (extraLogMsg) {
             fputs(extraLogMsg, stackFd);
             fputs("\n", stackFd);
@@ -1110,7 +1112,7 @@ _ArchLogProcessStateHelper(bool isFatal,
 
     // print out any registered program info
     {
-        ArchStackTrace_GetProgInfo().PrintInfoForErrors();
+        StackTrace_GetProgInfo().PrintInfoForErrors();
     }
 
     if (reason) {
@@ -1136,7 +1138,7 @@ _ArchLogProcessStateHelper(bool isFatal,
     fputs(" done.\n", stderr);
     // Additionally, print the first few lines of extra log information since
     // developers don't always think to look for it in the stack trace file.
-    ArchStackTrace_GetLogInfo().EmitAnyExtraLogInfo(stderr, 3 /* max */);
+    StackTrace_GetLogInfo().EmitAnyExtraLogInfo(stderr, 3 /* max */);
     printNDashes(bannerSize);
     fputs("\n", stderr);
 
@@ -1149,20 +1151,20 @@ _ArchLogProcessStateHelper(bool isFatal,
 }
 
 void
-ArchLogFatalProcessState(const char* reason,
-                         const char* message /* = nullptr */,
-                         const char* extraLogMsg /* = nullptr */)
+LogFatalProcessState(const char* reason,
+                     const char* message /* = nullptr */,
+                     const char* extraLogMsg /* = nullptr */)
 {
-    _ArchLogProcessStateHelper(true /* isFatal */, 
+    _LogProcessStateHelper(true /* isFatal */,
         reason, message, extraLogMsg);
 }
 
 void
-ArchLogCurrentProcessState(const char* reason,
-                           const char* message /* = nullptr */,
-                           const char* extraLogMsg /* = nullptr */)
+LogCurrentProcessState(const char* reason,
+                       const char* message /* = nullptr */,
+                       const char* extraLogMsg /* = nullptr */)
 {
-    _ArchLogProcessStateHelper(false /* isFatal */,
+    _LogProcessStateHelper(false /* isFatal */,
         reason, message, extraLogMsg);
 }
 
@@ -1170,11 +1172,11 @@ ArchLogCurrentProcessState(const char* reason,
  * Write a stack trace to a file, without forking.
  */
 void
-ArchLogStackTrace(const std::string& reason, bool fatal, 
-                  const string &sessionLog)
+LogStackTrace(const std::string& reason, bool fatal,
+              const string &sessionLog)
 {
-    ArchLogStackTrace(ArchGetProgramNameForErrors(), reason, fatal,
-                      sessionLog);
+    LogStackTrace(GetProgramNameForErrors(), reason, fatal,
+                  sessionLog);
 }
 
 /*
@@ -1183,14 +1185,14 @@ ArchLogStackTrace(const std::string& reason, bool fatal,
  * Note: use of mktemp is not threadsafe.
  */
 void
-ArchLogStackTrace(const std::string& progname, const std::string& reason,
-                  bool fatal, const string &sessionLog)
+LogStackTrace(const std::string& progname, const std::string& reason,
+              bool fatal, const string &sessionLog)
 {
     string tmpFile;
-    int fd = ArchMakeTmpFile(ArchStringPrintf("%s_%s",
-                                              stackTracePrefix,
-                                              ArchGetProgramNameForErrors()),
-                             &tmpFile);
+    int fd = MakeTmpFile(StringPrintf("%s_%s",
+                                      stackTracePrefix,
+                                      GetProgramNameForErrors()),
+                         &tmpFile);
 
     /* get hostname for printing out in the error message only */
     char hostname[MAXHOSTNAMELEN];
@@ -1205,18 +1207,18 @@ ArchLogStackTrace(const std::string& progname, const std::string& reason,
 
     // print out any registered program info
     {
-        ArchStackTrace_GetProgInfo().PrintInfoForErrors();
+        StackTrace_GetProgInfo().PrintInfoForErrors();
     }
 
     if (fd != -1) {
-        FILE* fout = ArchFdOpen(fd, "w");
+        FILE* fout = FdOpen(fd, "w");
         fprintf(stderr, "The stack can be found in %s:%s\n"
                 "--------------------------------------------------------------"
                 "\n", hostname, tmpFile.c_str());
-        ArchPrintStackTrace(fout, progname, reason);
+        PrintStackTrace(fout, progname, reason);
         /* If this is a fatal stack trace, attempt to add it to the db */
         if (fatal) {
-            ArchStackTrace_GetLogInfo().EmitAnyExtraLogInfo(fout);
+            StackTrace_GetLogInfo().EmitAnyExtraLogInfo(fout);
         }
         fclose(fout);
         if (fatal) {
@@ -1231,8 +1233,8 @@ ArchLogStackTrace(const std::string& progname, const std::string& reason,
         fprintf(stderr,
                 "--------------------------------------------------------------"
                 "\n");
-        ArchPrintStackTrace(stderr, progname, reason);
-        ArchStackTrace_GetLogInfo().EmitAnyExtraLogInfo(stderr);
+        PrintStackTrace(stderr, progname, reason);
+        StackTrace_GetLogInfo().EmitAnyExtraLogInfo(stderr);
     }
     fprintf(stderr,
             "--------------------------------------------------------------\n");
@@ -1267,21 +1269,21 @@ _LogStackTraceToOutputIterator(OutputIterator oi, size_t maxDepth, bool addEndl)
     }
 
     inFile.close();
-    ArchUnlinkFile(logfile);
+    UnlinkFile(logfile);
 }
 
 #endif
 
 /*
- * ArchPrintStackTrace
+ * PrintStackTrace
  *  print out a stack trace to the given FILE *.
  */
 void
-ArchPrintStackTrace(FILE *fout, const std::string& programName, const std::string& reason)
+PrintStackTrace(FILE *fout, const std::string& programName, const std::string& reason)
 {
     ostringstream oss;
 
-    ArchPrintStackTrace(oss, programName, reason);
+    PrintStackTrace(oss, programName, reason);
 
     if (fout == NULL) {
         fout = stderr;
@@ -1292,28 +1294,28 @@ ArchPrintStackTrace(FILE *fout, const std::string& programName, const std::strin
 }
 
 void
-ArchPrintStackTrace(FILE* fout, const std::string& reason)
+PrintStackTrace(FILE* fout, const std::string& reason)
 {
-    ArchPrintStackTrace(fout, ArchGetProgramNameForErrors(), reason);
+    PrintStackTrace(fout, GetProgramNameForErrors(), reason);
 }
 
 void
-ArchPrintStackTrace(std::ostream& out, const std::string& reason)
+PrintStackTrace(std::ostream& out, const std::string& reason)
 {
-    ArchPrintStackTrace(out, ArchGetProgramNameForErrors(), reason);
+    PrintStackTrace(out, GetProgramNameForErrors(), reason);
 }
 
 /*
- * ArchPrintStackTrace
+ * PrintStackTrace
  *  print out a stack trace to the given ostream.
  * 
  * This function should probably not be called from a signal handler as 
  * it calls printf and other unsafe functions.
  */
 void
-ArchPrintStackTrace(ostream& oss,
-                    const std::string& programName,
-                    const std::string& reason)
+PrintStackTrace(ostream& oss,
+                const std::string& programName,
+                const std::string& reason)
 {
     oss << "==============================================================\n"
         << " A stack trace has been requested by "
@@ -1326,8 +1328,8 @@ ArchPrintStackTrace(ostream& oss,
 #else
 
     vector<uintptr_t> frames;
-    ArchGetStackFrames(MAX_STACK_DEPTH, &frames);
-    ArchPrintStackFrames(oss, frames);
+    GetStackFrames(MAX_STACK_DEPTH, &frames);
+    PrintStackFrames(oss, frames);
 
 #endif
 
@@ -1335,28 +1337,28 @@ ArchPrintStackTrace(ostream& oss,
 }
 
 void
-ArchGetStackTrace(ostream& oss, const std::string& reason)
+GetStackTrace(ostream& oss, const std::string& reason)
 {
-    ArchPrintStackTrace(oss, ArchGetProgramNameForErrors(), reason);
+    PrintStackTrace(oss, GetProgramNameForErrors(), reason);
 }
 
 void
-ArchGetStackFrames(size_t maxDepth, vector<uintptr_t> *frames)
+GetStackFrames(size_t maxDepth, vector<uintptr_t> *frames)
 {
-    ArchGetStackFrames(maxDepth, /* skip = */ 0, frames);
+    GetStackFrames(maxDepth, /* skip = */ 0, frames);
 }
 
 void
-ArchGetStackFrames(size_t maxDepth, size_t skip, vector<uintptr_t> *frames)
+GetStackFrames(size_t maxDepth, size_t skip, vector<uintptr_t> *frames)
 {
     frames->resize(maxDepth);
-    frames->resize(ArchGetStackFrames(maxDepth, skip, frames->data()));
+    frames->resize(GetStackFrames(maxDepth, skip, frames->data()));
 }
 
 #if defined(ARCH_OS_LINUX) && defined(ARCH_BITS_64)
-struct Arch_UnwindContext {
+struct _UnwindContext {
 public:
-    Arch_UnwindContext(size_t maxdepth, size_t skip, uintptr_t* frames) :
+    _UnwindContext(size_t maxdepth, size_t skip, uintptr_t* frames) :
         maxdepth(maxdepth), skip(skip), curdepth(0), frames(frames) {}
 
 public:
@@ -1367,9 +1369,9 @@ public:
 };
 
 static _Unwind_Reason_Code
-Arch_unwindcb(struct _Unwind_Context *ctx, void *data)
+_unwindcb(struct _Unwind_Context *ctx, void *data)
 {   
-    Arch_UnwindContext* context = static_cast<Arch_UnwindContext*>(data);
+    _UnwindContext* context = static_cast<_UnwindContext*>(data);
 
     // never extend frames because it is unsafe to alloc inside a
     // signal handler, and this function is called sometimes (when
@@ -1389,24 +1391,24 @@ Arch_unwindcb(struct _Unwind_Context *ctx, void *data)
 }
 
 /*
- * ArchGetStackFrames
+ * GetStackFrames
  *  save some of stack into buffer.
  */
 size_t
-ArchGetStackFrames(size_t maxdepth, size_t skip, uintptr_t *frames)
+GetStackFrames(size_t maxdepth, size_t skip, uintptr_t *frames)
 {
     /* use the exception handling mechanism to unwind our stack.
      * note this is gcc >= 3.3.3 only.
      */
-    Arch_UnwindContext context(maxdepth, skip, frames);
-    _Unwind_Backtrace(Arch_unwindcb, (void*)&context);
+    _UnwindContext context(maxdepth, skip, frames);
+    _Unwind_Backtrace(_unwindcb, (void*)&context);
     return context.curdepth;
 }
 
 #elif defined(ARCH_OS_WINDOWS)
 
 size_t
-ArchGetStackFrames(size_t maxdepth, size_t skip, uintptr_t *frames)
+GetStackFrames(size_t maxdepth, size_t skip, uintptr_t *frames)
 {
     void* stack[MAX_STACK_DEPTH];
     size_t frameCount = CaptureStackBackTrace(skip, MAX_STACK_DEPTH, stack, NULL);
@@ -1420,7 +1422,7 @@ ArchGetStackFrames(size_t maxdepth, size_t skip, uintptr_t *frames)
 #elif defined(ARCH_OS_DARWIN)
 
 size_t
-ArchGetStackFrames(size_t maxdepth, size_t skip, uintptr_t *frames)
+GetStackFrames(size_t maxdepth, size_t skip, uintptr_t *frames)
 {
     void* stack[MAX_STACK_DEPTH];
     size_t maxFrames = std::min<size_t>(MAX_STACK_DEPTH, maxdepth+skip);
@@ -1434,7 +1436,7 @@ ArchGetStackFrames(size_t maxdepth, size_t skip, uintptr_t *frames)
 #else
 
 size_t
-ArchGetStackFrames(size_t, size_t, uintptr_t *)
+GetStackFrames(size_t, size_t, uintptr_t *)
 {
 }
 
@@ -1442,27 +1444,27 @@ ArchGetStackFrames(size_t, size_t, uintptr_t *)
 
 static
 std::string
-Arch_DefaultStackTraceCallback(uintptr_t address)
+_DefaultStackTraceCallback(uintptr_t address)
 {
     // Subtract one from the address before getting the info because
     // the stack frames have the addresses where we'll return to,
     // not where we called from.  We don't want the info for the
     // instruction after our calls, we want it for the call itself.
     // We don't need the exact address of the call because
-    // ArchGetAddressInfo() will return the info for the closest
+    // GetAddressInfo() will return the info for the closest
     // address is knows about that not after the given address.
     // (That's good because the address minus one is not the start
     // of the call instruction but there's no way to figure that out
     // here without decoding assembly instructions.)
     std::string objectPath, symbolName;
     void* baseAddress, *symbolAddress;
-    if (ArchGetAddressInfo(reinterpret_cast<void*>(address - 1),
+    if (GetAddressInfo(reinterpret_cast<void*>(address - 1),
                    &objectPath, &baseAddress,
                    &symbolName, &symbolAddress) && symbolAddress) {
-        Arch_DemangleFunctionName(&symbolName);
+        _DemangleFunctionName(&symbolName);
         const uintptr_t symbolOffset =
             (uint64_t)(address - (uintptr_t)symbolAddress);
-        return ArchStringPrintf("%s+%#0lx", symbolName.c_str(), symbolOffset);
+        return StringPrintf("%s+%#0lx", symbolName.c_str(), symbolOffset);
     }
     else {
         return "<unknown>";
@@ -1471,46 +1473,46 @@ Arch_DefaultStackTraceCallback(uintptr_t address)
 
 static
 vector<string>
-Arch_GetStackTrace(const vector<uintptr_t> &frames,
-                   bool skipUnknownFrames=false);
+_GetStackTrace(const vector<uintptr_t> &frames,
+               bool skipUnknownFrames=false);
 
 /*
- * ArchPrintStackFrames
+ * PrintStackFrames
  *  print out stack frames to the given ostream.
  */
 void
-ArchPrintStackFrames(ostream& oss, const vector<uintptr_t> &frames,
-                     bool skipUnknownFrames)
+PrintStackFrames(ostream& oss, const vector<uintptr_t> &frames,
+                 bool skipUnknownFrames)
 {
-    const vector<string> result = Arch_GetStackTrace(frames, skipUnknownFrames);
+    const vector<string> result = _GetStackTrace(frames, skipUnknownFrames);
     for (size_t i = 0; i < result.size(); i++) {
         oss << result[i] << std::endl;
     }
 }
 
 /*
- * ArchGetStackTrace
+ * GetStackTrace
  *  vector of strings
  */
 vector<string>
-ArchGetStackTrace(size_t maxDepth)
+GetStackTrace(size_t maxDepth)
 {
     vector<uintptr_t> frames;
-    ArchGetStackFrames(maxDepth, &frames);
-    return Arch_GetStackTrace(frames);
+    GetStackFrames(maxDepth, &frames);
+    return _GetStackTrace(frames);
 }
 
 
 static
-ArchStackTraceCallback*
-Arch_GetStackTraceCallback()
+StackTraceCallback*
+_GetStackTraceCallback()
 {
-    static ArchStackTraceCallback callback;
+    static StackTraceCallback callback;
     return &callback;
 }
 
 static vector<string>
-Arch_GetStackTrace(const vector<uintptr_t> &frames,
+_GetStackTrace(const vector<uintptr_t> &frames,
                    bool skipUnknownFrames)
 {
     vector<string> rv;
@@ -1521,9 +1523,9 @@ Arch_GetStackTrace(const vector<uintptr_t> &frames,
         return rv;
     }
 
-    ArchStackTraceCallback callback = *Arch_GetStackTraceCallback();
+    StackTraceCallback callback = *_GetStackTraceCallback();
     if (!callback) {
-        callback = Arch_DefaultStackTraceCallback;
+        callback = _DefaultStackTraceCallback;
     }
     int n = 0;
     for (size_t i = 0; i < frames.size(); i++) {
@@ -1531,24 +1533,24 @@ Arch_GetStackTrace(const vector<uintptr_t> &frames,
         if (skipUnknownFrames && symbolic == "<unknown>") {
             continue;
         }
-        rv.push_back(ArchStringPrintf(" #%-3i 0x%016lx in %s",
-                                      n++, frames[i], symbolic.c_str()));
+        rv.push_back(StringPrintf(" #%-3i 0x%016lx in %s",
+                                  n++, frames[i], symbolic.c_str()));
     }
 
     return rv;
 }
 
 void
-ArchSetStackTraceCallback(const ArchStackTraceCallback& cb)
+SetStackTraceCallback(const StackTraceCallback& cb)
 {
-    *Arch_GetStackTraceCallback() = cb;
+    *_GetStackTraceCallback() = cb;
 }
 
 void
-ArchGetStackTraceCallback(ArchStackTraceCallback* cb)
+GetStackTraceCallback(StackTraceCallback* cb)
 {
     if (cb) {
-        *cb = *Arch_GetStackTraceCallback();
+        *cb = *_GetStackTraceCallback();
     }
 }
 
@@ -1571,12 +1573,12 @@ archAlarmHandler(int /*sig */)
  * so should  not generally be used except following a catastrophe.
  */
 int
-ArchCrashHandlerSystemv(const char* pathname, char *const argv[],
-                        int timeout, ArchCrashHandlerSystemCB callback,
-                        void* userData)
+CrashHandlerSystemv(const char* pathname, char *const argv[],
+                    int timeout, CrashHandlerSystemCB callback,
+                    void* userData)
 {
 #if defined(ARCH_OS_WINDOWS)
-    fprintf(stderr, "ArchCrashHandlerSystemv unimplemented for Windows\n");
+    fprintf(stderr, "arch::CrashHandlerSystemv unimplemented for Windows\n");
     return -1;
 #else
     struct sigaction act, oldact;
@@ -1723,5 +1725,7 @@ ArchCrashHandlerSystemv(const char* pathname, char *const argv[],
     return retval;
 #endif
 }
+
+}  // namespace arch
 
 }  // namespace pxr

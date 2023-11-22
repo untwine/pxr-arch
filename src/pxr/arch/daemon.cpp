@@ -39,10 +39,12 @@
 
 namespace pxr {
 
+namespace arch {
+
 // Fork the current process and close all undesired file descriptors.
 //
 int
-ArchCloseAllFiles(int nExcept, const int* exceptFds)
+CloseAllFiles(int nExcept, const int* exceptFds)
 {
 #if defined(ARCH_OS_LINUX) || defined(ARCH_OS_DARWIN)
 
@@ -126,5 +128,7 @@ ArchCloseAllFiles(int nExcept, const int* exceptFds)
 
 #endif
 }
+
+}  // namespace arch
 
 }  // namespace pxr

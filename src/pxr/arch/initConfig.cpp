@@ -28,27 +28,29 @@
 
 namespace pxr {
 
-void Arch_InitDebuggerAttach();
-void Arch_InitTmpDir();
-void Arch_SetAppLaunchTime();
-void Arch_ValidateAssumptions();
-void Arch_InitTickTimer();
+namespace arch {
+
+void _InitDebuggerAttach();
+void _InitTmpDir();
+void _SetAppLaunchTime();
+void _ValidateAssumptions();
+void _InitTickTimer();
 
 namespace {
 
-ARCH_CONSTRUCTOR(Arch_InitConfig, 2, void)
+ARCH_CONSTRUCTOR(_InitConfig, 2, void)
 {
     // Initialize the application start time.  First so it's a close as
     // possible to the real start time.
-    Arch_SetAppLaunchTime();
+    _SetAppLaunchTime();
 
     // Initialize the temp directory.  Early so other initialization
     // functions can use it.
-    Arch_InitTmpDir();
+    _InitTmpDir();
 
     // Initialize program name for errors.  Early for initialization
     // error reporting.
-    ArchSetProgramNameForErrors(ArchGetExecutablePath().c_str());
+    SetProgramNameForErrors(GetExecutablePath().c_str());
 
     // Perform platform validations: these are very quick, lightweight
     // checks.  The reason that we call this function here is that pretty
@@ -57,13 +59,15 @@ ARCH_CONSTRUCTOR(Arch_InitConfig, 2, void)
     // perform this check; what is important is that when we bring up a new
     // architecture/compiler/build, the validation gets performed at some
     // point, to alert us to any problems.
-    Arch_ValidateAssumptions();
+    _ValidateAssumptions();
 
     // Initialize the debugger interface.
-    Arch_InitDebuggerAttach();
+    _InitDebuggerAttach();
 }
 
 }
+
+}  // namespace arch
 
 }  // namespace pxr
 

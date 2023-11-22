@@ -28,6 +28,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 // Static initializer to get the main thread id.  We want this to run as early
 // as possible, so we actually capture the main thread's id.  We assume that
 // we're not starting threads before main().
@@ -38,15 +40,17 @@ const std::thread::id _mainThreadId = std::this_thread::get_id();
 
 } // anonymous namespace
 
-bool ArchIsMainThread()
+bool IsMainThread()
 {
     return std::this_thread::get_id() == _mainThreadId;
 }
 
 std::thread::id
-ArchGetMainThreadId()
+GetMainThreadId()
 {
     return _mainThreadId;
 }
+
+}  // namespace arch
 
 }  // namespace pxr

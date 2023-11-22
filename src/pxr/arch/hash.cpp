@@ -58,6 +58,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 typedef  uint64_t  uint64;
 typedef  uint32_t  uint32;
 typedef  uint16_t  uint16;
@@ -653,24 +655,26 @@ void SpookyHash::Final(uint64 *hash1, uint64 *hash2)
 } // anon
 
 
-uint32_t ArchHash(const char *data, size_t len)
+uint32_t Hash(const char *data, size_t len)
 {
     return SpookyHash::Hash32(data, len, /*seed=*/0);
 }
 
-uint32_t ArchHash(const char *data, size_t len, uint32_t seed)
+uint32_t Hash(const char *data, size_t len, uint32_t seed)
 {
     return SpookyHash::Hash32(data, len, seed);
 }
 
-uint64_t ArchHash64(const char *data, size_t len)
+uint64_t Hash64(const char *data, size_t len)
 {
     return SpookyHash::Hash64(data, len, /*seed=*/0);
 }
 
-uint64_t ArchHash64(const char *data, size_t len, uint64_t seed)
+uint64_t Hash64(const char *data, size_t len, uint64_t seed)
 {
     return SpookyHash::Hash64(data, len, seed);
 }
+
+}  // namespace arch
 
 }  // namespace pxr

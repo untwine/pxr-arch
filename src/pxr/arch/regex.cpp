@@ -33,6 +33,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 namespace {
 
 std::string
@@ -59,7 +61,7 @@ _GlobToRegex(std::string pattern)
 
 #if defined(ARCH_OS_WINDOWS)
 
-class ArchRegex::_Impl {
+class Regex::_Impl {
 public:
     _Impl(const std::string& pattern, unsigned int flags, std::string* error);
     bool Match(const char* query) const;
@@ -68,14 +70,14 @@ private:
     std::regex _regex;
 };
 
-ArchRegex::_Impl::_Impl(
+Regex::_Impl::_Impl(
     const std::string& pattern, unsigned int flags, std::string* error)
 {
     auto stdflags = std::regex_constants::extended;
     stdflags |=
         std::regex_constants::nosubs |
         std::regex_constants::optimize;
-    if (flags & ArchRegex::CASE_INSENSITIVE) {
+    if (flags & Regex::CASE_INSENSITIVE) {
         stdflags |= std::regex_constants::icase;
     }
 
@@ -89,7 +91,7 @@ ArchRegex::_Impl::_Impl(
 }
 
 bool
-ArchRegex::_Impl::Match(const char* query) const
+Regex::_Impl::Match(const char* query) const
 {
     std::cmatch result;
 
@@ -109,7 +111,7 @@ ArchRegex::_Impl::Match(const char* query) const
 
 #else // defined(ARCH_OS_WINDOWS)
 
-class ArchRegex::_Impl {
+class Regex::_Impl {
 public:
     _Impl(const std::string& pattern, unsigned int flags, std::string* error);
     ~_Impl();
@@ -119,13 +121,13 @@ private:
     regex_t _regex;
 };
 
-ArchRegex::_Impl::_Impl(
+Regex::_Impl::_Impl(
     const std::string& pattern, unsigned int flags, std::string* error)
 {
     const int regflags =
         REG_EXTENDED |
         REG_NEWLINE |
-        ((flags & ArchRegex::CASE_INSENSITIVE) ? REG_ICASE : 0);
+        ((flags & Regex::CASE_INSENSITIVE) ? REG_ICASE : 0);
 
     const int result = regcomp(&_regex, pattern.c_str(), regflags);
     if (result != 0) {
@@ -137,20 +139,20 @@ ArchRegex::_Impl::_Impl(
     }
 }
 
-ArchRegex::_Impl::~_Impl()
+Regex::_Impl::~_Impl()
 {
     regfree(&_regex);
 }
 
 bool
-ArchRegex::_Impl::Match(const char* query) const
+Regex::_Impl::Match(const char* query) const
 {
     return regexec(&_regex, query, 0, NULL, 0) != REG_NOMATCH;
 }
 
 #endif // defined(ARCH_OS_WINDOWS)
 
-ArchRegex::ArchRegex(const std::string& pattern, unsigned int flags) :
+Regex::Regex(const std::string& pattern, unsigned int flags) :
     _flags(flags)
 {
     try {
@@ -170,32 +172,34 @@ ArchRegex::ArchRegex(const std::string& pattern, unsigned int flags) :
     }
 }
 
-ArchRegex::~ArchRegex()
+Regex::~Regex()
 {
     // Do nothing.
 }
 
-ArchRegex::operator bool() const
+Regex::operator bool() const
 {
     return static_cast<bool>(_impl);
 }
 
 std::string
-ArchRegex::GetError() const
+Regex::GetError() const
 {
     return _impl ? "" : (_error.empty() ? "uncompiled pattern" : _error);
 }
 
 unsigned int
-ArchRegex::GetFlags() const
+Regex::GetFlags() const
 {
     return _flags;
 }
 
 bool
-ArchRegex::Match(const std::string& query) const
+Regex::Match(const std::string& query) const
 {
     return _impl && _impl->Match(query.c_str());
 }
+
+}  // namespace arch
 
 }  // namespace pxr

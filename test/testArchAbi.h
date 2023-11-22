@@ -29,20 +29,24 @@
 
 namespace pxr {
 
-struct ArchAbiBase1 {
+namespace arch {
+
+struct AbiBase1 {
     void* dummy;
 };
 
-struct ArchAbiBase2 {
-    virtual ~ArchAbiBase2() { }
+struct AbiBase2 {
+    virtual ~AbiBase2() { }
     virtual const char* name() const = 0;
 };
 
 template <class T>
-struct ArchAbiDerived : public ArchAbiBase1, public ArchAbiBase2 {
-    virtual ~ArchAbiDerived() { }
-    virtual const char* name() const { return "ArchAbiDerived"; }
+struct AbiDerived : public AbiBase1, public AbiBase2 {
+    virtual ~AbiDerived() { }
+    virtual const char* name() const { return "AbiDerived"; }
 };
+
+}  // namespace arch
 
 }  // namespace pxr
 

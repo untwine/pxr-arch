@@ -33,13 +33,15 @@
 
 namespace pxr {
 
+namespace arch {
+
 /// Close all file descriptors (with possible exceptions)
 ///
-/// \c ArchCloseAllFiles will close all file descriptors open in the
+/// \c CloseAllFiles will close all file descriptors open in the
 /// current process.  Occasionally you'd like to close all files except
 /// for some small subset (like 0, 1, and 2).  The \p nExcept and \p
 /// exceptFds arguments can be used to provide the list of exceptions.
-/// \c ArchDaemonizeProcess uses this method to close all unwanted file
+/// \c DaemonizeProcess uses this method to close all unwanted file
 /// descriptors in the daemon process.
 ///
 /// \p nExcept should be the number of elements in the \p exceptFds array.
@@ -53,7 +55,7 @@ namespace pxr {
 /// is appropriate following a \c fork(2) call as all these file
 /// descriptors are duplicates of the ones in the parent process and
 /// shutting down the X11 display connection would mess up the parent's
-/// X11 display.  But you shouldn't use \c ArchCloseAllFiles unless you
+/// X11 display.  But you shouldn't use \c CloseAllFiles unless you
 /// know what you are doing.
 ///
 /// \return -1 on error and \c errno will be set to an appropriate
@@ -61,7 +63,9 @@ namespace pxr {
 ///
 /// \ingroup group_arch_Multithreading
 ARCH_API 
-int ArchCloseAllFiles(int nExcept, const int* exceptFds);
+int CloseAllFiles(int nExcept, const int* exceptFds);
+
+}  // namespace arch
 
 }  // namespace pxr
 

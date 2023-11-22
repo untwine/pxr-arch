@@ -29,7 +29,7 @@ using namespace pxr;
 
 int main()
 {
-    ARCH_AXIOM(ArchIsMainThread());
+    ARCH_AXIOM(arch::IsMainThread());
 
     return 0;
 }

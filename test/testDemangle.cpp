@@ -27,6 +27,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 class DummyClassInNamespace {};
 class OtherDummyClassInNamespace {
     public: class SubClass { };
@@ -34,6 +36,8 @@ class OtherDummyClassInNamespace {
 
 template <class T>
 class TemplatedDummyClassInNamespace { };
+
+}  // namespace arch
 
 }  // namespace pxr
 
@@ -62,15 +66,15 @@ TestDemangle(const std::string& typeName)
     std::string mangledName = typeInfo.name();
     std::string toBeDemangledName = typeInfo.name();
 
-    ARCH_AXIOM(ArchDemangle(&toBeDemangledName));
+    ARCH_AXIOM(arch::Demangle(&toBeDemangledName));
 
-    printf("ArchDemangle('%s') => '%s', expected '%s'\n",
+    printf("arch::Demangle('%s') => '%s', expected '%s'\n",
         mangledName.c_str(), toBeDemangledName.c_str(), typeName.c_str());
 
     ARCH_AXIOM(toBeDemangledName == typeName);
-    ARCH_AXIOM(ArchGetDemangled(mangledName) == typeName);
-    ARCH_AXIOM(ArchGetDemangled(typeInfo) == typeName);
-    ARCH_AXIOM(ArchGetDemangled<T>() == typeName);
+    ARCH_AXIOM(arch::GetDemangled(mangledName) == typeName);
+    ARCH_AXIOM(arch::GetDemangled(typeInfo) == typeName);
+    ARCH_AXIOM(arch::GetDemangled<T>() == typeName);
 
     return true;
 }
@@ -88,12 +92,12 @@ int main()
     // This one is a regression test for a demangle bug on Linux.
     TestDemangle<FooSsSsSsBar>("FooSsSsSsBar");
 
-    TestDemangle<DummyClassInNamespace>("pxr::DummyClassInNamespace");
-    TestDemangle<OtherDummyClassInNamespace::SubClass>("pxr::OtherDummyClassInNamespace::SubClass");
-    TestDemangle<TemplatedDummyClassInNamespace<DummyClassInNamespace>>(
-        "pxr::TemplatedDummyClassInNamespace<pxr::DummyClassInNamespace>");
-    TestDemangle<TemplatedDummyClassInNamespace<OtherDummyClassInNamespace::SubClass>>(
-        "pxr::TemplatedDummyClassInNamespace<pxr::OtherDummyClassInNamespace::SubClass>");
+    TestDemangle<arch::DummyClassInNamespace>("pxr::arch::DummyClassInNamespace");
+    TestDemangle<arch::OtherDummyClassInNamespace::SubClass>("pxr::arch::OtherDummyClassInNamespace::SubClass");
+    TestDemangle<arch::TemplatedDummyClassInNamespace<arch::DummyClassInNamespace>>(
+        "pxr::arch::TemplatedDummyClassInNamespace<pxr::arch::DummyClassInNamespace>");
+    TestDemangle<arch::TemplatedDummyClassInNamespace<arch::OtherDummyClassInNamespace::SubClass>>(
+        "pxr::arch::TemplatedDummyClassInNamespace<pxr::arch::OtherDummyClassInNamespace::SubClass>");
 
     TestDemangle<unsigned long>("unsigned long");
     TestDemangle<MangledAlso<int> >("MangledAlso<int>");
@@ -101,9 +105,9 @@ int main()
 
     const char* const badType = "type_that_doesnt_exist";
 #if defined(ARCH_OS_WINDOWS)
-    ARCH_AXIOM(ArchGetDemangled(badType) == badType);
+    ARCH_AXIOM(arch::GetDemangled(badType) == badType);
 #else
-    ARCH_AXIOM(ArchGetDemangled(badType) == "");
+    ARCH_AXIOM(arch::GetDemangled(badType) == "");
 #endif
    
     return 0;

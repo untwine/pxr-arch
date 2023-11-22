@@ -29,7 +29,9 @@
 
 namespace pxr {
 
-struct ArchBuildMode {
+namespace arch {
+
+struct BuildMode {
 // Check if the build system has specified a build mode, falling
 // back to commonly-used macros if it has not. (Typically, _DEBUG
 // is defined by Visual Studio and DEBUG by Xcode for debug-mode builds)
@@ -40,7 +42,9 @@ struct ArchBuildMode {
 #endif
 };
 
-#define ARCH_DEV_BUILD pxr::ArchBuildMode::DEV_BUILD
+#define ARCH_DEV_BUILD pxr::arch::BuildMode::DEV_BUILD
+
+}  // namespace arch
 
 }  // namespace pxr
 

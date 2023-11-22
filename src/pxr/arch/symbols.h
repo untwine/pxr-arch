@@ -34,6 +34,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 /// Returns information about the address \p address in the running program.
 ///
 /// Returns \c false if no information can be found, otherwise returns \c true
@@ -48,9 +50,11 @@ namespace pxr {
 ///
 /// \ingroup group_arch_Diagnostics
 ARCH_API
-bool ArchGetAddressInfo(void* address,
-                        std::string* objectPath, void** baseAddress,
-                        std::string* symbolName, void** symbolAddress);
+bool GetAddressInfo(void* address,
+                    std::string* objectPath, void** baseAddress,
+                    std::string* symbolName, void** symbolAddress);
+
+}  // namespace arch
 
 }  // namespace pxr
 

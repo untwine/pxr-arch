@@ -47,22 +47,24 @@
 
 namespace pxr {
 
+namespace arch {
+
 template <class T>
 constexpr static T UninitializedState = -1;
 
 template <class T>
 constexpr static T InitializingState = -2;
 
-static std::atomic<double> 
-Arch_NanosecondsPerTick{UninitializedState<double>};
+static std::atomic<double>
+_NanosecondsPerTick{UninitializedState<double>};
 
 // Tick measurement granularity.
-static std::atomic<int64_t> 
-Arch_TickQuantum{UninitializedState<int64_t>};
+static std::atomic<int64_t>
+_TickQuantum{UninitializedState<int64_t>};
 
-// Cost to take a measurement with ArchIntervalTimer.
-static std::atomic<int64_t>  
-Arch_IntervalTimerTickOverhead{UninitializedState<int64_t>};
+// Cost to take a measurement with IntervalTimer.
+static std::atomic<int64_t>
+_IntervalTimerTickOverhead{UninitializedState<int64_t>};
 
 template <typename T>
 static
@@ -70,16 +72,16 @@ T
 GetAtomicVar(std::atomic<T> &atomicVar, T (*computeVal)())
 {
     T state = atomicVar.load(std::memory_order_relaxed);
-    
+
     // Value has beeen initialized and can be read immediately.
     if (state >= 0) {
         return state;
     }
 
     // First thread that needs the value will start computing it.
-    if (state == UninitializedState<T> && 
+    if (state == UninitializedState<T> &&
         atomicVar.compare_exchange_strong(state, InitializingState<T>)) {
-        
+
         T newVal = computeVal();
         atomicVar.store(newVal,std::memory_order_relaxed);
         return newVal;
@@ -98,7 +100,7 @@ GetAtomicVar(std::atomic<T> &atomicVar, T (*computeVal)())
 
 static
 double
-Arch_ComputeNanosecondsPerTick()
+_ComputeNanosecondsPerTick()
 {
     mach_timebase_info_data_t info;
     mach_timebase_info(&info);
@@ -109,20 +111,20 @@ Arch_ComputeNanosecondsPerTick()
 
 static
 double
-Arch_ComputeNanosecondsPerTick()
+_ComputeNanosecondsPerTick()
 {
 #if defined(ARCH_CPU_ARM)
     uint64_t counter_hz;
     __asm __volatile("mrs	%0, CNTFRQ_EL0" : "=&r" (counter_hz));
-    Arch_NanosecondsPerTick = double(1e9) / double(counter_hz);
+    _NanosecondsPerTick = double(1e9) / double(counter_hz);
 #else
 
     // Measure how long it takes to call ::now().
     uint64_t nowDuration =
-        ArchMeasureExecutionTime(std::chrono::steady_clock::now);
+        MeasureExecutionTime(std::chrono::steady_clock::now);
 
     auto clockStart = std::chrono::steady_clock::now();
-    ArchIntervalTimer itimer;
+    IntervalTimer itimer;
     std::this_thread::sleep_for(std::chrono::milliseconds(6));
     const auto clockEnd = std::chrono::steady_clock::now();
     const auto ticks = itimer.GetElapsedTicks();
@@ -133,14 +135,14 @@ Arch_ComputeNanosecondsPerTick()
     // Subtract the tick timer overhead for the one measurement we made as well
     // as the overhead to call now() one time.
     return clockNanoSecs /
-        double(ticks - ArchGetIntervalTimerTickOverhead() - nowDuration);
+        double(ticks - GetIntervalTimerTickOverhead() - nowDuration);
 #endif
 }
 #elif defined(ARCH_OS_WINDOWS)
 
 static
 double
-Arch_ComputeNanosecondsPerTick()
+_ComputeNanosecondsPerTick()
 {
     // We want to use rdtsc so we need to find the frequency.  We run a
     // small sleep here to compute it using QueryPerformanceCounter()
@@ -152,13 +154,13 @@ Arch_ComputeNanosecondsPerTick()
     QueryPerformanceFrequency(&qpcFreq);
     const auto delay = (qpcFreq.QuadPart >> 4); // 1/16th of a second.
     QueryPerformanceCounter(&qpcStart);
-    const auto t1 = ArchGetTickTime();
+    const auto t1 = GetTickTime();
     do {
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
         QueryPerformanceCounter(&qpcEnd);
     } while (qpcEnd.QuadPart - qpcStart.QuadPart < delay);
     QueryPerformanceCounter(&qpcEnd);
-    const auto t2 = ArchGetTickTime();
+    const auto t2 = GetTickTime();
 
     // Total time take during the loop in seconds.
     const auto durationInSeconds =
@@ -179,8 +181,8 @@ Arch_ComputeNanosecondsPerTick()
 uint64_t testTimeAccum;
 
 static
-int64_t 
-Arch_ComputeTickQuantum()
+int64_t
+_ComputeTickQuantum()
 {
     constexpr int NumTrials = 64;
     uint64_t currMin = ~0;
@@ -188,11 +190,11 @@ Arch_ComputeTickQuantum()
     // Calculate the timer quantum.
     for (int trial = 0; trial != NumTrials; ++trial) {
         uint64_t times[] = {
-            ArchGetTickTime(),
-            ArchGetTickTime(),
-            ArchGetTickTime(),
-            ArchGetTickTime(),
-            ArchGetTickTime()
+            GetTickTime(),
+            GetTickTime(),
+            GetTickTime(),
+            GetTickTime(),
+            GetTickTime()
         };
         for (int i = 0; i != std::extent<decltype(times)>::value - 1; ++i) {
             times[i] = times[i+1] - times[i];
@@ -204,59 +206,59 @@ Arch_ComputeTickQuantum()
 }
 
 uint64_t
-ArchGetTickQuantum()
+GetTickQuantum()
 {
-    return GetAtomicVar(Arch_TickQuantum, Arch_ComputeTickQuantum);
+    return GetAtomicVar(_TickQuantum, _ComputeTickQuantum);
 }
 
 static
 int64_t
-Arch_ComputeIntervalTimerTickOverhead()
+_ComputeIntervalTimerTickOverhead()
 {
     uint64_t *escape = &testTimeAccum;
-    return static_cast<int64_t>(ArchMeasureExecutionTime([escape]() {
-        ArchIntervalTimer itimer;
+    return static_cast<int64_t>(MeasureExecutionTime([escape]() {
+        IntervalTimer itimer;
         *escape = itimer.GetElapsedTicks();
     }));
 }
 uint64_t
-ArchGetIntervalTimerTickOverhead()
+GetIntervalTimerTickOverhead()
 {
-    return GetAtomicVar(Arch_IntervalTimerTickOverhead, 
-        Arch_ComputeIntervalTimerTickOverhead);
+    return GetAtomicVar(_IntervalTimerTickOverhead,
+        _ComputeIntervalTimerTickOverhead);
 }
 
 
 int64_t
-ArchTicksToNanoseconds(uint64_t nTicks)
+TicksToNanoseconds(uint64_t nTicks)
 {
     return static_cast<int64_t>(
-        std::llround(static_cast<double>(nTicks)*ArchGetNanosecondsPerTick()));
+        std::llround(static_cast<double>(nTicks)*GetNanosecondsPerTick()));
 }
 
 double
-ArchTicksToSeconds(uint64_t nTicks)
+TicksToSeconds(uint64_t nTicks)
 {
-    return double(ArchTicksToNanoseconds(nTicks)) / 1e9;
+    return double(TicksToNanoseconds(nTicks)) / 1e9;
 }
 
 uint64_t
-ArchSecondsToTicks(double seconds)
+SecondsToTicks(double seconds)
 {
     return static_cast<uint64_t>(
-        std::llround(1.0e9 * seconds / ArchGetNanosecondsPerTick()));
+        std::llround(1.0e9 * seconds / GetNanosecondsPerTick()));
 }
 
 double 
-ArchGetNanosecondsPerTick() 
+GetNanosecondsPerTick()
 {
-    return GetAtomicVar(Arch_NanosecondsPerTick,           
-        Arch_ComputeNanosecondsPerTick);
+    return GetAtomicVar(_NanosecondsPerTick,
+        _ComputeNanosecondsPerTick);
 }
 
 uint64_t
-Arch_MeasureExecutionTime(uint64_t maxTicks, bool *reachedConsensus,
-                          void const *m, uint64_t (*callM)(void const *, int))
+_MeasureExecutionTime(uint64_t maxTicks, bool *reachedConsensus,
+                      void const *m, uint64_t (*callM)(void const *, int))
 {
     auto measureN = [m, callM](int nTimes) { return callM(m, nTimes); };
     
@@ -271,7 +273,7 @@ Arch_MeasureExecutionTime(uint64_t maxTicks, bool *reachedConsensus,
     // We want the tick quantum noise to -> 0.1% or less of the total time.
     // Since measured times are +/- 1 quantum, we multiply by 2000 to get the
     // desired runtime, and from there figure number of iterations for a sample.
-    const uint64_t minTicksPerSample = 2000 * ArchGetTickQuantum();
+    const uint64_t minTicksPerSample = 2000 * GetTickQuantum();
     const int sampleIters = (estTicksPer < minTicksPerSample)
         ? (minTicksPerSample + estTicksPer/2) / estTicksPer
         : 1;
@@ -297,7 +299,7 @@ Arch_MeasureExecutionTime(uint64_t maxTicks, bool *reachedConsensus,
         maxTicks = 5.e9;
     }
     
-    ArchIntervalTimer limitTimer;
+    IntervalTimer limitTimer;
 
     uint64_t bestMedian = ~0;
     while (true) {
@@ -333,5 +335,7 @@ Arch_MeasureExecutionTime(uint64_t maxTicks, bool *reachedConsensus,
     return bestMedian;
 }
 
+
+}  // namespace arch
 
 }  // namespace pxr

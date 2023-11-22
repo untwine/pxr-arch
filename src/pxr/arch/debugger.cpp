@@ -56,10 +56,12 @@
 
 namespace pxr {
 
-// We don't want this inlined so ArchDebuggerTrap() is as clean as
+namespace arch {
+
+// We don't want this inlined so DebuggerTrap() is as clean as
 // possible.  The fewer instructions in that function, the more likely
 // we don't confuse the debugger's stack unwinding.
-static void Arch_DebuggerInit() ARCH_NOINLINE;
+static void _DebuggerInit() ARCH_NOINLINE;
 
 static bool _archDebuggerInitialized = false;
 static bool _archDebuggerEnabled = false;
@@ -70,7 +72,7 @@ static char** _archDebuggerAttachArgs = 0;
 #if defined(ARCH_OS_LINUX) || defined(ARCH_OS_DARWIN)
 static
 void
-Arch_DebuggerTrapHandler(int)
+_DebuggerTrapHandler(int)
 {
     // If we're not configured to wait then do nothing.  Otherwise
     // reconfigure to not wait the next time then wait for the
@@ -85,17 +87,17 @@ Arch_DebuggerTrapHandler(int)
 #if defined(ARCH_OS_LINUX) || defined(ARCH_OS_DARWIN)
 static
 void
-Arch_DebuggerInitPosix()
+_DebuggerInitPosix()
 {
     _archDebuggerInitialized = true;
 
     // Handle the SIGTRAP signal so if no debugger is attached then
-    // nothing happens when ArchDebuggerTrap() is called.  If we
+    // nothing happens when DebuggerTrap() is called.  If we
     // didn't handle this signal then the app would die.
     struct sigaction act;
     sigemptyset(&act.sa_mask);
     act.sa_flags   = SA_NODEFER;
-    act.sa_handler = Arch_DebuggerTrapHandler;
+    act.sa_handler = _DebuggerTrapHandler;
     if (sigaction(SIGTRAP, &act, 0)) {
         ARCH_WARNING("Failed to set SIGTRAP handler;  "
                      "debug trap not enabled");
@@ -107,21 +109,21 @@ Arch_DebuggerInitPosix()
 }
 namespace {
 struct InitPosix {
-    InitPosix() { Arch_DebuggerInitPosix(); }
+    InitPosix() { _DebuggerInitPosix(); }
 };
 }
 #endif
 
 static
 void
-Arch_DebuggerInit()
+_DebuggerInit()
 {
 #if defined(ARCH_OS_LINUX) || defined(ARCH_OS_DARWIN)
 #if defined(ARCH_CPU_INTEL) && defined(ARCH_BITS_64)
     // Save some registers that normally don't have to be preserved.  We
-    // do this so the caller of ArchDebuggerTrap() can see its arguments
+    // do this so the caller of DebuggerTrap() can see its arguments
     // that were passed in registers.  If that function doesn't use those
-    // arguments after calling ArchDebuggerTrap() then the compiler is
+    // arguments after calling DebuggerTrap() then the compiler is
     // free to not store them anywhere and, if we clobber their values
     // here, there's nowhere the debugger can look to get them.
     uint64_t rdi, rsi, rdx, rcx;
@@ -170,10 +172,10 @@ static int
 nonLockingFork()
 {
     typedef int (*ForkFunc)(void);
-    extern ForkFunc Arch_nonLockingFork;
+    extern ForkFunc _nonLockingFork;
 
-    if (Arch_nonLockingFork != NULL) {
-        return (Arch_nonLockingFork)();
+    if (_nonLockingFork != NULL) {
+        return (_nonLockingFork)();
     }
     else {
         return fork();
@@ -186,7 +188,7 @@ nonLockingFork()
 // original process and we wait for the callback in the new process to exec
 // or return.
 bool
-Arch_DebuggerRunUnrelatedProcessPosix(bool (*cb)(void*), void* data)
+_DebuggerRunUnrelatedProcessPosix(bool (*cb)(void*), void* data)
 {
     // Do *not* use the heap in here.  Avoid using any functions except
     // system calls.
@@ -284,7 +286,7 @@ Arch_DebuggerRunUnrelatedProcessPosix(bool (*cb)(void*), void* data)
     // leader, a session leader, and we have no controlling terminal.
 
     // Close all open file descriptors
-    int result = ArchCloseAllFiles(1, &ready[1]);
+    int result = CloseAllFiles(1, &ready[1]);
     if (result == -1) {
         write(ready[1], &result, sizeof(result));
         _exit(3);
@@ -331,10 +333,10 @@ Arch_DebuggerRunUnrelatedProcessPosix(bool (*cb)(void*), void* data)
 
 static
 bool
-Arch_DebuggerAttachExecPosix(void* data)
+_DebuggerAttachExecPosix(void* data)
 {
     char** args = (char**)data;
-    execve(args[0], args, ArchEnviron());
+    execve(args[0], args, Environ());
     return false;
 }
 
@@ -344,7 +346,7 @@ Arch_DebuggerAttachExecPosix(void* data)
 
 static
 bool
-Arch_DebuggerIsAttachedPosix()
+_DebuggerIsAttachedPosix()
 {
     // Check for a ptrace based debugger by trying to ptrace.
     pid_t parent = getpid();
@@ -430,12 +432,12 @@ AmIBeingDebugged()
 
 static
 bool
-Arch_DebuggerAttach()
+_DebuggerAttach()
 {
     // Be very careful here to avoid using the heap.  We're not even sure
     // the stack is available but there's only so much we can do about that.
 
-    // We assume Arch_DebuggerInit() has been called.
+    // We assume _DebuggerInit() has been called.
     if (!_archDebuggerEnabled) {
         return false;
     }
@@ -455,7 +457,7 @@ Arch_DebuggerAttach()
     // file with the -x option.
     //
     // Note that, as of this writing, TotalView does not notice stops due to
-    // ArchDebuggerTrap() and there appears to be no way to fix that.  The
+    // DebuggerTrap() and there appears to be no way to fix that.  The
     // debugged program, however, does stop so users simply need to click
     // TotalView's pause button to see the program state.  Unfortunately,
     // there's no obvious indication that the program has stopped.
@@ -473,8 +475,8 @@ Arch_DebuggerAttach()
         // We need to start a process unrelated to this process so the
         // debugger's parent process is init, not this process (you can't
         // debug an ancestor process).
-        if (Arch_DebuggerRunUnrelatedProcessPosix(
-                    Arch_DebuggerAttachExecPosix, _archDebuggerAttachArgs)) {
+        if (_DebuggerRunUnrelatedProcessPosix(
+                    _DebuggerAttachExecPosix, _archDebuggerAttachArgs)) {
             // Give the debugger a chance to attach.  We have no way of
             // blocking to wait for that and we can't be sure the client
             // is even going to start a debugger so we simply sleep for
@@ -495,7 +497,7 @@ Arch_DebuggerAttach()
 // Do initialization now that would require heap/stack when attaching.
 ARCH_HIDDEN
 void
-Arch_InitDebuggerAttach()
+_InitDebuggerAttach()
 {
 #if defined(ARCH_OS_LINUX) || defined(ARCH_OS_DARWIN)
     // Maximum length of a pid written as a decimal.  It's okay for this
@@ -520,7 +522,7 @@ Arch_InitDebuggerAttach()
                 // Get the symlink in the proc filesystem if we haven't
                 // yet.
                 if (link.empty()) {
-                    link = ArchGetExecutablePath();
+                    link = GetExecutablePath();
                 }
 
                 n += link.size();
@@ -581,11 +583,11 @@ Arch_InitDebuggerAttach()
 }
 
 void
-ArchDebuggerTrap()
+DebuggerTrap()
 {
     // Trap if a debugger is attached or we try and fail to attach one.
     // If we attach one we assume it will automatically stop this process.
-    if (ArchDebuggerIsAttached() || !Arch_DebuggerAttach()) {
+    if (DebuggerIsAttached() || !_DebuggerAttach()) {
     if (_archDebuggerEnabled) {
 #if defined(ARCH_OS_WINDOWS)
             DebugBreak();
@@ -599,44 +601,44 @@ ArchDebuggerTrap()
 }
 
 void
-ArchDebuggerWait(bool wait)
+DebuggerWait(bool wait)
 {
     _archDebuggerWait = wait;
 }
 
 namespace {
 bool
-_ArchAvoidJIT()
+_AvoidJIT()
 {
     return (getenv("ARCH_AVOID_JIT") != nullptr);
 }
 }
 
 bool
-ArchDebuggerAttach()
+DebuggerAttach()
 {
-    return !_ArchAvoidJIT() &&
-            (ArchDebuggerIsAttached() || Arch_DebuggerAttach());
+    return !_AvoidJIT() &&
+            (DebuggerIsAttached() || _DebuggerAttach());
 }
 
 bool
-ArchDebuggerIsAttached()
+DebuggerIsAttached()
 {
-    Arch_DebuggerInit();
+    _DebuggerInit();
 #if defined(ARCH_OS_WINDOWS)
     return IsDebuggerPresent() == TRUE;
 #elif defined(ARCH_OS_DARWIN)
     return AmIBeingDebugged();
 #elif defined(ARCH_OS_LINUX)
-    return Arch_DebuggerIsAttachedPosix();
+    return _DebuggerIsAttachedPosix();
 #endif
     return false;
 }
 
 void
-ArchAbort(bool logging)
+Abort(bool logging)
 {
-    if (!_ArchAvoidJIT() || ArchDebuggerIsAttached()) {
+    if (!_AvoidJIT() || DebuggerIsAttached()) {
         if (!logging) {
 #if !defined(ARCH_OS_WINDOWS)
             // Remove signal handler.
@@ -654,5 +656,7 @@ ArchAbort(bool logging)
     // The exit code for abort() (128 + SIGABRT).
     _exit(134);
 }
+
+}  // namespace arch
 
 }  // namespace pxr

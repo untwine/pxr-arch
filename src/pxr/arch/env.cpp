@@ -42,8 +42,10 @@ extern "C" char** environ;
 
 namespace pxr {
 
+namespace arch {
+
 bool
-ArchHasEnv(const std::string &name)
+HasEnv(const std::string &name)
 {
 #if defined(ARCH_OS_WINDOWS)
     const DWORD size = GetEnvironmentVariable(name.c_str(), nullptr, 0);
@@ -54,7 +56,7 @@ ArchHasEnv(const std::string &name)
 }
 
 std::string
-ArchGetEnv(const std::string &name)
+GetEnv(const std::string &name)
 {
 #if defined(ARCH_OS_WINDOWS)
     const DWORD size = GetEnvironmentVariable(name.c_str(), nullptr, 0);
@@ -74,7 +76,7 @@ ArchGetEnv(const std::string &name)
 }
 
 bool
-ArchSetEnv(const std::string &name, const std::string &value, bool overwrite)
+SetEnv(const std::string &name, const std::string &value, bool overwrite)
 {
     // NOTE: Setting environment variables must be externally synchronized
     //       with other sets and gets to avoid race conditions.
@@ -93,7 +95,7 @@ ArchSetEnv(const std::string &name, const std::string &value, bool overwrite)
 #endif
 }
 
-bool ArchRemoveEnv(const std::string &name)
+bool RemoveEnv(const std::string &name)
 {
 #if defined(ARCH_OS_WINDOWS)
     return SetEnvironmentVariable(name.c_str(), nullptr) != 0;
@@ -103,7 +105,7 @@ bool ArchRemoveEnv(const std::string &name)
 }
 
 std::string
-ArchExpandEnvironmentVariables(const std::string& value)
+ExpandEnvironmentVariables(const std::string& value)
 {
 #if defined(ARCH_OS_WINDOWS)
     static std::regex regex("\\%([^\\%]+)\\%");
@@ -120,18 +122,20 @@ ArchExpandEnvironmentVariables(const std::string& value)
         //       indexes.
         const std::string::size_type pos   = match[0].first  - result.begin();
         const std::string::size_type count = match[0].second - match[0].first;
-        result.replace(pos, count, ArchGetEnv(match[1].str()));
+        result.replace(pos, count, GetEnv(match[1].str()));
     }
 
     return result;
 }
 
-char** ArchEnviron() {
+char** Environ() {
 #if defined(ARCH_OS_DARWIN)
     return *_NSGetEnviron();
 #else
     return environ;
 #endif
 }
+
+}  // namespace arch
 
 }  // namespace pxr

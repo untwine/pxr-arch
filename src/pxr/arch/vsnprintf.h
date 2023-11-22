@@ -38,13 +38,15 @@
 
 namespace pxr {
 
+namespace arch {
+
 /// \addtogroup group_arch_Strings
 ///@{
 
 /// Return the number of characters (not including the null character)
 /// necessary for a particular sprintf into a string.
 ///
-/// \c ArchVsnprintf guarantees the C99 behavior of vsnprintf on all systems:
+/// \c Vsnprintf guarantees the C99 behavior of vsnprintf on all systems:
 /// it returns the number of bytes (not including the terminating null
 /// character) needed to actually print the requested string.  If \c size
 /// indicates that \c str has enough capacity to hold the result, then the
@@ -54,7 +56,7 @@ namespace pxr {
 /// \c TfStringPrintf().
 ///
 ARCH_API
-int ArchVsnprintf(char *str, size_t size, const char *format, va_list ap)
+int Vsnprintf(char *str, size_t size, const char *format, va_list ap)
 #ifndef doxygen
     ARCH_PRINTF_FUNCTION(3, 0)
 #endif /* doxygen */
@@ -62,22 +64,22 @@ int ArchVsnprintf(char *str, size_t size, const char *format, va_list ap)
 
 /// Returns a string formed by a printf()-like specification.
 ///
-/// \c ArchStringPrintf() is a memory-safe architecture-independent way of 
+/// \c StringPrintf() is a memory-safe architecture-independent way of
 /// forming a string using printf()-like formatting.  For example,
 /// \code
 ///  string formatMsg(const string& caller, int i, double val[])
 ///  {
-///     return ArchStringPrintf("%s: val[%d] = %g\n", caller.c_str(), i, val[i]);
+///     return StringPrintf("%s: val[%d] = %g\n", caller.c_str(), i, val[i]);
 ///  }
 /// \endcode
 ///
 /// The function is safe only to the extent that the arguments match the
 /// formatting string.  In particular, be careful to pass strings themselve
-/// into \c ArchStringPrintf() as in the above example (i.e. \c caller.c_str()
+/// into \c StringPrintf() as in the above example (i.e. \c caller.c_str()
 /// as opposed to just passing \c caller).
 ///
 ARCH_API
-std::string ArchStringPrintf(const char *fmt, ...)
+std::string StringPrintf(const char *fmt, ...)
 #ifndef doxygen
     ARCH_PRINTF_FUNCTION(1, 2)
 #endif /* doxygen */
@@ -85,20 +87,22 @@ std::string ArchStringPrintf(const char *fmt, ...)
 
 /// Returns a string formed by a printf()-like specification.
 ///
-/// \c ArchVStringPrintf() is equivalent to \c ArchStringPrintf() except that
+/// \c VStringPrintf() is equivalent to \c StringPrintf() except that
 /// it is called with a \c va_list instead of a variable number of arguments.
-/// \c ArchVStringPrintf() does not call the \c va_end macro. Consequently,
+/// \c VStringPrintf() does not call the \c va_end macro. Consequently,
 /// the value of \c ap is undefined after the call. A functions that calls \c
-/// ArchVStringPrintf() should call \c va_end(ap) itself afterwards.
+/// VStringPrintf() should call \c va_end(ap) itself afterwards.
 ///
 ARCH_API
-std::string ArchVStringPrintf(const char *fmt, va_list ap)
+std::string VStringPrintf(const char *fmt, va_list ap)
 #ifndef doxygen
     ARCH_PRINTF_FUNCTION(1, 0)
     ;
 #endif
 
 /// @}
+
+}  // namespace arch
 
 }  // namespace pxr
     

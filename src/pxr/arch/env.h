@@ -31,6 +31,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 ///
 /// Architecture dependent access to environment variables.
 /// \ingroup group_arch_SystemFunctions
@@ -42,7 +44,7 @@ namespace pxr {
 ///
 ARCH_API 
 bool
-ArchHasEnv(const std::string &name);
+HasEnv(const std::string &name);
 
 ///
 /// Gets a value from the current environment identified by \c name.
@@ -50,7 +52,7 @@ ArchHasEnv(const std::string &name);
 ///
 ARCH_API 
 std::string
-ArchGetEnv(const std::string &name);
+GetEnv(const std::string &name);
 
 ///
 /// Creates or modifies an environment variable.
@@ -58,7 +60,7 @@ ArchGetEnv(const std::string &name);
 ///
 ARCH_API
 bool
-ArchSetEnv(const std::string &name, const std::string &value, bool overwrite);
+SetEnv(const std::string &name, const std::string &value, bool overwrite);
 
 ///
 /// Removes an environment variable.
@@ -66,7 +68,7 @@ ArchSetEnv(const std::string &name, const std::string &value, bool overwrite);
 ///
 ARCH_API
 bool
-ArchRemoveEnv(const std::string &name);
+RemoveEnv(const std::string &name);
 
 ///
 /// Expands environment variables in \c str.
@@ -74,7 +76,7 @@ ArchRemoveEnv(const std::string &name);
 ///
 ARCH_API
 std::string
-ArchExpandEnvironmentVariables(const std::string& str);
+ExpandEnvironmentVariables(const std::string& str);
 
 ///
 /// Return an array of the environment variables.
@@ -82,7 +84,9 @@ ArchExpandEnvironmentVariables(const std::string& str);
 ///
 ARCH_API
 char**
-ArchEnviron();
+Environ();
+
+}  // namespace arch
 
 }  // namespace pxr
 

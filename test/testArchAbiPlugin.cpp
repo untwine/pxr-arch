@@ -30,6 +30,6 @@ using namespace pxr;
 
 extern "C" {
 
-ARCH_EXPORT ArchAbiBase2* newDerived() { return new ArchAbiDerived<int>; }
+ARCH_EXPORT arch::AbiBase2* newDerived() { return new arch::AbiDerived<int>; }
 
 }

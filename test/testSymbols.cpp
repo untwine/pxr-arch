@@ -35,7 +35,7 @@ static int bss;
 
 static bool _GetLibraryPath(void* address, std::string* result)
 {
-    return ArchGetAddressInfo(address, result, NULL, NULL, NULL);
+    return arch::GetAddressInfo(address, result, NULL, NULL, NULL);
 }
 
 static std::string GetBasename(const std::string& path)

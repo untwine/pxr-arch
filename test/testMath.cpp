@@ -36,35 +36,35 @@ int main()
      * Verify that the exponent and significand of float and double are
      * IEEE-754 compliant.
      */
-    if (ArchFloatToBitPattern(5.6904566e-28f) != 0x12345678 ||
-        ArchBitPatternToFloat(0x12345678) != 5.6904566e-28f) {
+    if (arch::FloatToBitPattern(5.6904566e-28f) != 0x12345678 ||
+        arch::BitPatternToFloat(0x12345678) != 5.6904566e-28f) {
         ARCH_ERROR("float is not IEEE-754 compliant");
     }
-    if (ArchDoubleToBitPattern(
+    if (arch::DoubleToBitPattern(
             5.6263470058989390e-221) != 0x1234567811223344ULL ||
-        ArchBitPatternToDouble(
+        arch::BitPatternToDouble(
             0x1234567811223344ULL) != 5.6263470058989390e-221) {
         ARCH_ERROR("double is not IEEE-754 compliant");
     }
 
-    AXIOM(ArchSign(-123) == -1);
-    AXIOM(ArchSign(123) == 1);
-    AXIOM(ArchSign(0) == 0);
+    AXIOM(arch::Sign(-123) == -1);
+    AXIOM(arch::Sign(123) == 1);
+    AXIOM(arch::Sign(0) == 0);
 
-    AXIOM(ArchCountTrailingZeros(1) == 0);
-    AXIOM(ArchCountTrailingZeros(2) == 1);
-    AXIOM(ArchCountTrailingZeros(3) == 0);
-    AXIOM(ArchCountTrailingZeros(4) == 2);
-    AXIOM(ArchCountTrailingZeros(5) == 0);
-    AXIOM(ArchCountTrailingZeros(6) == 1);
-    AXIOM(ArchCountTrailingZeros(7) == 0);
-    AXIOM(ArchCountTrailingZeros(8) == 3);
+    AXIOM(arch::CountTrailingZeros(1) == 0);
+    AXIOM(arch::CountTrailingZeros(2) == 1);
+    AXIOM(arch::CountTrailingZeros(3) == 0);
+    AXIOM(arch::CountTrailingZeros(4) == 2);
+    AXIOM(arch::CountTrailingZeros(5) == 0);
+    AXIOM(arch::CountTrailingZeros(6) == 1);
+    AXIOM(arch::CountTrailingZeros(7) == 0);
+    AXIOM(arch::CountTrailingZeros(8) == 3);
 
-    AXIOM(ArchCountTrailingZeros(65535) == 0);
-    AXIOM(ArchCountTrailingZeros(65536) == 16);
+    AXIOM(arch::CountTrailingZeros(65535) == 0);
+    AXIOM(arch::CountTrailingZeros(65536) == 16);
 
-    AXIOM(ArchCountTrailingZeros(~((1ull << 32ull)-1ull)) == 32);
-    AXIOM(ArchCountTrailingZeros(1ull << 63ull) == 63);
+    AXIOM(arch::CountTrailingZeros(~((1ull << 32ull)-1ull)) == 32);
+    AXIOM(arch::CountTrailingZeros(1ull << 63ull) == 63);
     
     return 0;
 }

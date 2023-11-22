@@ -41,6 +41,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 /// \addtogroup group_arch_Memory
 ///@{
 
@@ -52,13 +54,13 @@ namespace pxr {
 /// satisfy it. This is needed for efficient user-defined memory management.
 ///
 inline size_t
-ArchAlignMemorySize(size_t nBytes) {
+AlignMemorySize(size_t nBytes) {
     return (nBytes + 7) & (~0x7);
 }
 
 /// Maximum extra space needed for alignment.
 ///
-/// The \c ArchAlignMemorySize() can increase the required memory by no more
+/// The \c AlignMemorySize() can increase the required memory by no more
 /// than \c ARCH_MAX_ALIGNMENT_INCREASE.
 ///
 /// \hideinitializer
@@ -70,7 +72,7 @@ ArchAlignMemorySize(size_t nBytes) {
 /// that will work for all data types.
 ///
 inline void *
-ArchAlignMemory(void *base)
+AlignMemory(void *base)
 {
     return reinterpret_cast<void *>
 	((reinterpret_cast<uintptr_t>(base) + 7) & ~0x7);
@@ -88,14 +90,16 @@ ArchAlignMemory(void *base)
 /// Aligned memory allocation.
 ARCH_API
 void *
-ArchAlignedAlloc(size_t alignment, size_t size);
+AlignedAlloc(size_t alignment, size_t size);
 
-/// Free memory allocated by ArchAlignedAlloc.
+/// Free memory allocated by AlignedAlloc.
 ARCH_API
 void
-ArchAlignedFree(void* ptr);
+AlignedFree(void* ptr);
 
 ///@}
+
+}  // namespace arch
 
 }  // namespace pxr
 

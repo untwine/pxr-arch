@@ -34,22 +34,26 @@
 
 namespace pxr {
 
+namespace arch {
+
 /// \addtogroup group_arch_SystemFunctions
 ///@{
 
 /// Return current working directory as a string.
 ARCH_API
-std::string ArchGetCwd();
+std::string GetCwd();
 
 /// Return the path to the program's executable.
 ARCH_API
-std::string ArchGetExecutablePath();
+std::string GetExecutablePath();
 
 /// Return the system's memory page size.  Safe to assume power-of-two.
 ARCH_API
-int ArchGetPageSize();
+int GetPageSize();
 
 ///@}
+
+}  // namespace arch
 
 }  // namespace pxr
 

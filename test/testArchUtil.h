@@ -27,19 +27,23 @@
 
 namespace pxr {
 
+namespace arch {
+
 // Crash types.
-enum class ArchTestCrashMode {
+enum class TestCrashMode {
     Error,
     ReadInvalidAddresses,
     ReadInvalidAddressesWithThread
 };
 
 // Cause the test to crash deliberately.
-void ArchTestCrash(ArchTestCrashMode mode);
+void TestCrash(TestCrashMode mode);
 
 // On Windows we can't easily fork() so we just run the test again with
 // command line arguments to request a crash.
-void ArchTestCrashArgParse(int argc, char** argv);
+void TestCrashArgParse(int argc, char** argv);
+
+}  // namespace arch
 
 }  // namespace pxr
 

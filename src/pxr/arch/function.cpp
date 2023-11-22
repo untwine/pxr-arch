@@ -28,6 +28,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 using namespace std;
 
 namespace {
@@ -237,8 +239,8 @@ _FilterTemplateList(const string& prettyFunction,
 } // anonymous namespace
 
 string
-ArchGetPrettierFunctionName(const string &function,
-                            const string &prettyFunction)
+GetPrettierFunctionName(const string &function,
+                        const string &prettyFunction)
 {
     // Get the function signature and template list, respectively.
     const pair<string, string> parts = _Split(prettyFunction);
@@ -255,5 +257,7 @@ ArchGetPrettierFunctionName(const string &function,
     // Construct the prettier function name.
     return functionName + _FormatTemplateList(templateList);
 }
+
+}  // namespace arch
 
 }  // namespace pxr

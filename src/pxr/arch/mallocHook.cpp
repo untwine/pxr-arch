@@ -40,6 +40,8 @@
 
 namespace pxr {
 
+namespace arch {
+
 // Malloc hooks were removed in glibc 2.34.
 #if defined(ARCH_OS_LINUX) && \
     defined(__GLIBC__) && __GLIBC__ <= 2 && __GLIBC_MINOR__ < 34
@@ -49,7 +51,7 @@ namespace pxr {
 using std::string;
 
 /*
- * ArchMallocHook requires allocators to provide some specific functionality
+ * MallocHook requires allocators to provide some specific functionality
  * in order to work properly. Allocators must provide hooks that are executed
  * when allocation functions are called (see above) and a corresponding set of
  * functions that do not execute hooks at all.
@@ -78,12 +80,14 @@ using std::string;
 /*
  * These are hook variables (they're not functions, so they don't need
  * an extern "C"). Allocator libraries must provide these hooks in order for
- * ArchMallocHook to work.
+ * MallocHook to work.
  */
 
 #if !defined(__MALLOC_HOOK_VOLATILE)
 #   define __MALLOC_HOOK_VOLATILE
 #endif /* !defined(__MALLOC_HOOK_VOLATILE) */
+
+}  // namespace arch
 
 }  // namespace pxr
 
@@ -101,6 +105,8 @@ extern void
     void* __ptr,  const void*);
 
 namespace pxr {
+
+namespace arch {
 
 template <typename T>
 static bool _GetSymbol(T* addr, const char* name, string* errMsg) {
@@ -150,9 +156,9 @@ _MallocProvidedBySameLibraryAs(const char* functionName,
 }
 
 static bool
-ArchIsPxmallocActive()
+IsPxmallocActive()
 {
-    const std::string impl = ArchGetEnv("TF_MALLOC_TAG_IMPL");
+    const std::string impl = GetEnv("TF_MALLOC_TAG_IMPL");
     if (!_CheckMallocTagImpl(impl, "pxmalloc")) {
         return false;
     }
@@ -161,9 +167,9 @@ ArchIsPxmallocActive()
 }
 
 static bool
-ArchIsJemallocActive()
+IsJemallocActive()
 {
-    const std::string impl = ArchGetEnv("TF_MALLOC_TAG_IMPL");
+    const std::string impl = GetEnv("TF_MALLOC_TAG_IMPL");
     if (!_CheckMallocTagImpl(impl, "jemalloc")) {
         return false;
     }
@@ -174,12 +180,12 @@ ArchIsJemallocActive()
 static bool
 _MallocHookAvailable()
 {
-    return (ArchIsPxmallocActive() ||
-            ArchIsPtmallocActive() ||
-            ArchIsJemallocActive());
+    return (IsPxmallocActive() ||
+            IsPtmallocActive() ||
+            IsJemallocActive());
 }
 
-struct Arch_MallocFunctionNames
+struct _MallocFunctionNames
 {
     const char* mallocFn;
     const char* reallocFn;
@@ -187,23 +193,23 @@ struct Arch_MallocFunctionNames
     const char* freeFn;
 };
 
-static Arch_MallocFunctionNames
+static _MallocFunctionNames
 _GetUnderlyingMallocFunctionNames()
 {
-    Arch_MallocFunctionNames names;
-    if (ArchIsPxmallocActive()) {
+    _MallocFunctionNames names;
+    if (IsPxmallocActive()) {
         names.mallocFn = "__pxmalloc_malloc";
         names.reallocFn = "__pxmalloc_realloc";
         names.memalignFn = "__pxmalloc_memalign";
         names.freeFn = "__pxmalloc_free";
     }
-    else if (ArchIsPtmallocActive()) {
+    else if (IsPtmallocActive()) {
         names.mallocFn = "__ptmalloc3_malloc";
         names.reallocFn = "__ptmalloc3_realloc";
         names.memalignFn = "__ptmalloc3_memalign";
         names.freeFn = "__ptmalloc3_free";
     }
-    else if (ArchIsJemallocActive()) {
+    else if (IsJemallocActive()) {
         names.mallocFn = "__jemalloc_malloc";
         names.reallocFn = "__jemalloc_realloc";
         names.memalignFn = "__jemalloc_memalign";
@@ -216,10 +222,10 @@ _GetUnderlyingMallocFunctionNames()
 #endif // MALLOC_HOOKS_AVAILABLE
 
 bool
-ArchIsPtmallocActive()
+IsPtmallocActive()
 {
 #ifdef MALLOC_HOOKS_AVAILABLE
-    const std::string impl = ArchGetEnv("TF_MALLOC_TAG_IMPL");
+    const std::string impl = GetEnv("TF_MALLOC_TAG_IMPL");
     if (!_CheckMallocTagImpl(impl, "ptmalloc")) {
         return false;
     }
@@ -231,7 +237,7 @@ ArchIsPtmallocActive()
 }
 
 bool
-ArchIsStlAllocatorOff()
+IsStlAllocatorOff()
 {
 #if defined(ARCH_COMPILER_GCC) || defined(ARCH_COMPILER_ICC) || \
     defined(ARCH_COMPILER_CLANG)
@@ -245,7 +251,7 @@ ArchIsStlAllocatorOff()
      * isn't, it's just a preference, not behavior that has to correct
      * to avoid a crash.
      */
-    static bool isOff = ArchHasEnv("GLIBCXX_FORCE_NEW");
+    static bool isOff = HasEnv("GLIBCXX_FORCE_NEW");
     return isOff;
 #else
     return false;
@@ -253,14 +259,14 @@ ArchIsStlAllocatorOff()
 }
 
 bool
-ArchMallocHook::IsInitialized()
+MallocHook::IsInitialized()
 {
     return _underlyingMallocFunc || _underlyingReallocFunc ||
        _underlyingMemalignFunc || _underlyingFreeFunc;
 }
 
 bool
-ArchMallocHook::Initialize(
+MallocHook::Initialize(
     ARCH_UNUSED_ARG void* (*mallocWrapper)(size_t, const void*),
     ARCH_UNUSED_ARG void* (*reallocWrapper)(void*, size_t, const void*),
     ARCH_UNUSED_ARG void* (*memalignWrapper)(size_t, size_t, const void*),
@@ -268,7 +274,7 @@ ArchMallocHook::Initialize(
     string* errMsg)
 {
 #if !defined(ARCH_OS_LINUX)
-    *errMsg = "ArchMallocHook only available for Linux/glibc systems";
+    *errMsg = "arch::MallocHook only available for Linux/glibc systems";
     return false;
 #elif !defined(MALLOC_HOOKS_AVAILABLE)
     *errMsg = "C library does not provide malloc hooks";
@@ -276,13 +282,13 @@ ArchMallocHook::Initialize(
 #else
     
     if (IsInitialized()) {
-        *errMsg = "ArchMallocHook already initialized";
+        *errMsg = "arch::MallocHook already initialized";
         return false;
     }
 
     if (!_MallocHookAvailable()) {
         *errMsg =
-            "ArchMallocHook functionality not available for current allocator";
+            "arch::MallocHook functionality not available for current allocator";
         return false;
     }
 
@@ -320,7 +326,7 @@ ArchMallocHook::Initialize(
      * We modify _underlyingMallocFunc etc. by reference, to avoid
      * a complaint about "type-punning" w.r.t. strict-aliasing.
      */
-    const Arch_MallocFunctionNames names = _GetUnderlyingMallocFunctionNames();
+    const _MallocFunctionNames names = _GetUnderlyingMallocFunctionNames();
 
     if (!_GetSymbol(&_underlyingMallocFunc, names.mallocFn, errMsg) ||
         !_GetSymbol(&_underlyingReallocFunc, names.reallocFn, errMsg) ||
@@ -344,5 +350,7 @@ ArchMallocHook::Initialize(
     return true;
 #endif
 }
+
+}  // namespace arch
 
 }  // namespace pxr

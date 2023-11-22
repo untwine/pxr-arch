@@ -36,30 +36,32 @@
 
 namespace pxr {
 
+namespace arch {
+
 /// Print message to standard error and abort program.
 ///
 /// \param msg The reason for the failure.
-/// \param funcName The name of the function that \c Arch_Error was called from.
-/// \param lineNo The line number of the file that \c Arch_Error was called from.
-/// \param fileName The name of the file that \c Arch_Error was called from.
+/// \param funcName The name of the function that \c _Error was called from.
+/// \param lineNo The line number of the file that \c _Error was called from.
+/// \param fileName The name of the file that \c _Error was called from.
 ///
 /// \private
 [[noreturn]]
 ARCH_API
-void Arch_Error(const char* msg, const char* funcName,
-                size_t lineNo, const char* fileName);
+void _Error(const char* msg, const char* funcName,
+            size_t lineNo, const char* fileName);
 
 /// Print warning message to standard error, but continue execution.
 ///
 /// \param msg The reason for the warning.
-/// \param funcName The name of the function that \c Arch_Warning was called from.
-/// \param lineNo The line number of the file that \c Arch_Warning was called from.
-/// \param fileName The name of the file that \c Arch_Warning was called from.
+/// \param funcName The name of the function that \c _Warning was called from.
+/// \param lineNo The line number of the file that \c _Warning was called from.
+/// \param fileName The name of the file that \c _Warning was called from.
 ///
 /// \private
 ARCH_API
-void Arch_Warning(const char* msg, const char* funcName,
-                  size_t lineNo, const char* fileName);
+void _Warning(const char* msg, const char* funcName,
+              size_t lineNo, const char* fileName);
 
 /// \addtogroup group_arch_Diagnostics
 ///@{
@@ -70,7 +72,7 @@ void Arch_Warning(const char* msg, const char* funcName,
 ///        an \c std::string) that describes why the program is aborting.
 /// \hideinitializer
 #define ARCH_ERROR(msg) \
-    pxr::Arch_Error(msg, __ARCH_FUNCTION__, __LINE__, __ARCH_FILE__)
+    pxr::arch::_Error(msg, __ARCH_FUNCTION__, __LINE__, __ARCH_FILE__)
 
 /// Prints a warning message to stderr.
 ///
@@ -78,7 +80,7 @@ void Arch_Warning(const char* msg, const char* funcName,
 ///        an \c std::string).
 /// \hideinitializer
 #define ARCH_WARNING(msg) \
-    pxr::Arch_Warning(msg, __ARCH_FUNCTION__, __LINE__, __ARCH_FILE__)
+    pxr::arch::_Warning(msg, __ARCH_FUNCTION__, __LINE__, __ARCH_FILE__)
 
 /// Aborts the program if \p cond evaluates to false.
 /// \hideinitializer
@@ -86,6 +88,8 @@ void Arch_Warning(const char* msg, const char* funcName,
     if (!(cond)) ARCH_ERROR("[" #cond "] axiom failed")
 
 ///@}
+
+}  // namespace arch
 
 }  // namespace pxr
 
