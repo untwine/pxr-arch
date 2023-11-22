@@ -85,9 +85,9 @@ void ArchAbort(bool logging = true);
 /// debugger's stack trace.  The calling functions should also use the
 /// \c ARCH_NOINLINE function attribute.
 #if defined(ARCH_COMPILER_GCC) || defined(ARCH_COMPILER_CLANG)
-#define ARCH_DEBUGGER_TRAP do { ArchDebuggerTrap(); asm(""); } while (0)
+#define ARCH_DEBUGGER_TRAP do { ARCH_NS::ArchDebuggerTrap(); asm(""); } while (0)
 #else
-#define ARCH_DEBUGGER_TRAP do { ArchDebuggerTrap(); } while (0)
+#define ARCH_DEBUGGER_TRAP do { ARCH_NS::ArchDebuggerTrap(); } while (0)
 #endif
 
 ARCH_NAMESPACE_CLOSE_SCOPE

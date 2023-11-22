@@ -54,7 +54,7 @@ void Arch_Warning(const char* msg, const char* funcName,
 ///        an \c std::string) that describes why the program is aborting.
 /// \hideinitializer
 #define ARCH_ERROR(msg) \
-    Arch_Error(msg, __ARCH_FUNCTION__, __LINE__, __ARCH_FILE__)
+    ARCH_NS::Arch_Error(msg, __ARCH_FUNCTION__, __LINE__, __ARCH_FILE__)
 
 /// Prints a warning message to stderr.
 ///
@@ -62,7 +62,7 @@ void Arch_Warning(const char* msg, const char* funcName,
 ///        an \c std::string).
 /// \hideinitializer
 #define ARCH_WARNING(msg) \
-    Arch_Warning(msg, __ARCH_FUNCTION__, __LINE__, __ARCH_FILE__)
+    ARCH_NS::Arch_Warning(msg, __ARCH_FUNCTION__, __LINE__, __ARCH_FILE__)
 
 /// Aborts the program if \p cond evaluates to false.
 /// \hideinitializer

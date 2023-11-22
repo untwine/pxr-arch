@@ -7,7 +7,7 @@
 
 #include <pxr/arch/export.h>
 #include <pxr/arch/pxr.h>
-#include <pxr/arch/testArchAbi.h>
+#include "./testArchAbi.h"
 
 
 ARCH_NAMESPACE_USING_DIRECTIVE
