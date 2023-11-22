@@ -101,28 +101,34 @@ _FixupStringNames(string* name)
 #endif
 }
 
-#if PXR_USE_NAMESPACES
-
 #define ARCH_STRINGIZE_EXPAND(x) #x
 #define ARCH_STRINGIZE(x) ARCH_STRINGIZE_EXPAND(x)
 
 static void
 _StripPxrInternalNamespace(string* name)
 {
-    // Note that this assumes PXR_INTERNAL_NS to be non-empty
-    constexpr const char nsQualifier[] = ARCH_STRINGIZE(PXR_INTERNAL_NS) "::";
-    constexpr const auto nsQualifierSize = sizeof(nsQualifier);
-    size_t lastNsQualifierEndPos = name->find(nsQualifier);
-    while (lastNsQualifierEndPos != std::string::npos) {
-        name->erase(lastNsQualifierEndPos, nsQualifierSize-1);
-        lastNsQualifierEndPos = name->find(nsQualifier);
+    constexpr char pre[] = "pxrInternal_";
+    constexpr char post[] = "__pxrReserved__";
+    const size_t preLen = sizeof(pre) - 1;
+    const size_t postLen = sizeof(post) - 1;
+
+    for (size_t pos = 0; (pos = name->find(pre, pos)) != std::string::npos;) {
+        size_t start = (pos >= 2 && name->compare(pos - 2, 2, "::") == 0) ? pos - 2 : pos;
+        size_t end = name->find(post, pos + preLen);
+        if (end == std::string::npos) {
+            pos += preLen;
+            continue;
+        }
+        end += postLen;
+        if (end + 1 < name->size() && name->compare(end, 2, "::") == 0) {
+            end += 2;
+        }
+        name->erase(start, end - start);
     }
 }
 
 #undef ARCH_STRINGIZE_EXPAND
 #undef ARCH_STRINGIZE
-
-#endif
 
 #if defined(_AT_LEAST_GCC_THREE_ONE_OR_CLANG)
 
@@ -213,17 +219,13 @@ ArchDemangle(string* mangledTypeName)
                     copy.c_str(), mangledTypeName->c_str());
         }
 
-        #if PXR_USE_NAMESPACES
         _StripPxrInternalNamespace(mangledTypeName);
-        #endif
         return true;
     }
     return false;
 #else
     if(_DemangleNew(mangledTypeName)) {
-        #if PXR_USE_NAMESPACES
         _StripPxrInternalNamespace(mangledTypeName);
-        #endif
         return true;
     }
 
@@ -254,9 +256,7 @@ bool
 ArchDemangle(string* mangledTypeName)
 {
     _FixupStringNames(mangledTypeName);
-    #if PXR_USE_NAMESPACES
     _StripPxrInternalNamespace(mangledTypeName);
-    #endif
     return true;
 }
 

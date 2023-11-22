@@ -1,219 +1,74 @@
-# It's important to not include the wrong math.h here.
-set(CMAKE_INCLUDE_CURRENT_DIR OFF)
+cmake_minimum_required(VERSION 3.23...4.1)
 
-set(PXR_PREFIX pxr/base)
-set(PXR_PACKAGE arch)
+# Default build type value.
+set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the build type")
 
-set(PLATFORM_LIBS ${M_LIB})
-if(WIN32)
-    set(PLATFORM_LIBS Ws2_32.lib Dbghelp.lib ${PLATFORM_LIBS})
+project(pxr-arch
+    VERSION 0.25.8
+    HOMEPAGE_URL "https://github.com/untwine/pxr-arch"
+    LANGUAGES C CXX
+)
+
+if (NOT "${CMAKE_CXX_STANDARD}")
+    set(CMAKE_CXX_STANDARD 17 CACHE STRING "Default C++ standard")
 endif()
 
-pxr_library(arch
-    LIBRARIES
-        ${CMAKE_DL_LIBS}
-        ${PLATFORM_LIBS}
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-    PUBLIC_CLASSES
-        align
-        attributes
-        daemon
-        debugger
-        demangle
-        env
-        error
-        errno
-        fileSystem
-        function
-        hash
-        library
-        mallocHook
-        regex
-        stackTrace
-        symbols
-        systemInfo
-        threads
-        timing
-        virtualMemory
-        vsnprintf
+# Default options.
+option(BUILD_SHARED_LIBS "Build Shared Library" ON)
+option(BUILD_TESTS "Build tests" OFF)
+option(ENABLE_PRECOMPILED_HEADERS "Enable precompiled headers." OFF)
 
-    PUBLIC_HEADERS
-        api.h
-        buildMode.h
-        defines.h
-        export.h
-        functionLite.h
-        hints.h
-        inttypes.h
-        math.h
-        pragmas.h
-
-    PRIVATE_HEADERS
-        testArchAbi.h
-        testArchUtil.h
-
-    CPPFILES
-        assumptions.cpp
-        initConfig.cpp
-
-    DOXYGEN_FILES
-        overview.dox
-)
-
-pxr_build_test_shared_lib(testArchAbiPlugin
-    CPPFILES
-        testenv/testArchAbiPlugin.cpp
-)
-pxr_build_test(testArchAbi
-    LIBRARIES
-        arch
-        ${CMAKE_DL_LIBS}
-    CPPFILES
-        testenv/testArchAbi.cpp
-)
-pxr_build_test(testArchAttributes
-    LIBRARIES
-        arch
-    CPPFILES
-        testenv/testAttributes.cpp
-    )
-pxr_build_test(testArchDemangle
-    LIBRARIES
-        arch
-    CPPFILES
-        testenv/testDemangle.cpp
-)
-pxr_build_test(testArchError
-    LIBRARIES
-        arch
-    CPPFILES
-        testenv/testArchUtil.cpp
-        testenv/testError.cpp
-)
-pxr_build_test(testArchErrno
-    LIBRARIES
-        arch
-    CPPFILES
-        testenv/testErrno.cpp
-)
-pxr_build_test(testArchFileSystem
-    LIBRARIES
-        arch
-    CPPFILES
-        testenv/testFileSystem.cpp
-)
-pxr_build_test(testArchFunction
-    LIBRARIES
-        arch
-    CPPFILES
-        testenv/testFunction.cpp
-)
-pxr_build_test(testArchMath
-    LIBRARIES
-        arch
-    CPPFILES
-        testenv/testMath.cpp
-)
-pxr_build_test(testArchPRead
-    LIBRARIES
-        arch
-    CPPFILES
-        testenv/testArchPRead.cpp
-)
-pxr_build_test(testArchStackTrace
-    LIBRARIES
-        arch
-    CPPFILES
-        testenv/testArchUtil.cpp
-        testenv/testStackTrace.cpp
-)
-pxr_build_test(testArchSymbols
-    LIBRARIES
-        arch
-    CPPFILES
-        testenv/testSymbols.cpp
-)
-pxr_build_test(testArchSystemInfo
-    LIBRARIES
-        arch
-    CPPFILES
-        testenv/testSystemInfo.cpp
-)
-pxr_build_test(testArchThreads
-    LIBRARIES
-        arch
-    CPPFILES
-        testenv/testThreads.cpp
-)
-pxr_build_test(testArchTiming
-    LIBRARIES
-        arch
-    CPPFILES
-        testenv/testTiming.cpp
-)
-pxr_build_test(testArchVsnprintf
-    LIBRARIES
-        arch
-    CPPFILES
-        testenv/testVsnprintf.cpp
-)
-
-# On windows, in debug mode, we need to copy testArchStaceTrace.pdb into the
-# testing folder, so the test can find it (and print out the right stack),
-# even if the build or test folder has been moved (ie, when the baked-in path in
-# executable, where it also looks for the pdb, doesn't work)
-
-if (PXR_BUILD_TESTS AND WIN32)
-    # This effectively creates a test-env dir (similar to pxr_install_test_dir),
-    # and adds a single file, testArchStackTrace.pdb, to it.  The test-env dir
-    # ensures that the .pdb is copied into the temporary test dir, which is
-    # the PWD when the tests are run.  The PWD (and some subdirs) is the only
-    # place that .pdbs will be searched for, other than the baked-in absolute
-    # path in the windows binary
-    install(
-        FILES $<TARGET_PDB_FILE:testArchStackTrace>
-        DESTINATION tests/ctest/testArchStackTrace
-        CONFIGURATIONS Debug RelWithDebInfo
-    )
+if (NOT BUILD_SHARED_LIBS)
+    add_compile_definitions(PXR_STATIC)
 endif()
 
+include(GNUInstallDirs)
 
-pxr_register_test(testArchAbi
-    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testArchAbi"
+if (WIN32)
+    # Prevent WinDef.h from defining min/max macros.
+    add_definitions(-DNOMINMAX)
+
+    # Exclude unnecessary Windows APIs for faster builds and fewer macro conflicts.
+    add_definitions(-DWIN32_LEAN_AND_MEAN)
+
+    # Disable /Zc:inline in VS 2019+ to retain "arch_ctor_<name>" symbols in release.
+    # https://developercommunity.visualstudio.com/t/914943
+    if (MSVC_VERSION GREATER_EQUAL 1920)
+        set(CMAKE_CXX_FLAGS "/Zc:inline- ${CMAKE_CXX_FLAGS}")
+    else()
+        set(CMAKE_CXX_FLAGS "/Zc:inline ${CMAKE_CXX_FLAGS}")
+    endif()
+endif()
+
+find_package(Threads REQUIRED)
+
+add_subdirectory(src)
+
+# Build and setup tests if required.
+if (BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(test)
+endif()
+
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+    "cmake/pxr-arch-config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/pxr-arch-config.cmake"
+    INSTALL_DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/cmake/pxr-arch
 )
-pxr_register_test(testArchAttributes
-    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testArchAttributes"
+
+write_basic_package_version_file(
+    "pxr-arch-config-version.cmake"
+    COMPATIBILITY AnyNewerVersion
 )
-pxr_register_test(testArchDemangle
-    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testArchDemangle"
-)
-pxr_register_test(testArchError
-    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testArchError"
-)
-pxr_register_test(testArchErrno
-    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testArchErrno"
-)
-pxr_register_test(testArchFileSystem
-    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testArchFileSystem"
-)
-pxr_register_test(testArchFunction
-    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testArchFunction"
-)
-pxr_register_test(testArchStackTrace
-    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testArchStackTrace"
-)
-pxr_register_test(testArchSymbols
-    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testArchSymbols"
-)
-pxr_register_test(testArchSystemInfo
-    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testArchSystemInfo"
-)
-pxr_register_test(testArchTiming
-    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testArchTiming"
-)
-pxr_register_test(testArchThreads
-    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testArchThreads"
-)
-pxr_register_test(testArchVsnprintf
-    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testArchVsnprintf"
+
+install(
+    FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/pxr-arch-config.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/pxr-arch-config-version.cmake"
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/cmake/pxr-arch
 )

@@ -204,7 +204,7 @@ StaticInit Arch_PerLibInit<StaticInit>::init;
 #define _ARCH_CAT_NOEXPAND(a, b) a ## b
 #define _ARCH_CAT(a, b) _ARCH_CAT_NOEXPAND(a, b)
 #define _ARCH_ENSURE_PER_LIB_INIT(T, prefix) \
-    static Arch_PerLibInit<T> _ARCH_CAT(prefix, __COUNTER__)
+    static ARCH_NS::Arch_PerLibInit<T> _ARCH_CAT(prefix, __COUNTER__)
 
 #if defined(doxygen)
 
@@ -221,25 +221,25 @@ struct Arch_ConstructorEntry {
 };
 
 // Emit a Arch_ConstructorEntry in the __Data,pxrctor section.
-#   define ARCH_CONSTRUCTOR(_name, _priority)                                  \
-    static void _name();                                                       \
-    static const Arch_ConstructorEntry _ARCH_CAT_NOEXPAND(arch_ctor_, _name)   \
-        __attribute__((used, section("__DATA,pxrctor"))) = {                   \
-        reinterpret_cast<Arch_ConstructorEntry::Type>(&_name),                 \
-        static_cast<unsigned>(ARCH_VERSION),                                   \
-        _priority                                                              \
-    };                                                                         \
+#   define ARCH_CONSTRUCTOR(_name, _priority)                                         \
+    static void _name();                                                              \
+    static const ARCH_NS::Arch_ConstructorEntry _ARCH_CAT_NOEXPAND(arch_ctor_, _name) \
+        __attribute__((used, section("__DATA,pxrctor"))) = {                          \
+        reinterpret_cast<ARCH_NS::Arch_ConstructorEntry::Type>(&_name),               \
+        static_cast<unsigned>(ARCH_VERSION),                                          \
+        _priority                                                                     \
+    };                                                                                \
     static void _name()
     
 // Emit a Arch_ConstructorEntry in the __Data,pxrdtor section.
-#   define ARCH_DESTRUCTOR(_name, _priority)                                   \
-    static void _name();                                                       \
-    static const Arch_ConstructorEntry _ARCH_CAT_NOEXPAND(arch_dtor_, _name)   \
-        __attribute__((used, section("__DATA,pxrdtor"))) = {                   \
-        reinterpret_cast<Arch_ConstructorEntry::Type>(&_name),                 \
-        static_cast<unsigned>(ARCH_VERSION),                                   \
-        _priority                                                              \
-    };                                                                         \
+#   define ARCH_DESTRUCTOR(_name, _priority)                                          \
+    static void _name();                                                              \
+    static const ARCH_NS::Arch_ConstructorEntry _ARCH_CAT_NOEXPAND(arch_dtor_, _name) \
+        __attribute__((used, section("__DATA,pxrdtor"))) = {                          \
+        reinterpret_cast<ARCH_NS::Arch_ConstructorEntry::Type>(&_name),               \
+        static_cast<unsigned>(ARCH_VERSION),                                          \
+        _priority                                                                     \
+    };                                                                                \
     static void _name()
 
 #elif defined(ARCH_COMPILER_GCC) || defined(ARCH_COMPILER_CLANG)
@@ -286,14 +286,14 @@ struct Arch_ConstructorInit {
     static void _name();                                                       \
     namespace {                                                                \
     __declspec(allocate(".pxrctor"))                                           \
-    extern const Arch_ConstructorEntry                                         \
+    extern const ARCH_NS::Arch_ConstructorEntry                                \
     _ARCH_CAT_NOEXPAND(arch_ctor_, _name) = {                                  \
-        reinterpret_cast<Arch_ConstructorEntry::Type>(&_name),                 \
+        reinterpret_cast<ARCH_NS::Arch_ConstructorEntry::Type>(&_name),        \
         static_cast<unsigned>(ARCH_VERSION),                                   \
         _priority                                                              \
     };                                                                         \
     }                                                                          \
-    _ARCH_ENSURE_PER_LIB_INIT(Arch_ConstructorInit, _archCtorInit);            \
+    _ARCH_ENSURE_PER_LIB_INIT(ARCH_NS::Arch_ConstructorInit, _archCtorInit);   \
     static void _name()
 
     // Emit a Arch_ConstructorEntry in the .pxrdtor section.
@@ -301,14 +301,14 @@ struct Arch_ConstructorInit {
     static void _name();                                                       \
     namespace {                                                                \
     __declspec(allocate(".pxrdtor"))                                           \
-    extern const Arch_ConstructorEntry                                         \
+    extern const ARCH_NS::Arch_ConstructorEntry                                \
     _ARCH_CAT_NOEXPAND(arch_dtor_, _name) = {                                  \
-        reinterpret_cast<Arch_ConstructorEntry::Type>(&_name),                 \
+        reinterpret_cast<ARCH_NS::Arch_ConstructorEntry::Type>(&_name),        \
         static_cast<unsigned>(ARCH_VERSION),                                   \
         _priority                                                              \
     };                                                                         \
     }                                                                          \
-    _ARCH_ENSURE_PER_LIB_INIT(Arch_ConstructorInit, _archCtorInit);            \
+    _ARCH_ENSURE_PER_LIB_INIT(ARCH_NS::Arch_ConstructorInit, _archCtorInit);   \
     static void _name()
 
 #else

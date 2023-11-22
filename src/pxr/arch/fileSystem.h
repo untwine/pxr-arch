@@ -117,53 +117,14 @@ typedef struct stat ArchStatType;
 ARCH_API FILE*
 ArchOpenFile(char const* fileName, char const* mode);
 
-#if defined(ARCH_OS_WINDOWS)
-#   define ArchChmod(path, mode)        _chmod(path, mode)
-#else
-#   define ArchChmod(path, mode)        chmod(path, mode)
-#endif
-
-#if defined(ARCH_OS_WINDOWS)
-#   define ArchCloseFile(fd)            _close(fd)
-#else
-#   define ArchCloseFile(fd)            close(fd)
-#endif
-
-#if defined(ARCH_OS_WINDOWS)
-#   define ArchUnlinkFile(path)         _unlink(path)
-#else
-#   define ArchUnlinkFile(path)         unlink(path)
-#endif
-
-#if defined(ARCH_OS_WINDOWS)
-    ARCH_API int ArchFileAccess(const char* path, int mode);
-#else
-#   define ArchFileAccess(path, mode)   access(path, mode)
-#endif
-
-#if defined(ARCH_OS_WINDOWS)
-#   define ArchFdOpen(fd, mode)         _fdopen(fd, mode)
-#else
-#   define ArchFdOpen(fd, mode)         fdopen(fd, mode)
-#endif
-
-#if defined(ARCH_OS_WINDOWS)
-#   define ArchFileNo(stream)           _fileno(stream)
-#else
-#   define ArchFileNo(stream)           fileno(stream)
-#endif
-
-#if defined(ARCH_OS_WINDOWS)
-#   define ArchFileIsaTTY(stream)       _isatty(stream)
-#else
-#   define ArchFileIsaTTY(stream)       isatty(stream)
-#endif
-
-#if defined(ARCH_OS_WINDOWS)
-    ARCH_API int ArchRmDir(const char* path);
-#else
-#   define ArchRmDir(path)   rmdir(path)
-#endif
+ARCH_API int ArchChmod(const char* path, int mode);
+ARCH_API int ArchCloseFile(int fd);
+ARCH_API int ArchUnlinkFile(const char* path);
+ARCH_API int ArchFileAccess(const char* path, int mode);
+ARCH_API FILE* ArchFdOpen(int fd, const char* mode);
+ARCH_API int ArchFileNo(FILE* file);
+ARCH_API int ArchFileIsaTTY(int fd);
+ARCH_API int ArchRmDir(const char* path);
 
 /// Return the length of a file in bytes.
 ///

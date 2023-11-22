@@ -5,8 +5,11 @@
 //
 // Modified by Jeremy Retailleau.
 
-#include "pxr/arch/pxr.h"
-#include "pxr/arch/api.h"
+#ifndef PXR_ARCH_TEST_ARCH_ABI_H
+#define PXR_ARCH_TEST_ARCH_ABI_H
+
+#include <pxr/arch/pxr.h>
+#include <pxr/arch/api.h>
 
 ARCH_NAMESPACE_OPEN_SCOPE
 
@@ -26,3 +29,5 @@ struct ArchAbiDerived : public ArchAbiBase1, public ArchAbiBase2 {
 };
 
 ARCH_NAMESPACE_CLOSE_SCOPE
+
+#endif // PXR_ARCH_TEST_ARCH_ABI_H
