@@ -8,7 +8,7 @@
 // Modified by Jeremy Retailleau.
 
 #include <pxr/arch/error.h>
-#include <pxr/arch/testArchUtil.h>
+#include "./testArchUtil.h"
 
 using namespace pxr;
 

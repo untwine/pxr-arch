@@ -6,7 +6,7 @@
 // Modified by Jeremy Retailleau.
 
 #include <pxr/arch/export.h>
-#include <pxr/arch/testArchAbi.h>
+#include "./testArchAbi.h"
 
 
 using namespace pxr;
