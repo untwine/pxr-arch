@@ -102,12 +102,12 @@ int main()
     // This one is a regression test for a demangle bug on Linux.
     TestDemangle<FooSsSsSsBar>("FooSsSsSsBar");
 
-    TestDemangle<DummyClassInNamespace>("DummyClassInNamespace"); 
-    TestDemangle<OtherDummyClassInNamespace::SubClass>("OtherDummyClassInNamespace::SubClass");
+    TestDemangle<DummyClassInNamespace>("pxr::DummyClassInNamespace");
+    TestDemangle<OtherDummyClassInNamespace::SubClass>("pxr::OtherDummyClassInNamespace::SubClass");
     TestDemangle<TemplatedDummyClassInNamespace<DummyClassInNamespace>>(
-        "TemplatedDummyClassInNamespace<DummyClassInNamespace>");
+        "pxr::TemplatedDummyClassInNamespace<pxr::DummyClassInNamespace>");
     TestDemangle<TemplatedDummyClassInNamespace<OtherDummyClassInNamespace::SubClass>>(
-        "TemplatedDummyClassInNamespace<OtherDummyClassInNamespace::SubClass>");
+        "pxr::TemplatedDummyClassInNamespace<pxr::OtherDummyClassInNamespace::SubClass>");
 
     TestDemangle<unsigned long>("unsigned long");
     TestDemangle<MangledAlso<int> >("MangledAlso<int>");
