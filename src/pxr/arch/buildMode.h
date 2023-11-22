@@ -23,7 +23,7 @@ struct ArchBuildMode {
 #endif
 };
 
-#define ARCH_DEV_BUILD ArchBuildMode::DEV_BUILD
+#define ARCH_DEV_BUILD pxr::ArchBuildMode::DEV_BUILD
 
 }  // namespace pxr
 
