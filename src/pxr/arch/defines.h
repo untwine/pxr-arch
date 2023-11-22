@@ -8,6 +8,8 @@
 #ifndef PXR_ARCH_DEFINES_H
 #define PXR_ARCH_DEFINES_H
 
+#define PXR_VERSION 2502
+
 //
 // OS
 //
