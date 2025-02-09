@@ -8,8 +8,6 @@ project(pxr-arch
     LANGUAGES C CXX
 )
 
-include(GNUInstallDirs)
-
 if (NOT "${CMAKE_CXX_STANDARD}")
     set(CMAKE_CXX_STANDARD 17 CACHE STRING "Default C++ standard")
 endif()
@@ -25,6 +23,15 @@ option(ENABLE_PRECOMPILED_HEADERS "Enable precompiled headers." OFF)
 
 if (NOT BUILD_SHARED_LIBS)
     add_compile_definitions(PXR_STATIC)
+endif()
+
+if (SKBUILD)
+    set(CMAKE_INSTALL_LIBDIR "pxr-arch/lib")
+    set(CMAKE_INSTALL_INCLUDEDIR "pxr-arch/include")
+    set(CMAKE_INSTALL_SHAREDIR "pxr-arch/cmake")
+else()
+    include(GNUInstallDirs)
+    set(CMAKE_INSTALL_SHAREDIR "share/cmake/pxr-arch")
 endif()
 
 if (WIN32)
@@ -75,11 +82,11 @@ include(CMakePackageConfigHelpers)
 configure_package_config_file(
     "cmake/pxr-arch-config.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/pxr-arch-config.cmake"
-    INSTALL_DESTINATION share/cmake/pxr-arch
+    INSTALL_DESTINATION ${CMAKE_INSTALL_SHAREDIR}
 )
 
 install(
     FILES
         "${CMAKE_CURRENT_BINARY_DIR}/pxr-arch-config.cmake"
-    DESTINATION share/cmake/pxr-arch
+    DESTINATION ${CMAKE_INSTALL_SHAREDIR}
 )

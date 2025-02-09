@@ -106,5 +106,5 @@ install(
 install(EXPORT ${PROJECT_NAME}
     FILE pxr-arch-targets.cmake
     NAMESPACE pxr::
-    DESTINATION share/cmake/pxr-arch
+    DESTINATION ${CMAKE_INSTALL_SHAREDIR}
 )
