@@ -1,4 +1,4 @@
-name: pypi
+name: pypi-release
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ jobs:
     runs-on: ${{ matrix.runs-on }}
     strategy:
       matrix:
-        os: [ linux-intel, linux-arm, macOS-intel, macOS-arm ]
+        os: [ linux-intel, linux-arm, windows, macOS-intel, macOS-arm ]
         include:
           - archs: auto64
             platform: auto
@@ -17,8 +17,8 @@ jobs:
             runs-on: ubuntu-latest
           - os: linux-arm
             runs-on: ubuntu-24.04-arm
-#          - os: windows
-#            runs-on: windows-latest
+          - os: windows
+            runs-on: windows-latest
           - os: macos-intel
             # macos-13 was the last x86_64 runner
             runs-on: macos-13
@@ -35,10 +35,6 @@ jobs:
         env:
           CIBW_PLATFORM: ${{ matrix.platform }}
           CIBW_ARCHS: ${{ matrix.archs }}
-        with:
-          package-dir: .
-          output-dir: wheelhouse
-          config-file: "{package}/pyproject.toml"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -62,7 +58,7 @@ jobs:
   upload_pypi:
     needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
-    environment: pypi
+    environment: release
     permissions:
       id-token: write
     steps:
@@ -72,7 +68,7 @@ jobs:
           path: dist
           merge-multiple: true
 
-#      - uses: pypa/gh-action-pypi-publish@release/v1
-#        with:
-#          # To test: repository-url: https://test.pypi.org/legacy/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+           repository-url: https://test.pypi.org/legacy/
 
