@@ -18,6 +18,19 @@
 
 ARCH_NAMESPACE_OPEN_SCOPE
 
+// POSIX strerror_r: returns int, writes to buffer
+inline char* check_error(int result, char* msg_buf, int errorCode) {
+    if (result != 0) {
+        snprintf(msg_buf, 256, "unknown error: %d", errorCode);
+    }
+    return msg_buf;
+}
+
+// GNU strerror_r: returns char*
+inline char* check_error(char* result, char*, int) {
+    return result;
+}
+
 std::string
 ArchStrerror()
 {
@@ -39,20 +52,10 @@ ArchStrerror(int errorCode)
     if (msg == nullptr) {
         return "Unknown error code";
     }
-    return std::string(msg);  
+    return std::string(msg);
 #elif defined(_GNU_SOURCE)
-    // from strerror_r(3):
-    //
-    //   The GNU-specific strerror_r() returns a pointer to a string
-    //   containing the error message. This may be either a pointer to a
-    //   string that the function stores in buf, or a pointer to some
-    //   (immutable) static string (in which case buf is unused). If the
-    //   function stores a string in buf, then at most buflen bytes are stored
-    //   (the string may be truncated if buflen is too small and errnum is
-    //   unknown). The string always includes a terminating null byte.
-    //
-    char* result = strerror_r(errorCode, msg_buf, sizeof(msg_buf));
-    return std::string(result);
+    return check_error(
+        strerror_r(errorCode, msg_buf, 256), msg_buf, errorCode);
 #elif !defined(ARCH_COMPILER_MSVC)
     strerror_r(errorCode, msg_buf, 256);
 #else
