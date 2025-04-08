@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "pxr-arch"
-version = "0.25.2"
+version = "0.25.2.post1"
 description = "Regroup architecture-dependent code used in OpenUSD"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -20,9 +20,6 @@ classifiers = [
 [project.urls]
 Repository = "https://github.com/untwine/pxr-arch"
 Documentation = "https://untwine.github.io/pxr-arch/"
-
-[project.optional-dependencies]
-dev = ["pxr-arch-dev==0.25.2"]
 
 [tool.scikit-build]
 cmake.version = ">=3.21,<4"
