@@ -344,6 +344,11 @@ public:
     // truncation message.  NOT async-signal-safe.
     void EmitAnyExtraLogInfo(FILE *outFile, size_t maxLines = 0) const;
 
+    // Attempt to write the extra log info to fd via aswrite().  If maxLines >
+    // 0, writes at most that many value lines (header lines do not count) plus
+    // a truncation marker.  Async-signal-safe for crash-handler paths.
+    void ASEmitAnyExtraLogInfo(int fd, size_t maxLines = 0) const;
+
     // Attempt to write the extra log info to buf, up to one less than bufSize,
     // always null-terminates.  If maxLines > 0, writes at most that many value
     // lines (header lines do not count) and appends a truncation marker.
@@ -420,6 +425,23 @@ Arch_LogInfo::EmitAnyExtraLogInfo(FILE *outFile, size_t maxLines) const
     }, maxLines);
 }
 
+void
+Arch_LogInfo::ASEmitAnyExtraLogInfo(int fd, size_t maxLines) const
+{
+    // Uses aswrite (write(2)) and is async-signal-safe.  Each chunk emitted by
+    // _ForEachLine results in one aswrite call -- several small writes rather
+    // than one buffered write, which is fine on the crash path.
+    if (!_logInfoForErrorsMutex.try_lock()) {
+        return;
+    }
+    std::lock_guard<_AtomicFlagMutex>
+        lock(_logInfoForErrorsMutex, std::adopt_lock);
+    _ForEachLine([fd](const char *s) {
+        aswrite(fd, s);
+        return true;
+    }, maxLines);
+}
+
 bool
 Arch_LogInfo::TryToFillLogInfoBuffer(char *buf, size_t bufSize,
                                      size_t maxLines) const
@@ -460,9 +482,6 @@ ArchStackTrace_TryGetLogInfo()
     return _logInfoSingleton.load(std::memory_order_acquire);
 }
 
-static constexpr size_t ExtraLogInfoBufSize = 64 * 1024 * 1024;
-static char _extraLogInfoBuffer[ExtraLogInfoBufSize];
-
 // Serializes entry to _ArchLogProcessStateHelper across threads and disallows
 // recursive entry from a nested crash.  Namespace-scope (and constant-init)
 // so a first-call from a signal handler does not race with construction.
@@ -471,9 +490,10 @@ static _AtomicFlagMutex _archLogProcessStateBusy;
 static char const *
 _GetExtraLogInfoReportDebugUnsafeImpl()
 {
-    ArchStackTrace_GetLogInfo()
-        .TryToFillLogInfoBuffer(_extraLogInfoBuffer, ExtraLogInfoBufSize);
-    return _extraLogInfoBuffer;
+    static constexpr size_t bufSize = 1 * 1024 * 1024;
+    static char buf[bufSize];
+    ArchStackTrace_GetLogInfo().TryToFillLogInfoBuffer(buf, bufSize);
+    return buf;
 }
 
 static void
@@ -1313,9 +1333,7 @@ _ArchLogProcessStateHelper(bool isFatal,
                 aswrite(stackFd, "\n");
             }
             if (Arch_LogInfo* logInfo = ArchStackTrace_TryGetLogInfo()) {
-                logInfo->TryToFillLogInfoBuffer(
-                    _extraLogInfoBuffer, ExtraLogInfoBufSize);
-                aswrite(stackFd, _extraLogInfoBuffer);
+                logInfo->ASEmitAnyExtraLogInfo(stackFd);
             }
             if (extraLogMsg) {
                 aswrite(stackFd, extraLogMsg);
