@@ -107,13 +107,23 @@ _FixupStringNames(string* name)
 static void
 _StripPxrInternalNamespace(string* name)
 {
-    // Note that this assumes ARCH_INTERNAL_NS to be non-empty
-    constexpr const char nsQualifier[] = ARCH_STRINGIZE(ARCH_INTERNAL_NS) "::";
-    constexpr const auto nsQualifierSize = sizeof(nsQualifier);
-    size_t lastNsQualifierEndPos = name->find(nsQualifier);
-    while (lastNsQualifierEndPos != std::string::npos) {
-        name->erase(lastNsQualifierEndPos, nsQualifierSize-1);
-        lastNsQualifierEndPos = name->find(nsQualifier);
+    constexpr char pre[] = "pxrInternal_";
+    constexpr char post[] = "__pxrReserved__";
+    const size_t preLen = sizeof(pre) - 1;
+    const size_t postLen = sizeof(post) - 1;
+
+    for (size_t pos = 0; (pos = name->find(pre, pos)) != std::string::npos;) {
+        size_t start = (pos >= 2 && name->compare(pos - 2, 2, "::") == 0) ? pos - 2 : pos;
+        size_t end = name->find(post, pos + preLen);
+        if (end == std::string::npos) {
+            pos += preLen;
+            continue;
+        }
+        end += postLen;
+        if (end + 1 < name->size() && name->compare(end, 2, "::") == 0) {
+            end += 2;
+        }
+        name->erase(start, end - start);
     }
 }
 
