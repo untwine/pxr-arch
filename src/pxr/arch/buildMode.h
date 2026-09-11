@@ -23,7 +23,7 @@ struct ArchBuildMode {
 #endif
 };
 
-#define ARCH_DEV_BUILD ArchBuildMode::DEV_BUILD
+#define ARCH_DEV_BUILD PXR_NS::ArchBuildMode::DEV_BUILD
 
 ARCH_NAMESPACE_CLOSE_SCOPE
 
