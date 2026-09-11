@@ -263,6 +263,22 @@ int ArchUnlinkFile(const char* path) {
 }
 
 #if defined(ARCH_OS_WINDOWS)
+    ARCH_API int ArchChmod(const char* path, int mode) { return _chmod(path, mode); }
+    ARCH_API int ArchCloseFile(int fd) { return _close(fd); }
+    ARCH_API FILE* ArchFdOpen(int fd, const char* mode) { return _fdopen(fd, mode); }
+    ARCH_API int ArchFileNo(FILE* file) { return _fileno(file); }
+    ARCH_API int ArchFileIsaTTY(int fd) { return _isatty(fd); }
+#else
+    ARCH_API int ArchChmod(const char* path, int mode) { return chmod(path, mode); }
+    ARCH_API int ArchCloseFile(int fd) { return close(fd); }
+    ARCH_API int ArchFileAccess(const char* path, int mode) { return access(path, mode); }
+    ARCH_API FILE* ArchFdOpen(int fd, const char* mode) { return fdopen(fd, mode); }
+    ARCH_API int ArchFileNo(FILE* file) { return fileno(file); }
+    ARCH_API int ArchFileIsaTTY(int fd) { return isatty(fd); }
+    ARCH_API int ArchRmDir(const char* path) { return rmdir(path); }
+#endif
+
+#if defined(ARCH_OS_WINDOWS)
 int ArchRmDir(const char* path)
 {
     return RemoveDirectoryW(_MakeWinPath(path).c_str()) ? 0 : -1;
