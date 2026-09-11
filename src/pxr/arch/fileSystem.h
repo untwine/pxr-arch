@@ -115,23 +115,14 @@ typedef struct stat ArchStatType;
 ARCH_API FILE*
 ArchOpenFile(char const* fileName, char const* mode);
 
-#if defined(ARCH_OS_WINDOWS)
-#   define ArchChmod(path, mode)        _chmod(path, mode)
-#else
-#   define ArchChmod(path, mode)        chmod(path, mode)
-#endif
-
-#if defined(ARCH_OS_WINDOWS)
-#   define ArchCloseFile(fd)            _close(fd)
-#else
-#   define ArchCloseFile(fd)            close(fd)
-#endif
+ARCH_API int ArchChmod(const char* path, int mode);
+ARCH_API int ArchCloseFile(int fd);
 
 /// Touch \p fileName, updating access and modification time to 'now'.
 ///
 /// A simple touch-like functionality. Simple in a sense that it does not
 /// offer as many options as the same-name unix touch command, but otherwise
-/// is identical to the default touch behavior. If \p create is true and 
+/// is identical to the default touch behavior. If \p create is true and
 /// the file does not already exist, an empty file gets created, otherwise
 /// the touch call fails if the file does not already exist.
 ARCH_API bool ArchTouchFile(const std::string& fileName, bool create);
@@ -143,37 +134,16 @@ ARCH_API int ArchUnlinkFile(const char* path);
 
 #if defined(ARCH_OS_WINDOWS)
     ARCH_API int ArchWindowsFileAccess(const char* path, uint32_t dwAccessMask);
-    ARCH_API int ArchFileAccess(const char* path, int mode);
-#else
-#   define ArchFileAccess(path, mode)   access(path, mode)
 #endif
-
-#if defined(ARCH_OS_WINDOWS)
-#   define ArchFdOpen(fd, mode)         _fdopen(fd, mode)
-#else
-#   define ArchFdOpen(fd, mode)         fdopen(fd, mode)
-#endif
-
-#if defined(ARCH_OS_WINDOWS)
-#   define ArchFileNo(stream)           _fileno(stream)
-#else
-#   define ArchFileNo(stream)           fileno(stream)
-#endif
-
-#if defined(ARCH_OS_WINDOWS)
-#   define ArchFileIsaTTY(stream)       _isatty(stream)
-#else
-#   define ArchFileIsaTTY(stream)       isatty(stream)
-#endif
+ARCH_API int ArchFileAccess(const char* path, int mode);
+ARCH_API FILE* ArchFdOpen(int fd, const char* mode);
+ARCH_API int ArchFileNo(FILE* file);
+ARCH_API int ArchFileIsaTTY(int fd);
 
 /// Delete an empty directory
 ///
 /// Returns 0 on success, or -1 otherwise.
-#if defined(ARCH_OS_WINDOWS)
-    ARCH_API int ArchRmDir(const char* path);
-#else
-#   define ArchRmDir(path)   rmdir(path)
-#endif
+ARCH_API int ArchRmDir(const char* path);
 
 /// Return the length of a file in bytes.
 ///
