@@ -46,7 +46,7 @@
 #endif
 
 #if defined(ARCH_OS_DARWIN)
-#include "pxr/base/arch/darwin.h"
+#include "pxr/arch/darwin.h"
 #endif
 
 ARCH_NAMESPACE_OPEN_SCOPE

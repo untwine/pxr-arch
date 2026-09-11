@@ -10,7 +10,7 @@
 #include <pxr/arch/defines.h>
 #include <pxr/arch/error.h>
 #include <pxr/arch/fileSystem.h>
-#include <pxr/arch/testArchUtil.h>
+#include "./testArchUtil.h"
 
 #include <string>
 #include <cstdlib>

@@ -6,11 +6,11 @@
 //
 #ifndef PXR_ARCH_DARWIN_H
 #define PXR_ARCH_DARWIN_H
-#include "pxr/pxr.h"
+#include "pxr/arch/pxr.h"
 
-PXR_NAMESPACE_OPEN_SCOPE
+ARCH_NAMESPACE_OPEN_SCOPE
 
 const char* Arch_DarwinGetTemporaryDirectory();
 
-PXR_NAMESPACE_CLOSE_SCOPE
+ARCH_NAMESPACE_CLOSE_SCOPE
 #endif // PXR_ARCH_DARWIN_H
