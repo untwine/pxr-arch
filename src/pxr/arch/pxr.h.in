@@ -1,0 +1,30 @@
+// Copyright 2016 Pixar
+//
+// Licensed under the terms set forth in the LICENSE.txt file available at
+// https://openusd.org/license.
+//
+
+#ifndef PXR_ARCH_H
+#define PXR_ARCH_H
+
+#define ARCH_MAJOR_VERSION @PROJECT_VERSION_MAJOR@
+#define ARCH_MINOR_VERSION @PROJECT_VERSION_MINOR@
+#define ARCH_PATCH_VERSION @PROJECT_VERSION_PATCH@
+
+#define ARCH_VERSION @ARCH_VERSION@
+
+#define PXR_NS pxr
+#define ARCH_INTERNAL_NS pxrInternal_v@PROJECT_VERSION_MAJOR@_@PROJECT_VERSION_MINOR@_@PROJECT_VERSION_PATCH@__pxrReserved__
+#define PXR_NS_GLOBAL ::PXR_NS
+
+namespace ARCH_INTERNAL_NS { }
+
+namespace PXR_NS {
+    using namespace ARCH_INTERNAL_NS;
+}
+
+#define ARCH_NAMESPACE_OPEN_SCOPE   namespace ARCH_INTERNAL_NS {
+#define ARCH_NAMESPACE_CLOSE_SCOPE  }
+#define ARCH_NAMESPACE_USING_DIRECTIVE using namespace PXR_NS;
+
+#endif // PXR_ARCH_H
