@@ -9,7 +9,7 @@
 
 #include <pxr/arch/pxr.h>
 #include <pxr/arch/error.h>
-#include <pxr/arch/testArchUtil.h>
+#include "./testArchUtil.h"
 
 ARCH_NAMESPACE_USING_DIRECTIVE
 
